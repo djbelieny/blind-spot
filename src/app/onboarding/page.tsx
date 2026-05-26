@@ -5,6 +5,7 @@ import ConstellationBackground from '@/components/onboarding/ConstellationBackgr
 import ChatBubble from '@/components/onboarding/ChatBubble'
 import QuizCard from '@/components/onboarding/QuizCard'
 import PersonaCard from '@/components/onboarding/PersonaCard'
+import HyperFrameVideo from '@/components/HyperFrameVideo'
 import type { OnboardingStage, QuizAnswer, QuizQuestion, PersonaType, Language, BlindSpot } from '@/types/learner'
 
 interface Message {
@@ -35,6 +36,8 @@ function OnboardingInner() {
   const [showPersona, setShowPersona] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
   const [topBlindSpot, setTopBlindSpot] = useState<BlindSpot | null>(null)
+  const [hfData, setHfData] = useState<Record<string, unknown> | null>(null)
+  const [hfType, setHfType] = useState<'dna_reveal' | 'blind_spot'>('dna_reveal')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll
@@ -173,10 +176,12 @@ function OnboardingInner() {
       })
       const data = await res.json()
 
-      // Show DNA reveal
+      // Show DNA reveal with HyperFrame video
       setStage('dna_reveal')
       if (data.dnaReveal) {
         setMessages(prev => [...prev, { role: 'tutor', content: data.dnaReveal }])
+        setHfType('dna_reveal')
+        setHfData({ dnaType: data.dnaType, objective: data.objective, minutesPerDay: data.minutesPerDay, persona })
       }
 
       // Pulse nodes for blind spots
@@ -275,6 +280,10 @@ function OnboardingInner() {
           {messages.map((msg, i) => (
             <ChatBubble key={i} role={msg.role} content={msg.content} />
           ))}
+          {/* HyperFrame video after DNA reveal */}
+          {hfData && (stage === 'dna_reveal' || stage === 'blind_spot_reveal' || stage === 'plan') && (
+            <HyperFrameVideo type={hfType} data={hfData} autoPlay onEnded={() => setHfData(null)} />
+          )}
           {streamingContent && (
             <ChatBubble role="tutor" content={streamingContent} isStreaming />
           )}
