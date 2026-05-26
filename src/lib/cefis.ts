@@ -56,6 +56,11 @@ export async function getCertificates() {
   return cefisAuthFetch('/performance/certificates')
 }
 
+export async function getLessons(courseId: string): Promise<any[]> {
+  const data = await getCourseLessons(courseId)
+  return data.lessons ?? data.data ?? data ?? []
+}
+
 export async function getAllCourses(): Promise<any[]> {
   const all: any[] = []
   let page = 1

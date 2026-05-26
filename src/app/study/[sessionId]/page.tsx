@@ -29,7 +29,12 @@ export default function StudyPage() {
   const [showCheckpoint, setShowCheckpoint] = useState(false)
   const [checkpointQuestions, setCheckpointQuestions] = useState<CheckpointQuestion[]>([])
   const [completedNodes, setCompletedNodes] = useState<string[]>([])
+  const [lastCheckpointScore, setLastCheckpointScore] = useState<number | null>(null)
+  const [showReflection, setShowReflection] = useState(false)
+  const [reflectionText, setReflectionText] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const welcomeSetRef = useRef(false)
+  const checkpointTriggeredRef = useRef<Set<number>>(new Set())
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,15 +43,34 @@ export default function StudyPage() {
   useEffect(() => {
     if (!sessionId) return
     fetch(`/api/study/profile?sessionId=${sessionId}`)
-      .then(r => r.json())
-      .then((data: LearnerProfile) => setProfile(data))
+      .then(r => r.ok ? r.json() : null)
+      .then((data: LearnerProfile | null) => setProfile(data))
       .catch(console.error)
   }, [sessionId])
+
+  // Auto-set welcome message once profile loads
+  useEffect(() => {
+    if (!profile || welcomeSetRef.current) return
+    welcomeSetRef.current = true
+    const bs = profile.blindSpotsIdentified?.[0]
+    if (!bs) return
+    const welcome = `Vamos trabalhar em **${bs.name}**. ${bs.description} Pronto para começar?`
+    setMessages([{ role: 'tutor', content: welcome }])
+  }, [profile])
+
+  // Auto-trigger checkpoint every 8 messages
+  useEffect(() => {
+    const total = messages.length
+    if (total === 0 || total % 8 !== 0) return
+    if (checkpointTriggeredRef.current.has(total)) return
+    checkpointTriggeredRef.current.add(total)
+    triggerCheckpoint()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length])
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
 
-    // Map display 'tutor' role → 'assistant' for the API (OpenAI convention)
     const apiMessages = messages.map(m => ({
       role: (m.role === 'tutor' ? 'assistant' : 'user') as 'assistant' | 'user',
       content: m.content,
@@ -107,21 +131,42 @@ export default function StudyPage() {
     }
   }
 
-  // Expose checkpoint trigger for future use (e.g. after N messages)
   const triggerCheckpoint = async () => {
-    const res = await fetch('/api/study/checkpoint', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, courseName: 'Current lesson', conceptsCovered: [] }),
-    })
-    if (!res.ok) return
-    const data = (await res.json()) as { questions: CheckpointQuestion[] }
-    if (data.questions?.length) {
-      setCheckpointQuestions(data.questions)
-      setShowCheckpoint(true)
+    const bs = profile?.blindSpotsIdentified?.[0]
+    const courseName = profile?.recommendedCourseIds?.[0] ?? 'Current lesson'
+    try {
+      const res = await fetch('/api/study/checkpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          courseName: bs?.name ?? courseName,
+          conceptsCovered: bs ? [bs.conceptTag] : [],
+        }),
+      })
+      if (!res.ok) return
+      const data = (await res.json()) as { questions: CheckpointQuestion[] }
+      if (data.questions?.length) {
+        setCheckpointQuestions(data.questions)
+        setShowCheckpoint(true)
+      }
+    } catch (e) {
+      console.error('Checkpoint failed:', e)
     }
   }
-  void triggerCheckpoint // available for external call
+
+  const handleReflectionSubmit = () => {
+    if (!reflectionText.trim()) return
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: reflectionText },
+      { role: 'tutor', content: 'Otimo! Registrei sua reflexao. Continue assim — reconhecer o que voce aprendeu e parte do processo.' },
+    ])
+    setReflectionText('')
+    setShowReflection(false)
+  }
+
+  const currentCourseName = profile?.recommendedCourseIds?.[0] ?? null
 
   return (
     <main className="min-h-screen bg-[#0A0C14] flex flex-col">
@@ -130,17 +175,20 @@ export default function StudyPage() {
       {showCheckpoint && (
         <CheckpointModal
           questions={checkpointQuestions}
-          courseName="Current lesson"
+          courseName={profile?.blindSpotsIdentified?.[0]?.name ?? 'Current lesson'}
           language={profile?.language ?? 'en'}
           onComplete={(score) => {
             setShowCheckpoint(false)
+            setLastCheckpointScore(score)
             setCompletedNodes(prev => [...prev, 'current'])
-            // Persist to API
             fetch('/api/study/progress', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ sessionId, courseId: 'current', checkpointScore: score }),
             }).catch(console.error)
+            if (score >= 80) {
+              setShowReflection(true)
+            }
           }}
         />
       )}
@@ -150,22 +198,17 @@ export default function StudyPage() {
         <div className="mb-6 pb-4 border-b border-[#8A8FA8]/10">
           <p className="text-[#8A8FA8] text-xs uppercase tracking-widest">Blind Spot</p>
           <p className="text-[#F0F0F5] text-sm mt-1 truncate">
-            {profile?.objective ?? 'Study session'}
+            {currentCourseName ?? profile?.objective ?? 'Study session'}
           </p>
+          {lastCheckpointScore !== null && (
+            <p className="text-[#34C785] text-xs mt-1">
+              Last checkpoint: {lastCheckpointScore}%
+            </p>
+          )}
         </div>
 
         {/* Chat */}
         <div className="flex-1 overflow-y-auto space-y-2 pb-4">
-          {messages.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-[#8A8FA8] text-sm">
-                {profile?.language === 'pt-BR'
-                  ? 'Faça uma pergunta sobre o conteúdo...'
-                  : 'Ask a question about the content...'}
-              </p>
-            </div>
-          )}
-
           {messages.map((msg, i) => (
             <ChatBubble key={i} role={msg.role} content={msg.content} />
           ))}
@@ -183,6 +226,28 @@ export default function StudyPage() {
                   style={{ animationDelay: `${i * 150}ms` }}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Post-session reflection */}
+          {showReflection && (
+            <div className="bg-[#0D1117] border border-[#34C785]/30 rounded-2xl p-4 mt-4">
+              <p className="text-[#34C785] text-xs uppercase tracking-widest mb-2">Reflexao pos-sessao</p>
+              <p className="text-[#F0F0F5] text-sm mb-3">
+                O que voce aprendeu hoje que nao sabia antes?
+              </p>
+              <textarea
+                value={reflectionText}
+                onChange={e => setReflectionText(e.target.value)}
+                placeholder="Escreva sua reflexao..."
+                className="w-full bg-[#0A0C14] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[80px]"
+              />
+              <button
+                onClick={handleReflectionSubmit}
+                className="mt-2 bg-[#34C785] text-[#0A0C14] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity"
+              >
+                Salvar reflexao →
+              </button>
             </div>
           )}
 
