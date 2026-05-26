@@ -27,20 +27,17 @@ export default function Home() {
             onChange={(e) => setMessage(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="What do you want to get unstuck on?"
-            className="w-full bg-transparent text-[#F0F0F5] text-xl md:text-2xl placeholder-[#8A8FA8] border-b border-[#8A8FA8]/30 focus:border-[#F5A623] outline-none pb-3 transition-colors duration-300"
+            placeholder="What are you trying to learn?"
+            className="w-full bg-transparent text-[#F0F0F5] text-xl md:text-2xl placeholder-[#8A8FA8]/50 border-b border-[#8A8FA8]/20 focus:border-[#F5A623]/60 outline-none pb-4 transition-colors duration-300"
           />
-          {!message && focused && (
-            <span className="absolute right-0 top-0 text-[#F5A623] animate-pulse text-2xl">|</span>
-          )}
         </div>
         {message && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-7 flex justify-end">
             <button
               type="submit"
-              className="text-[#F5A623] text-sm tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity"
+              className="text-[#F5A623]/80 text-sm hover:text-[#F5A623] transition-colors"
             >
-              Find my blind spots →
+              {message.length > 3 ? 'Keep going →' : '→'}
             </button>
           </div>
         )}
