@@ -496,17 +496,17 @@ function StudyInner() {
           {selectedNodeId && !contentPanelOpen && (
             <button
               onClick={() => setContentPanelOpen(true)}
-              className="absolute top-4 right-4 text-[10px] uppercase tracking-widest text-[#7C3AED] border border-[#7C3AED]/30 px-3 py-1.5 rounded-full hover:bg-[#7C3AED]/10 transition-colors backdrop-blur-sm bg-[#08090F]/40"
+              className="absolute top-4 left-4 text-[10px] uppercase tracking-widest text-[#7C3AED] border border-[#7C3AED]/30 px-3 py-1.5 rounded-full hover:bg-[#7C3AED]/10 transition-colors backdrop-blur-sm bg-[#08090F]/40"
             >
               {isEn ? 'View materials' : 'Ver materiais'}
             </button>
           )}
         </div>
 
-        {/* ── Content panel — right sidebar (slides in) ── */}
+        {/* ── Content panel — left sidebar (slides in) ── */}
         <div
-          className={`absolute inset-y-0 right-0 w-full sm:w-[340px] bg-[#0E0F1A] border-l border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
-            contentPanelOpen && selectedNodeId ? 'translate-x-0' : 'translate-x-full'
+          className={`absolute inset-y-0 left-0 w-full sm:w-[340px] bg-[#0E0F1A] border-r border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
+            contentPanelOpen && selectedNodeId ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           {/* Panel header */}
