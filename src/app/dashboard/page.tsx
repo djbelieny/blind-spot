@@ -167,8 +167,15 @@ function TopicCard({
   const hasProgress = Object.values(topic.pillars).some(v => v > 5)
 
   return (
-    <div className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-6">
-      <h3 className="text-[#F0F0F5] text-lg font-medium leading-snug line-clamp-2">{topic.name}</h3>
+    <div
+      className="bg-[#0E0F1A] border border-[#8A8FA8]/10 hover:border-[#7C3AED]/30 hover:bg-[#0F1025] rounded-3xl p-7 flex flex-col gap-6 transition-all duration-200 cursor-pointer group"
+      onClick={() => onStudy(topic)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onStudy(topic)}
+      aria-label={`Study ${topic.name}`}
+    >
+      <h3 className="text-[#F0F0F5] text-lg font-medium leading-snug line-clamp-2 group-hover:text-white transition-colors">{topic.name}</h3>
 
       {blindSpots.length > 0 && (
         <div>
@@ -198,12 +205,9 @@ function TopicCard({
         />
       </div>
 
-      <button
-        onClick={() => onStudy(topic)}
-        className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity self-start"
-      >
+      <span className="text-[#7C3AED] text-sm group-hover:text-[#9D5CF7] transition-colors self-start">
         {isEn ? 'Continue studying →' : 'Continuar estudando →'}
-      </button>
+      </span>
     </div>
   )
 }
@@ -517,20 +521,25 @@ function DashboardInner() {
 
             {/* CEFIS tracks */}
             {tracks.map(track => (
-              <div key={track.trackId} className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-6">
+              <div
+                key={track.trackId}
+                className="bg-[#0E0F1A] border border-[#22D3EE]/12 hover:border-[#22D3EE]/30 hover:bg-[#0F1225] rounded-3xl p-7 flex flex-col gap-6 transition-all duration-200 cursor-pointer group"
+                onClick={() => sessionId && router.push(`/study/${sessionId}?q=${encodeURIComponent(track.trackName)}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && sessionId && router.push(`/study/${sessionId}?q=${encodeURIComponent(track.trackName)}`)}
+                aria-label={`Study ${track.trackName}`}
+              >
                 <div>
-                  <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1">CEFIS</p>
-                  <h3 className="text-[#F0F0F5] text-lg font-medium leading-snug">{track.trackName}</h3>
+                  <p className="text-[#22D3EE] text-[10px] uppercase tracking-widest mb-1">CEFIS</p>
+                  <h3 className="text-[#F0F0F5] text-lg font-medium leading-snug group-hover:text-white transition-colors">{track.trackName}</h3>
                 </div>
                 <div className="flex justify-center">
                   <RadarChart pillars={track.pillars} label={track.trackName} language={language} size={220} />
                 </div>
-                <button
-                  onClick={() => sessionId && router.push(`/study/${sessionId}?q=${encodeURIComponent(track.trackName)}`)}
-                  className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity self-start"
-                >
+                <span className="text-[#22D3EE] text-sm group-hover:opacity-80 transition-opacity self-start">
                   {isEn ? 'Continue studying →' : 'Continuar estudando →'}
-                </button>
+                </span>
               </div>
             ))}
           </div>

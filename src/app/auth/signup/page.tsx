@@ -2,6 +2,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
 
 function SignupInner() {
   const router = useRouter()
@@ -44,67 +45,91 @@ function SignupInner() {
     <main className="min-h-screen bg-[#08090F] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-10">
-          <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">Blind Spot</p>
+          <div className="flex items-center gap-1.5 mb-6">
+            <span className="text-[#F0F0F5] font-semibold text-lg tracking-tight">blindspot</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mb-2.5 flex-shrink-0" />
+          </div>
           <h1 className="text-[#F0F0F5] text-2xl font-light">
             {q ? 'Create your account to continue.' : 'Create your account.'}
           </h1>
           {q && (
             <p className="text-[#8A8FA8] text-sm mt-2 leading-relaxed">
-              Your goal: <span className="text-[#F0F0F5]">{q}</span>
+              Your goal: <span className="text-[#F0F0F5]">&ldquo;{q}&rdquo;</span>
             </p>
           )}
+          {!q && <p className="text-[#8A8FA8] text-sm mt-1.5">Start finding your blind spots.</p>}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            autoFocus
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Your name (optional)"
-            className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
-          />
-          <div className="relative">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label htmlFor="signup-name" className="sr-only">Your name (optional)</label>
             <input
+              id="signup-name"
+              autoFocus
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your name (optional)"
+              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+            />
+          </div>
+          <div>
+            <label htmlFor="signup-email" className="sr-only">Email address</label>
+            <input
+              id="signup-email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Email address"
+              required
+              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+            />
+          </div>
+          <div className="relative">
+            <label htmlFor="signup-password" className="sr-only">Password (minimum 6 characters)</label>
+            <input
+              id="signup-password"
               type={showPw ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Password (min 6 characters)"
               required
               minLength={6}
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 pr-14 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPw(v => !v)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8FA8]/50 hover:text-[#8A8FA8] text-xs transition-colors"
+              aria-label={showPw ? 'Hide password' : 'Show password'}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1 rounded-lg"
             >
-              {showPw ? 'hide' : 'show'}
+              {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
 
-          {error && <p className="text-red-400/80 text-xs px-1">{error}</p>}
+          {error && (
+            <p role="alert" className="text-red-400/90 text-xs px-1">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-[#7C3AED] text-[#08090F] font-semibold py-4 rounded-2xl hover:opacity-90 transition-opacity disabled:opacity-40 text-sm mt-2"
+            className="w-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white font-medium py-4 rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 text-sm mt-1"
           >
-            {loading ? 'Creating account…' : 'Get started →'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                Creating account…
+              </span>
+            ) : 'Get started'}
           </button>
         </form>
 
         <p className="text-[#8A8FA8]/50 text-sm text-center mt-8">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-[#8A8FA8] hover:text-[#F0F0F5] transition-colors">
+          <Link href="/auth/login" className="text-[#8A8FA8] hover:text-[#F0F0F5] transition-colors underline underline-offset-2">
             Sign in
           </Link>
         </p>

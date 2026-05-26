@@ -6,6 +6,7 @@ import ChatBubble from '@/components/onboarding/ChatBubble'
 import VoiceToggle from '@/components/study/VoiceToggle'
 import CheckpointModal from '@/components/study/CheckpointModal'
 import KnowledgeMap from '@/components/study/KnowledgeMap'
+import { ArrowLeft, RotateCw, X, MessageCircle } from 'lucide-react'
 import type { LearnerProfile, ContentCard } from '@/types/learner'
 
 // ─── Content card badges ──────────────────────────────────────────────────────
@@ -416,8 +417,8 @@ function StudyInner() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b border-[#8A8FA8]/8 bg-[#08090F]/90 backdrop-blur-sm"
         style={{ height: HEADER_H }}>
-        <button onClick={() => router.push('/dashboard')} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-sm flex-shrink-0">
-          ←
+        <button onClick={() => router.push('/dashboard')} aria-label="Back to dashboard" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors flex-shrink-0 p-1 rounded-lg">
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest leading-none mb-0.5">Blind Spot</p>
@@ -509,16 +510,17 @@ function StudyInner() {
                 {blindSpots.find(b => b.id === selectedNodeId)?.name ?? currentTopic}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={() => loadContentCards(currentTopic, messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n'))}
                 disabled={cardsLoading}
-                className="text-[#8A8FA8]/40 text-xs hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+                aria-label="Refresh materials"
+                className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors disabled:opacity-30 p-1.5 rounded-lg hover:bg-[#8A8FA8]/5"
               >
-                {cardsLoading ? '…' : '↻'}
+                <RotateCw className={`w-3.5 h-3.5 ${cardsLoading ? 'animate-spin' : ''}`} />
               </button>
-              <button onClick={() => setContentPanelOpen(false)} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-lg leading-none">
-                ×
+              <button onClick={() => setContentPanelOpen(false)} aria-label="Close panel" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -567,8 +569,8 @@ function StudyInner() {
             <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest">
               {isEn ? 'Ask your tutor' : 'Pergunte ao tutor'}
             </p>
-            <button onClick={() => setChatOpen(false)} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-lg leading-none">
-              ×
+            <button onClick={() => setChatOpen(false)} aria-label="Close chat" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -641,15 +643,17 @@ function StudyInner() {
         {/* ── Chat FAB ── */}
         <button
           onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
-          className={`absolute bottom-6 right-6 z-40 w-13 h-13 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
+          className={`absolute bottom-6 right-6 z-40 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 active:scale-95 ${
             chatOpen
-              ? 'bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8]'
-              : 'bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white'
+              ? 'bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8] hover:border-[#8A8FA8]/40'
+              : 'bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white hover:opacity-90'
           }`}
           style={{ width: 52, height: 52 }}
-          aria-label={isEn ? 'Open chat' : 'Abrir chat'}
+          aria-label={isEn ? (chatOpen ? 'Close chat' : 'Open chat') : (chatOpen ? 'Fechar chat' : 'Abrir chat')}
         >
-          <span className="text-lg">{chatOpen ? '×' : '💬'}</span>
+          {chatOpen
+            ? <X className="w-5 h-5" />
+            : <MessageCircle className="w-5 h-5" />}
         </button>
 
       </div>

@@ -130,9 +130,38 @@
     @apply bg-background text-foreground;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-dm-sans), 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
+  }
+
+  /* Global cursor for all interactive elements */
+  button, [role="button"], a, summary {
+    cursor: pointer;
+  }
+  button:disabled, [disabled] {
+    cursor: not-allowed;
+  }
+
+  /* Keyboard-visible focus ring only — removes ugly outlines on mouse click */
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid #7C3AED;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
