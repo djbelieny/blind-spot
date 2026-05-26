@@ -448,50 +448,47 @@ function StudyInner() {
       {/* ── Main area: map + panels ─────────────────────────────────────────── */}
       <div className="flex-1 relative overflow-hidden">
 
-        {/* ── Knowledge Map (primary, always behind panels) ── */}
-        <div className="absolute inset-0 flex flex-col">
-          {/* Map title */}
-          <div className="px-5 pt-4 pb-2 flex items-center justify-between flex-shrink-0">
-            <div>
-              <p className="text-[#7C3AED] text-[10px] uppercase tracking-widest">
-                {isEn ? 'Knowledge map' : 'Mapa de conhecimento'}
-              </p>
-              <p className="text-[#8A8FA8] text-xs mt-0.5">
-                {isEn ? 'Tap a node to explore' : 'Toque em um nó para explorar'}
+        {/* ── Knowledge Map — fills entire area ── */}
+        <div className="absolute inset-0">
+          {blindSpots.length > 0 ? (
+            <KnowledgeMap
+              blindSpots={blindSpots}
+              completedIds={completedNodeIds}
+              activeId={selectedNodeId}
+              selectedId={selectedNodeId}
+              onSelect={handleNodeSelect}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
+                {isEn
+                  ? 'Complete the onboarding diagnostic to unlock your knowledge map.'
+                  : 'Complete o diagnóstico de integração para desbloquear seu mapa de conhecimento.'}
               </p>
             </div>
-            {selectedNodeId && (
-              <button
-                onClick={() => { setContentPanelOpen(v => !v) }}
-                className="text-[10px] uppercase tracking-widest text-[#7C3AED] border border-[#7C3AED]/30 px-3 py-1.5 rounded-full hover:bg-[#7C3AED]/10 transition-colors"
-              >
-                {contentPanelOpen
-                  ? (isEn ? 'Hide materials' : 'Ocultar')
-                  : (isEn ? 'View materials' : 'Ver materiais')}
-              </button>
-            )}
-          </div>
+          )}
 
-          {/* The SVG map */}
-          <div className="flex-1 px-3 pb-3 min-h-0">
-            {blindSpots.length > 0 ? (
-              <KnowledgeMap
-                blindSpots={blindSpots}
-                completedIds={completedNodeIds}
-                activeId={selectedNodeId}
-                selectedId={selectedNodeId}
-                onSelect={handleNodeSelect}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
-                  {isEn
-                    ? 'Complete the onboarding diagnostic to unlock your knowledge map.'
-                    : 'Complete o diagnóstico de integração para desbloquear seu mapa de conhecimento.'}
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Floating hint — only when nothing selected */}
+          {!selectedNodeId && blindSpots.length > 0 && (
+            <div className="absolute top-4 left-5 pointer-events-none">
+              <p className="text-[#7C3AED]/70 text-[10px] uppercase tracking-widest">
+                {isEn ? 'Knowledge map' : 'Mapa de conhecimento'}
+              </p>
+              <p className="text-[#8A8FA8]/50 text-xs mt-0.5">
+                {isEn ? 'Tap a node to begin' : 'Toque em um nó para explorar'}
+              </p>
+            </div>
+          )}
+
+          {/* View materials pill — shows when node selected but panel closed */}
+          {selectedNodeId && !contentPanelOpen && (
+            <button
+              onClick={() => setContentPanelOpen(true)}
+              className="absolute top-4 right-4 text-[10px] uppercase tracking-widest text-[#7C3AED] border border-[#7C3AED]/30 px-3 py-1.5 rounded-full hover:bg-[#7C3AED]/10 transition-colors backdrop-blur-sm bg-[#08090F]/40"
+            >
+              {isEn ? 'View materials' : 'Ver materiais'}
+            </button>
+          )}
         </div>
 
         {/* ── Content panel — right sidebar (slides in) ── */}
@@ -561,17 +558,22 @@ function StudyInner() {
           }`}
           style={{ height: '55%' }}
         >
-          {/* Drawer handle */}
-          <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#8A8FA8]/8 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-1 rounded-full bg-[#8A8FA8]/20 mx-auto" />
+          {/* Drawer header */}
+          <div className="flex-shrink-0">
+            <div className="flex justify-center pt-2.5 pb-0.5">
+              <div className="w-8 h-1 rounded-full bg-[#8A8FA8]/20" />
             </div>
-            <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest">
-              {isEn ? 'Ask your tutor' : 'Pergunte ao tutor'}
-            </p>
-            <button onClick={() => setChatOpen(false)} aria-label="Close chat" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#8A8FA8]/8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#7C3AED]" />
+                <p className="text-[#F0F0F5] text-sm font-medium">
+                  {isEn ? 'Tutor' : 'Tutor'}
+                </p>
+              </div>
+              <button onClick={() => setChatOpen(false)} aria-label="Close chat" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -643,17 +645,24 @@ function StudyInner() {
         {/* ── Chat FAB ── */}
         <button
           onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
-          className={`absolute bottom-6 right-6 z-40 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 active:scale-95 ${
+          className={`absolute bottom-6 right-6 z-40 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
             chatOpen
-              ? 'bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8] hover:border-[#8A8FA8]/40'
-              : 'bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white hover:opacity-90'
+              ? 'rounded-full bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8] hover:border-[#8A8FA8]/40 justify-center'
+              : 'rounded-full bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white hover:opacity-90 shadow-lg shadow-[#7C3AED]/20 pl-5 pr-6'
           }`}
-          style={{ width: 52, height: 52 }}
-          aria-label={isEn ? (chatOpen ? 'Close chat' : 'Open chat') : (chatOpen ? 'Fechar chat' : 'Abrir chat')}
+          style={chatOpen ? { width: 52, height: 52 } : { height: 52 }}
+          aria-label={isEn ? (chatOpen ? 'Close chat' : 'Ask tutor') : (chatOpen ? 'Fechar chat' : 'Perguntar ao tutor')}
         >
-          {chatOpen
-            ? <X className="w-5 h-5" />
-            : <MessageCircle className="w-5 h-5" />}
+          {chatOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <>
+              <MessageCircle className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium whitespace-nowrap">
+                {isEn ? 'Ask tutor' : 'Perguntar'}
+              </span>
+            </>
+          )}
         </button>
 
       </div>
