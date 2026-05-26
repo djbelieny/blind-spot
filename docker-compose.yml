@@ -1,0 +1,53 @@
+version: '3.9'
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - qdrant
+
+  hyperframes-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.hyperframes
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./hyperframes-output:/app/output
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  caddy_data:
+  caddy_config:
+  qdrant_data:
+  redis_data:

@@ -1,0 +1,8 @@
+FROM node:22-alpine
+RUN apk add --no-cache ffmpeg chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+WORKDIR /app
+RUN npm install @hyperframes/producer express
+COPY hyperframes-server.js .
+EXPOSE 3001
+CMD ["node", "hyperframes-server.js"]
