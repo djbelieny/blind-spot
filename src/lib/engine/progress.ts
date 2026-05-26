@@ -70,3 +70,37 @@ export async function getProgress(sessionId: string): Promise<LearnerProgress | 
     return null
   }
 }
+
+export async function markNodeComplete(
+  sessionId: string,
+  courseId: string,
+  checkpointScore?: number
+): Promise<void> {
+  const key = progressKey(sessionId)
+  const raw = await redis.get(key)
+  let progress: LearnerProgress
+
+  if (!raw) {
+    progress = {
+      sessionId,
+      completedCourseIds: [],
+      checkpointScores: {},
+      studyStreakDays: 0,
+      totalMinutesStudied: 0,
+    }
+  } else {
+    progress = JSON.parse(raw) as LearnerProgress
+  }
+
+  if (!progress.completedCourseIds.includes(courseId)) {
+    progress.completedCourseIds.push(courseId)
+  }
+
+  if (checkpointScore !== undefined) {
+    progress.checkpointScores[courseId] = checkpointScore
+  }
+
+  progress.lastStudiedAt = new Date()
+
+  await redis.set(key, JSON.stringify(progress), 'EX', PROFILE_TTL)
+}

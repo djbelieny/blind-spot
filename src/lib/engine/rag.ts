@@ -13,7 +13,7 @@ async function embed(text: string): Promise<number[]> {
     })
     return res.data[0].embedding
   } catch {
-    return new Array(EMBEDDING_DIM).fill(0)
+    return new Array(EMBEDDING_DIM).fill(0) as number[]
   }
 }
 
@@ -21,15 +21,14 @@ export async function upsertChunks(chunks: TextChunk[]): Promise<void> {
   const BATCH = 100
   for (let i = 0; i < chunks.length; i += BATCH) {
     const batch = chunks.slice(i, i + BATCH)
-    const vectors = await Promise.all(batch.map(c => embed(c.content)))
+    const vectors = await Promise.all(batch.map(c => embed(c.text)))
     const points = batch.map((chunk, idx) => ({
       id: chunk.id,
       vector: vectors[idx],
       payload: {
         courseId: chunk.courseId,
         lessonId: chunk.lessonId,
-        content: chunk.content,
-        language: chunk.language,
+        text: chunk.text,
       },
     }))
     await qdrant.upsert(COLLECTION_NAME, { wait: true, points })
@@ -58,8 +57,7 @@ export async function searchSimilar(
       id: String(r.id),
       courseId: (r.payload?.courseId as string) ?? '',
       lessonId: (r.payload?.lessonId as string) ?? '',
-      content: (r.payload?.content as string) ?? '',
-      language: (r.payload?.language as string) ?? 'pt-BR',
+      text: (r.payload?.text as string) ?? '',
     }))
   } catch {
     return []
@@ -67,12 +65,12 @@ export async function searchSimilar(
 }
 
 export function chunkTranscript(
-  text: string,
+  rawText: string,
   courseId: string,
   lessonId: string,
   wordsPerChunk = 300
 ): TextChunk[] {
-  const words = text.split(/\s+/)
+  const words = rawText.split(/\s+/)
   const chunks: TextChunk[] = []
   let i = 0
 
@@ -82,8 +80,7 @@ export function chunkTranscript(
       id: `${courseId}-${lessonId}-${i}`,
       courseId,
       lessonId,
-      content: slice,
-      language: 'pt-BR',
+      text: slice,
     })
     i += wordsPerChunk
   }
