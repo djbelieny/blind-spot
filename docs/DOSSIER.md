@@ -1,14 +1,17 @@
-# Dossier: Hackathon CEFIS — AI Tutor
+# Blind Spot — Dossier
 
-> Última atualização: 26 Mai 2026
+> *The tutor that reveals what you have not seen yet.*
+> Hackathon CEFIS · 26 Mai 2026
 
 ---
 
 ## Visão do Produto
 
+**Nome:** Blind Spot
+**Tagline:** *"The tutor that reveals what you have not seen yet."*
 **Lema:** *"Você ainda não sabe o que não sabe."*
 
-O tutor não é um buscador de cursos com IA — é um **revelador de blind spots**. O diferencial não é a recomendação, é o diagnóstico. O aluno chega achando que sabe o que precisa aprender. O tutor mostra o que ele não viu.
+O tutor não é um buscador de cursos com IA — é um **revelador de blind spots**. O diferencial não é a recomendação, é o diagnóstico. O aluno chega achando que sabe o que precisa aprender. O Blind Spot mostra o que ele não viu.
 
 **Foco absoluto no resultado do aluno:** máximo aprendizado no menor tempo possível, da forma mais eficiente, gerando o maior senso de conquista.
 
