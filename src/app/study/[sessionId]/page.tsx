@@ -468,6 +468,7 @@ function StudyInner() {
               activeId={selectedNodeId}
               selectedId={selectedNodeId}
               onSelect={handleNodeSelect}
+              rootLabel={currentTopic || profile?.objective || '···'}
             />
           ) : (
             <div className="h-full flex items-center justify-center">
@@ -562,101 +563,104 @@ function StudyInner() {
           </div>
         </div>
 
-        {/* ── Chat drawer (slides up from bottom) ── */}
+        {/* ── Floating chat panel ── */}
         <div
-          className={`absolute inset-x-0 bottom-0 bg-[#0E0F1A] border-t border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-30 ${
-            chatOpen ? 'translate-y-0' : 'translate-y-full'
+          className={`absolute bottom-[92px] right-6 z-40 transition-all duration-300 ease-out ${
+            chatOpen
+              ? 'opacity-100 translate-y-0 pointer-events-auto'
+              : 'opacity-0 translate-y-3 pointer-events-none'
           }`}
-          style={{ height: '55%' }}
+          style={{ width: 'min(380px, calc(100vw - 48px))' }}
         >
-          {/* Drawer header */}
-          <div className="flex-shrink-0">
-            <div className="flex justify-center pt-2.5 pb-0.5">
-              <div className="w-8 h-1 rounded-full bg-[#8A8FA8]/20" />
-            </div>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#8A8FA8]/8">
+          <div
+            className="bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-3xl flex flex-col overflow-hidden"
+            style={{ height: 480, boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(124,58,237,0.1)' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#8A8FA8]/8 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[#7C3AED]" />
-                <p className="text-[#F0F0F5] text-sm font-medium">
-                  {isEn ? 'Tutor' : 'Tutor'}
-                </p>
+                <p className="text-[#F0F0F5] text-sm font-medium">Tutor</p>
               </div>
-              <button onClick={() => setChatOpen(false)} aria-label="Close chat" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
+              <button onClick={() => setChatOpen(false)} aria-label="Close chat"
+                className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
                 <X className="w-4 h-4" />
               </button>
             </div>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
-            {messages.length === 0 && (
-              <p className="text-[#8A8FA8]/30 text-xs text-center py-4">
-                {isEn ? 'Ask anything about the selected topic.' : 'Pergunte qualquer coisa sobre o tópico selecionado.'}
-              </p>
-            )}
-            {messages.map((msg, i) => (
-              <ChatBubble key={i} role={msg.role} content={msg.content} />
-            ))}
-            {streamingContent && <ChatBubble role="tutor" content={streamingContent} isStreaming />}
-            {isLoading && !streamingContent && (
-              <div className="flex gap-1 px-4 py-3">
-                {[0,1,2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
-                ))}
-              </div>
-            )}
-            {showReflection && (
-              <div className="bg-[#08090F] border border-[#34C785]/30 rounded-2xl p-4 mt-2">
-                <p className="text-[#34C785] text-xs uppercase tracking-widest mb-2">
-                  {isEn ? 'Post-session reflection' : 'Reflexão pós-sessão'}
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+              {messages.length === 0 && (
+                <p className="text-[#8A8FA8]/30 text-xs text-center py-4">
+                  {isEn ? 'Ask anything about the selected topic.' : 'Pergunte qualquer coisa sobre o tópico.'}
                 </p>
-                <p className="text-[#F0F0F5] text-sm mb-3">
-                  {isEn ? "What did you learn today that you didn't know before?" : 'O que você aprendeu hoje que não sabia antes?'}
-                </p>
-                <textarea
-                  value={reflectionText}
-                  onChange={e => setReflectionText(e.target.value)}
-                  placeholder={isEn ? 'Write your reflection…' : 'Escreva sua reflexão…'}
-                  className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[60px]"
-                />
-                <button onClick={handleReflectionSubmit}
-                  className="mt-2 bg-[#34C785] text-[#08090F] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity">
-                  {isEn ? 'Save reflection →' : 'Salvar reflexão →'}
-                </button>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <form
-            onSubmit={e => { e.preventDefault(); sendMessage(input) }}
-            className="flex-shrink-0 border-t border-[#8A8FA8]/10 px-5 py-3"
-          >
-            <div className="flex gap-3 items-center">
-              <input
-                ref={chatInputRef}
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder={isEn ? 'Ask anything…' : 'Pergunte algo…'}
-                className="flex-1 bg-transparent text-[#F0F0F5] placeholder-[#8A8FA8]/50 outline-none text-sm"
-                disabled={isLoading}
-                autoFocus={chatOpen}
-              />
-              {input && (
-                <button type="submit" className="text-[#7C3AED] text-xs uppercase tracking-widest opacity-70 hover:opacity-100">
-                  →
-                </button>
               )}
+              {messages.map((msg, i) => (
+                <ChatBubble key={i} role={msg.role} content={msg.content} />
+              ))}
+              {streamingContent && <ChatBubble role="tutor" content={streamingContent} isStreaming />}
+              {isLoading && !streamingContent && (
+                <div className="flex gap-1 px-2 py-2">
+                  {[0,1,2].map(i => (
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce"
+                      style={{ animationDelay: `${i*150}ms` }} />
+                  ))}
+                </div>
+              )}
+              {showReflection && (
+                <div className="bg-[#08090F] border border-[#34C785]/30 rounded-2xl p-4 mt-2">
+                  <p className="text-[#34C785] text-xs uppercase tracking-widest mb-2">
+                    {isEn ? 'Post-session reflection' : 'Reflexão pós-sessão'}
+                  </p>
+                  <p className="text-[#F0F0F5] text-sm mb-3">
+                    {isEn ? "What did you learn today that you didn't know before?" : 'O que você aprendeu hoje que não sabia antes?'}
+                  </p>
+                  <textarea
+                    value={reflectionText}
+                    onChange={e => setReflectionText(e.target.value)}
+                    placeholder={isEn ? 'Write your reflection…' : 'Escreva sua reflexão…'}
+                    className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[60px]"
+                  />
+                  <button onClick={handleReflectionSubmit}
+                    className="mt-2 bg-[#34C785] text-[#08090F] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity">
+                    {isEn ? 'Save reflection →' : 'Salvar reflexão →'}
+                  </button>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          </form>
+
+            {/* Input */}
+            <form
+              onSubmit={e => { e.preventDefault(); sendMessage(input) }}
+              className="flex-shrink-0 px-4 py-3 border-t border-[#8A8FA8]/8"
+            >
+              <div className="flex gap-3 items-center bg-[#08090F] border border-[#8A8FA8]/10 rounded-2xl px-4 py-2.5">
+                <input
+                  ref={chatInputRef}
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder={isEn ? 'Ask anything…' : 'Pergunte algo…'}
+                  className="flex-1 bg-transparent text-[#F0F0F5] placeholder-[#8A8FA8]/40 outline-none text-sm"
+                  disabled={isLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={!input || isLoading}
+                  className="w-7 h-7 rounded-full bg-[#7C3AED] flex items-center justify-center text-white text-xs disabled:opacity-30 flex-shrink-0 transition-opacity hover:opacity-80"
+                >
+                  ↑
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
         {/* ── Chat FAB ── */}
         <button
           onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
-          className={`absolute bottom-6 right-6 z-40 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
+          className={`absolute bottom-6 right-6 z-50 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
             chatOpen
               ? 'rounded-full bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8] hover:border-[#8A8FA8]/40 justify-center'
               : 'rounded-full bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white hover:opacity-90 shadow-lg shadow-[#7C3AED]/20 pl-5 pr-6'
