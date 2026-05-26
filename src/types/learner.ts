@@ -188,6 +188,20 @@ export interface LearnerProgress {
   topics?: StudyTopic[]
 }
 
+export type ContentCardType = 'text' | 'video' | 'audio' | 'exercise'
+
+export interface ContentCard {
+  id: string
+  type: ContentCardType
+  title: string
+  body?: string           // text card: 80-120 word mini-lesson
+  audioScript?: string    // audio card: script sent to TTS
+  searchQuery?: string    // video card: YouTube search query
+  exercisePrompt?: string // exercise card: prompt sent to tutor
+  duration?: string       // "2 min read" | "5 min video" | "1 min listen"
+  tag?: string
+}
+
 export interface InferredProfile {
   domain: string
   urgency: Urgency
