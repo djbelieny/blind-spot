@@ -45,10 +45,10 @@ export default function HyperFrameVideo({ type, data, autoPlay = true, onEnded }
 
   if (loading) {
     return (
-      <div className="w-full aspect-video bg-[#0D1117] rounded-2xl flex items-center justify-center border border-[#8A8FA8]/10 my-4">
+      <div className="w-full aspect-video bg-[#0E0F1A] rounded-2xl flex items-center justify-center border border-[#8A8FA8]/10 my-4">
         <div className="flex gap-1.5">
           {[0, 1, 2].map(i => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623]/40 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+            <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
           ))}
         </div>
       </div>

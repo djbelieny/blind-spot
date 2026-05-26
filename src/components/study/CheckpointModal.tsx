@@ -39,8 +39,8 @@ export default function CheckpointModal({ questions, courseName, language, onCom
 
   if (showResult) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-30 bg-[#0A0C14]/90 backdrop-blur-sm px-4">
-        <div className="bg-[#0D1117] border border-[#34C785]/30 rounded-2xl p-8 max-w-md w-full text-center">
+      <div className="fixed inset-0 flex items-center justify-center z-30 bg-[#08090F]/90 backdrop-blur-sm px-4">
+        <div className="bg-[#0E0F1A] border border-[#34C785]/30 rounded-2xl p-8 max-w-md w-full text-center">
           <div className="text-5xl font-bold text-[#34C785] mb-2">{score}%</div>
           <p className="text-[#F0F0F5] mb-1">{isEn ? 'Session complete' : 'Sessão completa'}</p>
           <p className="text-[#8A8FA8] text-sm mb-6">{courseName}</p>
@@ -51,7 +51,7 @@ export default function CheckpointModal({ questions, courseName, language, onCom
           </p>
           <button
             onClick={() => onComplete(score)}
-            className="bg-[#34C785] text-[#0A0C14] font-medium px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+            className="bg-[#34C785] text-[#08090F] font-medium px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
           >
             {isEn ? 'Continue →' : 'Continuar →'}
           </button>
@@ -63,13 +63,13 @@ export default function CheckpointModal({ questions, courseName, language, onCom
   if (!current) return null
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-30 bg-[#0A0C14]/80 backdrop-blur-sm px-4">
-      <div className="bg-[#0D1117] border border-[#8A8FA8]/20 rounded-2xl p-6 max-w-lg w-full">
+    <div className="fixed inset-0 flex items-center justify-center z-30 bg-[#08090F]/80 backdrop-blur-sm px-4">
+      <div className="bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-2xl p-6 max-w-lg w-full">
         <div className="flex gap-1 mb-4">
           {questions.map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#F5A623]' : 'bg-[#8A8FA8]/20'}`}
+              className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#7C3AED]' : 'bg-[#8A8FA8]/20'}`}
             />
           ))}
         </div>
@@ -82,7 +82,7 @@ export default function CheckpointModal({ questions, courseName, language, onCom
             <button
               key={opt}
               onClick={() => handleAnswer(opt)}
-              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#F5A623]/50 hover:bg-[#F5A623]/5 transition-all"
+              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 transition-all"
             >
               {opt}
             </button>

@@ -42,7 +42,7 @@ interface PersonaCardProps {
 export default function PersonaCard({ language, onSelect }: PersonaCardProps) {
   const isPt = language === 'pt-BR'
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-20 px-4 bg-[#0A0C14]/80 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center z-20 px-4 bg-[#08090F]/80 backdrop-blur-sm">
       <div className="max-w-2xl w-full">
         <p className="text-[#8A8FA8] text-sm text-center mb-6">
           {isPt ? 'Como você prefere que eu te ajude?' : 'How would you like me to help you?'}
@@ -52,7 +52,7 @@ export default function PersonaCard({ language, onSelect }: PersonaCardProps) {
             <button
               key={p.id}
               onClick={() => onSelect(p.id)}
-              className="bg-[#0D1117] border border-[#8A8FA8]/20 rounded-2xl p-5 text-left hover:border-[#F5A623]/50 hover:bg-[#F5A623]/5 transition-all duration-200 group"
+              className="bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-2xl p-5 text-left hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 transition-all duration-200 group"
             >
               <div className="text-2xl mb-3">{p.icon}</div>
               <div className="text-[#F0F0F5] font-medium text-sm mb-1">
@@ -61,7 +61,7 @@ export default function PersonaCard({ language, onSelect }: PersonaCardProps) {
               <div className="text-[#8A8FA8] text-xs mb-3 leading-relaxed">
                 {isPt ? p.descriptionPt : p.description}
               </div>
-              <div className="text-[#F5A623]/60 text-xs italic leading-relaxed group-hover:text-[#F5A623]">
+              <div className="text-[#7C3AED]/60 text-xs italic leading-relaxed group-hover:text-[#7C3AED]">
                 {isPt ? p.samplePt : p.sample}
               </div>
             </button>

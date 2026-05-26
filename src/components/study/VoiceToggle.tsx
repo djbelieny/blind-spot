@@ -74,8 +74,8 @@ export default function VoiceToggle({ persona, onTranscript, onPlayTTS }: VoiceT
           onClick={toggleListen}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
             isListening
-              ? 'bg-[#F5A623] animate-pulse'
-              : 'bg-[#1a1f2e] border border-[#8A8FA8]/20 hover:border-[#F5A623]/50'
+              ? 'bg-[#7C3AED] animate-pulse'
+              : 'bg-[#1a1f2e] border border-[#8A8FA8]/20 hover:border-[#7C3AED]/50'
           }`}
           title={isListening ? 'Listening...' : 'Speak'}
         >
@@ -88,13 +88,13 @@ export default function VoiceToggle({ persona, onTranscript, onPlayTTS }: VoiceT
         onClick={() => setIsVoiceMode(v => !v)}
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
           isVoiceMode
-            ? 'bg-[#F5A623]/20 border border-[#F5A623]/50'
-            : 'bg-[#1a1f2e] border border-[#8A8FA8]/20 hover:border-[#F5A623]/30'
+            ? 'bg-[#7C3AED]/20 border border-[#7C3AED]/50'
+            : 'bg-[#1a1f2e] border border-[#8A8FA8]/20 hover:border-[#7C3AED]/30'
         }`}
         title={isVoiceMode ? 'Switch to text' : 'Switch to voice'}
       >
         {isVoiceMode ? (
-          <svg className="w-5 h-5 text-[#F5A623]" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[#7C3AED]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
           </svg>
         ) : (

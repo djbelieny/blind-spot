@@ -49,8 +49,8 @@
 }
 
 :root {
-  --bg: #0A0C14;
-  --amber: #F5A623;
+  --bg: #08090F;
+  --primary: #7C3AED;
   --text: #F0F0F5;
   --muted: #8A8FA8;
   --progress: #34C785;

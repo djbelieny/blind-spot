@@ -41,10 +41,10 @@ function SignupInner() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0A0C14] flex items-center justify-center px-6">
+    <main className="min-h-screen bg-[#08090F] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-10">
-          <p className="text-[#F5A623] text-xs uppercase tracking-widest mb-3">Blind Spot</p>
+          <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">Blind Spot</p>
           <h1 className="text-[#F0F0F5] text-2xl font-light">
             {q ? 'Create your account to continue.' : 'Create your account.'}
           </h1>
@@ -62,7 +62,7 @@ function SignupInner() {
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Your name (optional)"
-            className="w-full bg-[#0D1117] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+            className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
           />
           <input
             type="email"
@@ -70,7 +70,7 @@ function SignupInner() {
             onChange={e => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full bg-[#0D1117] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+            className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
           />
           <div className="relative">
             <input
@@ -80,7 +80,7 @@ function SignupInner() {
               placeholder="Password (min 6 characters)"
               required
               minLength={6}
-              className="w-full bg-[#0D1117] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 pr-14 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 pr-14 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
             />
             <button
               type="button"
@@ -96,7 +96,7 @@ function SignupInner() {
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-[#F5A623] text-[#0A0C14] font-semibold py-4 rounded-2xl hover:opacity-90 transition-opacity disabled:opacity-40 text-sm mt-2"
+            className="w-full bg-[#7C3AED] text-[#08090F] font-semibold py-4 rounded-2xl hover:opacity-90 transition-opacity disabled:opacity-40 text-sm mt-2"
           >
             {loading ? 'Creating account…' : 'Get started →'}
           </button>

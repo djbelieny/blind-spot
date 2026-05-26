@@ -1,5 +1,5 @@
 import redis from '@/lib/redis'
-import type { LearnerProfile, LearnerProgress, LearnerPillars, TrackProgress } from '@/types/learner'
+import type { LearnerProfile, LearnerProgress, LearnerPillars, TrackProgress, StudyTopic } from '@/types/learner'
 
 const PROFILE_TTL = 60 * 60 * 24 * 7 // 7 days
 
@@ -103,6 +103,25 @@ export async function updatePillarsFromCheckpoint(
   }
   tp.lastUpdatedAt = new Date().toISOString()
   tp.totalSessionsCompleted += 1
+  await redis.set(progressKey(sessionId), JSON.stringify(progress), 'EX', PROFILE_TTL)
+}
+
+export async function getTopics(sessionId: string): Promise<StudyTopic[]> {
+  const progress = await getProgress(sessionId)
+  return progress?.topics ?? []
+}
+
+export async function saveTopic(sessionId: string, topic: StudyTopic): Promise<void> {
+  const progress = await getProgress(sessionId)
+  if (!progress) return
+  const topics = progress.topics ?? []
+  const idx = topics.findIndex(t => t.id === topic.id)
+  if (idx >= 0) {
+    topics[idx] = topic
+  } else {
+    topics.push(topic)
+  }
+  progress.topics = topics
   await redis.set(progressKey(sessionId), JSON.stringify(progress), 'EX', PROFILE_TTL)
 }
 

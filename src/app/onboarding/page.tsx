@@ -160,6 +160,154 @@ const LOADING_LINES_PT = [
   'Encontrando o caminho mais curto para seu objetivo…',
 ]
 
+// ─── DNA + Persona metadata ────────────────────────────────────────────────────
+
+const DNA_META: Record<string, {
+  symbol: string
+  en: { name: string; tagline: string }
+  pt: { name: string; tagline: string }
+  color: string
+}> = {
+  explorador: {
+    symbol: '◎',
+    en: { name: 'Practical Explorer', tagline: 'You learn by doing, not by reading.' },
+    pt: { name: 'Explorador Prático', tagline: 'Você aprende fazendo, não lendo.' },
+    color: '#7C3AED',
+  },
+  absorvedor: {
+    symbol: '◈',
+    en: { name: 'Visual Absorber', tagline: 'You retain what you can picture.' },
+    pt: { name: 'Absorvedor Visual', tagline: 'Você retém o que consegue visualizar.' },
+    color: '#7C3AED',
+  },
+  construtor: {
+    symbol: '▦',
+    en: { name: 'Methodical Builder', tagline: 'You need structure before you can move forward.' },
+    pt: { name: 'Construtor Metódico', tagline: 'Você precisa de estrutura para avançar.' },
+    color: '#7C3AED',
+  },
+  conector: {
+    symbol: '⬡',
+    en: { name: 'Conceptual Connector', tagline: 'You need the "why" before the "how".' },
+    pt: { name: 'Conector Conceitual', tagline: 'Você precisa do "porquê" antes do "como".' },
+    color: '#7C3AED',
+  },
+  sprint: {
+    symbol: '⚡',
+    en: { name: 'Intense Sprinter', tagline: 'Short focus, high intensity — you peak fast.' },
+    pt: { name: 'Sprint Intenso', tagline: 'Foco curto, alta intensidade — você voa rápido.' },
+    color: '#7C3AED',
+  },
+}
+
+const PERSONA_META: Record<string, { en: string; pt: string; icon: string }> = {
+  direto:      { en: 'Direct',      pt: 'Direto',      icon: '→' },
+  encorajador: { en: 'Supportive',  pt: 'Encorajador', icon: '◉' },
+  socratico:   { en: 'Socratic',    pt: 'Socrático',   icon: '?' },
+}
+
+// ─── RevealCard ────────────────────────────────────────────────────────────────
+
+function RevealCard({
+  dnaType, persona, minutesPerDay, dnaReveal, topBlindSpot, language, onStart, onDashboard,
+}: {
+  dnaType: string | null
+  persona: string
+  minutesPerDay: string
+  dnaReveal: string
+  topBlindSpot: { name: string; impact: string } | null
+  language: Language
+  onStart: () => void
+  onDashboard: () => void
+}) {
+  const isEn = language === 'en'
+  const dna = dnaType ? DNA_META[dnaType] : null
+  const personaMeta = persona ? PERSONA_META[persona] : null
+  const mins = minutesPerDay ? `${minutesPerDay} min` : null
+
+  return (
+    <div className="space-y-7">
+
+      {/* DNA identity card */}
+      {dna && (
+        <div className="relative overflow-hidden rounded-3xl border border-[#7C3AED]/20 bg-gradient-to-br from-[#7C3AED]/8 to-transparent p-7">
+          {/* Big faded symbol in background */}
+          <span className="absolute right-5 top-3 text-[88px] leading-none text-[#7C3AED]/6 select-none pointer-events-none font-light">
+            {dna.symbol}
+          </span>
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl text-[#7C3AED]">{dna.symbol}</span>
+              <div>
+                <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-0.5">
+                  {isEn ? 'Your learning DNA' : 'Seu DNA de aprendizado'}
+                </p>
+                <h2 className="text-[#F0F0F5] text-xl font-medium leading-tight">
+                  {isEn ? dna.en.name : dna.pt.name}
+                </h2>
+              </div>
+            </div>
+            <p className="text-[#8A8FA8] text-sm leading-relaxed">
+              {isEn ? dna.en.tagline : dna.pt.tagline}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Persona + stats chips */}
+      {(personaMeta || mins) && (
+        <div className="flex flex-wrap gap-2">
+          {personaMeta && (
+            <span className="flex items-center gap-1.5 border border-[#8A8FA8]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
+              <span className="text-[#7C3AED]">{personaMeta.icon}</span>
+              {isEn ? personaMeta.en : personaMeta.pt}
+            </span>
+          )}
+          {mins && (
+            <span className="flex items-center gap-1.5 border border-[#8A8FA8]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
+              <span className="text-[#7C3AED]">◷</span>
+              {mins} {isEn ? '/ day' : '/ dia'}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Mentor narrative */}
+      {dnaReveal && (
+        <p className="text-[#8A8FA8] text-[14px] leading-[1.8] font-light whitespace-pre-line">
+          {dnaReveal}
+        </p>
+      )}
+
+      {/* Top blind spot */}
+      {topBlindSpot && (
+        <div className="border-l-2 border-[#7C3AED]/40 pl-4">
+          <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1.5">
+            {isEn ? 'Where we start' : 'O que vamos trabalhar primeiro'}
+          </p>
+          <p className="text-[#F0F0F5] text-sm leading-relaxed">{topBlindSpot.impact}</p>
+        </div>
+      )}
+
+      {/* CTAs */}
+      <div className="space-y-3 pt-1">
+        <button
+          onClick={onStart}
+          className="w-full bg-[#7C3AED] text-[#08090F] font-semibold py-4 px-6 rounded-2xl hover:opacity-90 transition-opacity text-sm"
+        >
+          {isEn ? "Let's fix this →" : "Vamos começar →"}
+        </button>
+        <button
+          onClick={onDashboard}
+          className="w-full text-[#8A8FA8] text-sm py-3 hover:text-[#F0F0F5] transition-colors"
+        >
+          {isEn ? 'See the full picture' : 'Ver o plano completo'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 function OnboardingInner() {
@@ -187,6 +335,7 @@ function OnboardingInner() {
   const [revealing, setRevealing] = useState(false)
   const [loadingLineIdx, setLoadingLineIdx] = useState(0)
   const [dnaReveal, setDnaReveal] = useState('')
+  const [dnaType, setDnaType] = useState<string | null>(null)
   const [topBlindSpot, setTopBlindSpot] = useState<{ name: string; impact: string } | null>(null)
   const revealFetchedRef = useRef(false)
 
@@ -245,6 +394,7 @@ function OnboardingInner() {
       .then(r => r.json())
       .then(d => {
         setDnaReveal(d.dnaReveal ?? '')
+        setDnaType(d.dnaType ?? null)
         if (d.blindSpots?.length) {
           setTopBlindSpot({ name: d.blindSpots[0].name, impact: d.blindSpots[0].impact ?? d.blindSpots[0].evidence })
         }
@@ -316,14 +466,14 @@ function OnboardingInner() {
   if (!objective) return null
 
   return (
-    <main className="min-h-screen bg-[#0A0C14] flex flex-col">
+    <main className="min-h-screen bg-[#08090F] flex flex-col">
       <ConstellationBackground nodeCount={nodeCount} />
 
       {/* Subtle progress line — no numbers */}
       {currentStep?.type !== 'reveal' && (
         <div className="fixed top-0 left-0 right-0 z-20 h-[2px] bg-[#8A8FA8]/10">
           <div
-            className="h-full bg-[#F5A623]/60 transition-all duration-500 ease-out"
+            className="h-full bg-[#7C3AED]/60 transition-all duration-500 ease-out"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -349,8 +499,8 @@ function OnboardingInner() {
                       onClick={() => handleChoice((currentStep as ChoiceStep).key, opt.value)}
                       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm transition-all duration-200 ${
                         selectedChoice === opt.value
-                          ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F0F0F5]'
-                          : 'border-[#8A8FA8]/12 bg-[#0D1117] hover:border-[#8A8FA8]/30 hover:bg-[#0D1117]/80 text-[#F0F0F5]'
+                          ? 'border-[#7C3AED] bg-[#7C3AED]/10 text-[#F0F0F5]'
+                          : 'border-[#8A8FA8]/12 bg-[#0E0F1A] hover:border-[#8A8FA8]/30 hover:bg-[#0E0F1A]/80 text-[#F0F0F5]'
                       }`}
                     >
                       {opt.label}
@@ -368,7 +518,7 @@ function OnboardingInner() {
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleText() } }}
                     placeholder={(currentStep as TextStep).placeholder}
                     rows={3}
-                    className="w-full bg-[#0D1117] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30 resize-none mb-4"
+                    className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30 resize-none mb-4"
                   />
                   <div className="flex justify-between items-center">
                     {(currentStep as TextStep).optional && (
@@ -378,7 +528,7 @@ function OnboardingInner() {
                     )}
                     <button
                       onClick={handleText}
-                      className="ml-auto text-[#F5A623] text-sm hover:opacity-80 transition-opacity"
+                      className="ml-auto text-[#7C3AED] text-sm hover:opacity-80 transition-opacity"
                     >
                       {language === 'pt-BR' ? 'Continuar →' : 'Continue →'}
                     </button>
@@ -394,7 +544,7 @@ function OnboardingInner() {
               <div className="text-center py-8">
                 <div className="flex gap-1.5 justify-center mb-5">
                   {[0,1,2].map(i => (
-                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
                   ))}
                 </div>
                 {!diagLoading && (
@@ -420,8 +570,8 @@ function OnboardingInner() {
                       onClick={() => handleDiagAnswer(diagQuestions[diagIndex].id, opt)}
                       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm transition-all duration-200 ${
                         selectedChoice === opt
-                          ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F0F0F5]'
-                          : 'border-[#8A8FA8]/12 bg-[#0D1117] hover:border-[#8A8FA8]/30 text-[#F0F0F5]'
+                          ? 'border-[#7C3AED] bg-[#7C3AED]/10 text-[#F0F0F5]'
+                          : 'border-[#8A8FA8]/12 bg-[#0E0F1A] hover:border-[#8A8FA8]/30 text-[#F0F0F5]'
                       }`}
                     >
                       {opt}
@@ -444,7 +594,7 @@ function OnboardingInner() {
               <div className="text-center py-8">
                 <div className="flex gap-1.5 justify-center mb-6">
                   {[0,1,2].map(i => (
-                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623]/50 animate-bounce" style={{ animationDelay: `${i*200}ms` }} />
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/50 animate-bounce" style={{ animationDelay: `${i*200}ms` }} />
                   ))}
                 </div>
                 <p className="text-[#8A8FA8] text-sm transition-all duration-700">
@@ -452,40 +602,16 @@ function OnboardingInner() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-8">
-                {/* DNA reveal — tutor's personal take */}
-                {dnaReveal && (
-                  <p className="text-[#F0F0F5] text-[15px] leading-[1.75] font-light whitespace-pre-line">
-                    {dnaReveal}
-                  </p>
-                )}
-
-                {/* Top blind spot — one sentence, no jargon */}
-                {topBlindSpot && (
-                  <div className="border-l-2 border-[#F5A623]/50 pl-5">
-                    <p className="text-[#8A8FA8] text-xs uppercase tracking-widest mb-2">
-                      {language === 'pt-BR' ? 'O que vamos trabalhar primeiro' : 'Where we start'}
-                    </p>
-                    <p className="text-[#F0F0F5] text-sm leading-relaxed">{topBlindSpot.impact}</p>
-                  </div>
-                )}
-
-                {/* CTAs — action-oriented, warm */}
-                <div className="space-y-3 pt-2">
-                  <button
-                    onClick={() => sessionId && router.push(`/study/${sessionId}`)}
-                    className="w-full bg-[#F5A623] text-[#0A0C14] font-semibold py-4 px-6 rounded-2xl hover:opacity-90 transition-opacity text-sm"
-                  >
-                    {language === 'pt-BR' ? "Vamos começar →" : "Let's fix this →"}
-                  </button>
-                  <button
-                    onClick={() => router.push('/dashboard')}
-                    className="w-full text-[#8A8FA8] text-sm py-3 hover:text-[#F0F0F5] transition-colors"
-                  >
-                    {language === 'pt-BR' ? 'Ver o plano completo' : 'See the full picture'}
-                  </button>
-                </div>
-              </div>
+              <RevealCard
+                dnaType={dnaType}
+                persona={answers.persona}
+                minutesPerDay={answers.minutesPerDay}
+                dnaReveal={dnaReveal}
+                topBlindSpot={topBlindSpot}
+                language={language}
+                onStart={() => sessionId && router.push(`/study/${sessionId}`)}
+                onDashboard={() => router.push('/dashboard')}
+              />
             )
           )}
 

@@ -37,10 +37,10 @@ function ProfileInner() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0A0C14] flex items-center justify-center">
+      <main className="min-h-screen bg-[#08090F] flex items-center justify-center">
         <div className="flex gap-1.5">
           {[0,1,2].map(i => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
+            <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
           ))}
         </div>
       </main>
@@ -50,7 +50,7 @@ function ProfileInner() {
   const isEn = language === 'en'
 
   return (
-    <main className="min-h-screen bg-[#0A0C14] px-6 py-16">
+    <main className="min-h-screen bg-[#08090F] px-6 py-16">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
@@ -86,7 +86,7 @@ function ProfileInner() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {tracks.map(track => (
-              <div key={track.trackId} className="bg-[#0D1117] border border-[#8A8FA8]/10 rounded-3xl p-8">
+              <div key={track.trackId} className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-8">
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="text-[#F0F0F5] text-base font-medium">{track.trackName}</h2>
@@ -96,7 +96,7 @@ function ProfileInner() {
                         : `${track.totalSessionsCompleted} sessão(ões) · ${track.coursesCompleted.length} curso(s) concluído(s)`}
                     </p>
                   </div>
-                  <span className="text-[#F5A623] text-xl font-light">
+                  <span className="text-[#7C3AED] text-xl font-light">
                     {PILLAR_AVERAGE(track.pillars)}%
                   </span>
                 </div>
@@ -118,7 +118,7 @@ function ProfileInner() {
           </p>
           <button
             onClick={() => sessionId && router.push(`/study/${sessionId}`)}
-            className="text-[#F5A623] text-sm hover:opacity-80 transition-opacity"
+            className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity"
           >
             {isEn ? 'Continue studying →' : 'Continuar estudando →'}
           </button>

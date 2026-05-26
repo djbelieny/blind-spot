@@ -166,6 +166,15 @@ export interface TrackProgress {
   coursesCompleted: string[]
 }
 
+export interface StudyTopic {
+  id: string
+  name: string
+  blindSpots: BlindSpot[]
+  pillars: LearnerPillars
+  createdAt: string
+  lastStudiedAt?: string
+}
+
 export interface LearnerProgress {
   sessionId: string
   completedCourseIds: string[]
@@ -176,6 +185,7 @@ export interface LearnerProgress {
   lastStudiedAt?: Date
   totalMinutesStudied: number
   trackProgress: TrackProgress[]
+  topics?: StudyTopic[]
 }
 
 export interface InferredProfile {

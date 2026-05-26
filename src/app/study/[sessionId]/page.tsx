@@ -169,7 +169,7 @@ export default function StudyPage() {
   const currentCourseName = profile?.recommendedCourseIds?.[0] ?? null
 
   return (
-    <main className="min-h-screen bg-[#0A0C14] flex flex-col">
+    <main className="min-h-screen bg-[#08090F] flex flex-col">
       <ConstellationBackground nodeCount={20} allGreen={completedNodes.length > 0} />
 
       {showCheckpoint && (
@@ -222,7 +222,7 @@ export default function StudyPage() {
               {[0, 1, 2].map(i => (
                 <div
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[#F5A623]/40 animate-bounce"
+                  className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce"
                   style={{ animationDelay: `${i * 150}ms` }}
                 />
               ))}
@@ -231,7 +231,7 @@ export default function StudyPage() {
 
           {/* Post-session reflection */}
           {showReflection && (
-            <div className="bg-[#0D1117] border border-[#34C785]/30 rounded-2xl p-4 mt-4">
+            <div className="bg-[#0E0F1A] border border-[#34C785]/30 rounded-2xl p-4 mt-4">
               <p className="text-[#34C785] text-xs uppercase tracking-widest mb-2">Reflexao pos-sessao</p>
               <p className="text-[#F0F0F5] text-sm mb-3">
                 O que voce aprendeu hoje que nao sabia antes?
@@ -240,11 +240,11 @@ export default function StudyPage() {
                 value={reflectionText}
                 onChange={e => setReflectionText(e.target.value)}
                 placeholder="Escreva sua reflexao..."
-                className="w-full bg-[#0A0C14] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[80px]"
+                className="w-full bg-[#08090F] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[80px]"
               />
               <button
                 onClick={handleReflectionSubmit}
-                className="mt-2 bg-[#34C785] text-[#0A0C14] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity"
+                className="mt-2 bg-[#34C785] text-[#08090F] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity"
               >
                 Salvar reflexao →
               </button>
@@ -273,7 +273,7 @@ export default function StudyPage() {
             {input && (
               <button
                 type="submit"
-                className="text-[#F5A623] text-xs uppercase tracking-widest opacity-70 hover:opacity-100"
+                className="text-[#7C3AED] text-xs uppercase tracking-widest opacity-70 hover:opacity-100"
               >
                 →
               </button>

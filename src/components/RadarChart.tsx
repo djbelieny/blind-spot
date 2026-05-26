@@ -3,14 +3,14 @@ import { useEffect, useRef } from 'react'
 import type { LearnerPillars } from '@/types/learner'
 
 const PILLAR_LABELS: Record<keyof LearnerPillars, { en: string; pt: string }> = {
-  comprehension: { en: 'Comprehension', pt: 'Compreensão' },
-  application:   { en: 'Application',   pt: 'Aplicação' },
-  analysis:      { en: 'Analysis',      pt: 'Análise' },
-  synthesis:     { en: 'Synthesis',     pt: 'Síntese' },
-  speed:         { en: 'Speed',         pt: 'Velocidade' },
-  retention:     { en: 'Retention',     pt: 'Retenção' },
-  consistency:   { en: 'Consistency',   pt: 'Consistência' },
-  precision:     { en: 'Precision',     pt: 'Precisão' },
+  comprehension: { en: 'Learning Depth', pt: 'Profundidade' },
+  application:   { en: 'Practice',       pt: 'Prática' },
+  analysis:      { en: 'Critical Think', pt: 'Raciocínio' },
+  synthesis:     { en: 'Connections',    pt: 'Conexões' },
+  speed:         { en: 'Learning Pace',  pt: 'Ritmo' },
+  retention:     { en: 'Memory',         pt: 'Memória' },
+  consistency:   { en: 'Consistency',    pt: 'Consistência' },
+  precision:     { en: 'Accuracy',       pt: 'Precisão' },
 }
 
 const KEYS = Object.keys(PILLAR_LABELS) as (keyof LearnerPillars)[]
@@ -75,11 +75,11 @@ export default function RadarChart({ pillars, label, language = 'en', size = 280
         ))}
 
         {/* Data fill */}
-        <path d={dataPath} fill="#F5A623" fillOpacity={0.15} stroke="#F5A623" strokeWidth={1.5} strokeOpacity={0.8} />
+        <path d={dataPath} fill="#7C3AED" fillOpacity={0.15} stroke="#7C3AED" strokeWidth={1.5} strokeOpacity={0.8} />
 
         {/* Data dots */}
         {dataPoints.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r={3} fill="#F5A623" fillOpacity={pillars[KEYS[i]] > 0 ? 0.9 : 0} />
+          <circle key={i} cx={p.x} cy={p.y} r={3} fill="#7C3AED" fillOpacity={pillars[KEYS[i]] > 0 ? 0.9 : 0} />
         ))}
 
         {/* Labels */}

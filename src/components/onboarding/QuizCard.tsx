@@ -37,13 +37,13 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-20 px-4">
-      <div className="bg-[#0D1117] border border-[#F5A623]/20 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-[#0E0F1A] border border-[#7C3AED]/20 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
         <div className="flex gap-1 mb-4">
           {questions.map((_, i) => (
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                i < currentIdx ? 'bg-[#F5A623]' : i === currentIdx ? 'bg-[#F5A623]/60' : 'bg-[#8A8FA8]/20'
+                i < currentIdx ? 'bg-[#7C3AED]' : i === currentIdx ? 'bg-[#7C3AED]/60' : 'bg-[#8A8FA8]/20'
               }`}
             />
           ))}
@@ -54,7 +54,7 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
             <button
               key={opt}
               onClick={() => handleSelect(opt)}
-              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#F5A623]/50 hover:bg-[#F5A623]/5 transition-all duration-200"
+              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 transition-all duration-200"
             >
               {opt}
             </button>

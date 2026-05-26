@@ -43,12 +43,25 @@ export async function POST(req: NextRequest) {
     dailyMinutes: profile.minutesPerDay,
   }))
 
+  // Deterministic DNA type assignment from profile signals
+  const dnaType = assignDNAType(profile)
+
   await updateProfile(sessionId, {
     blindSpotsIdentified: blindSpots,
     recommendedCourseIds: studyPlan.items.map(i => i.courseId),
     persona: persona ?? undefined,
+    dnaType,
     stage: 'plan',
   })
 
-  return NextResponse.json({ blindSpots, dnaReveal, studyPlan })
+  return NextResponse.json({ blindSpots, dnaReveal, studyPlan, dnaType })
+}
+
+function assignDNAType(profile: import('@/types/learner').LearnerProfile): import('@/types/learner').DNAType {
+  if (profile.urgency === 'immediate' && profile.minutesPerDay <= 20) return 'sprint'
+  if (profile.learningStyle === 'visual') return 'absorvedor'
+  if (profile.learningStyle === 'practice') return 'explorador'
+  if (profile.rhythm === 'deep-dive' && profile.backgroundLevel !== 'expert') return 'construtor'
+  if (profile.backgroundLevel === 'intermediate' || profile.backgroundLevel === 'expert') return 'conector'
+  return 'explorador'
 }
