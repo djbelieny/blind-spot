@@ -15,7 +15,14 @@ export async function analyzeGaps(
     keywords: (c.keywords ?? []).slice(0, 5),
   }))
 
+  const lang = profile.language ?? 'en'
+  const langRule = lang === 'en'
+    ? 'LANGUAGE: Write ALL text fields (name, description, evidence, impact) in English only.'
+    : 'IDIOMA: Escreva TODOS os campos de texto (name, description, evidence, impact) em português brasileiro apenas.'
+
   const prompt = `You are a learning diagnostic expert. Analyze this student's gaps with deep reasoning.
+
+${langRule}
 
 STUDENT PROFILE:
 - Objective: ${profile.objective}

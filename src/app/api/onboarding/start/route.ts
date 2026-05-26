@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
   const authUser = token ? await getUserFromToken(token) : null
 
   const sessionId = randomUUID()
-  const language = detectLanguage(firstMessage)
+  // Prefer user's stored language preference over auto-detection
+  const language = authUser?.preferredLanguage ?? detectLanguage(firstMessage)
   const complexity = analyzeComplexity(firstMessage)
   const urgency = inferUrgency(firstMessage)
   const motivationType = inferMotivation(firstMessage)

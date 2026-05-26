@@ -13,7 +13,9 @@ export async function generateDomainQuestions(
   level: BackgroundLevel,
   language: Language
 ): Promise<QuizQuestion[]> {
-  const langInstruction = language === 'en' ? 'Write everything in English.' : 'Escreva tudo em português brasileiro.'
+  const langInstruction = language === 'en'
+    ? '⚠️ CRITICAL: Write ALL text (question, options, everything) in English ONLY. Not a single word in Portuguese.'
+    : '⚠️ CRÍTICO: Escreva TODO o texto (pergunta, opções, tudo) em português brasileiro APENAS. Nenhuma palavra em inglês.'
   const difficulty = DIFFICULTY_MAP[level]
 
   const prompt = `You are creating diagnostic questions to assess a student's knowledge level.

@@ -22,14 +22,21 @@ export function buildSystemPrompt(profile: LearnerProfile, stage: OnboardingStag
   const personaInstruction =
     PERSONA_INSTRUCTIONS[persona]?.[lang] ?? PERSONA_INSTRUCTIONS['encorajador'][lang]
 
+  const langName = lang === 'en' ? 'English' : 'Brazilian Portuguese (pt-BR)'
+  const langRule = lang === 'en'
+    ? '⚠️ CRITICAL LANGUAGE RULE: You MUST respond EXCLUSIVELY in English. Every single word must be in English. Never use Portuguese, Spanish, or any other language — not even a single word. Do not switch languages under any circumstances.'
+    : '⚠️ REGRA CRÍTICA DE IDIOMA: Você DEVE responder EXCLUSIVAMENTE em português brasileiro. Cada palavra deve estar em português. Nunca use inglês ou qualquer outro idioma — nem uma única palavra. Não mude de idioma em hipótese alguma.'
+
   return `You are Blind Spot, an AI tutor. Your tagline: "The tutor that reveals what you have not seen yet."
+
+${langRule}
+
+RESPONSE LANGUAGE: ${langName} — no exceptions.
 
 STUDENT PROFILE:
 ${JSON.stringify(profile, null, 2)}
 
 PERSONA: ${personaInstruction}
-
-LANGUAGE: Always respond in ${lang === 'en' ? 'English' : 'Brazilian Portuguese'}.
 
 CURRENT STAGE: ${stage}
 

@@ -11,6 +11,7 @@ export interface User {
   passwordHash: string
   name?: string
   createdAt: string
+  preferredLanguage?: 'en' | 'pt-BR'
   cefisToken?: string
   cefisEmail?: string
   cefisName?: string

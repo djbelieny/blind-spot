@@ -513,6 +513,35 @@ function StudyInner() {
             {profile.dnaType}
           </span>
         )}
+        {/* Language toggle */}
+        <div className="flex-shrink-0 flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-[10px]">
+          {(['en', 'pt-BR'] as const).map(lang => (
+            <button
+              key={lang}
+              onClick={() => {
+                if (sessionId) {
+                  fetch('/api/profile/settings', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, language: lang }),
+                  }).catch(console.error)
+                  // Reload profile so AI picks up the new language
+                  fetch(`/api/study/profile?sessionId=${sessionId}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(d => { if (d) setProfile(d) })
+                    .catch(console.error)
+                }
+              }}
+              className={`px-2.5 py-1 transition-colors ${
+                profile?.language === lang
+                  ? 'bg-[#7C3AED] text-white'
+                  : 'bg-[#0E0F1A] text-[#8A8FA8] hover:text-[#F0F0F5]'
+              }`}
+            >
+              {lang === 'en' ? 'EN' : 'PT'}
+            </button>
+          ))}
+        </div>
         {lastCheckpointScore !== null && (
           <span className="text-[#34C785] text-xs flex-shrink-0">
             {lastCheckpointScore}%

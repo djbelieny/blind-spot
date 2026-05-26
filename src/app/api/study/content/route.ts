@@ -23,7 +23,13 @@ export async function POST(req: NextRequest) {
   const lang = profile.language === 'pt-BR' ? 'Brazilian Portuguese' : 'English'
   const contextSnippet = context ? `\nRecent conversation context: ${context.slice(0, 400)}` : ''
 
+  const langRule = profile.language === 'en'
+    ? '⚠️ CRITICAL: Write ALL card text (title, body, audioScript, exercisePrompt) in English ONLY. Not a single word in Portuguese.'
+    : '⚠️ CRÍTICO: Escreva TODO o texto dos cards (title, body, audioScript, exercisePrompt) em português brasileiro APENAS. Nenhuma palavra em inglês.'
+
   const prompt = `You are generating multimodal learning content cards for a student.
+
+${langRule}
 
 Student DNA type: ${dnaType}
 Topic: ${topic}

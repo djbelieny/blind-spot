@@ -414,9 +414,36 @@ function DashboardInner() {
                 : (isEn ? 'Welcome back.' : 'Bem-vindo de volta.')}
             </h1>
           </div>
-          <button onClick={handleLogout} className="text-[#8A8FA8]/40 text-xs hover:text-[#8A8FA8] transition-colors mt-2">
-            {isEn ? 'Sign out' : 'Sair'}
-          </button>
+          <div className="flex items-center gap-4 mt-2">
+            {/* Language toggle */}
+            <div className="flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-xs">
+              {(['en', 'pt-BR'] as const).map(lang => (
+                <button
+                  key={lang}
+                  onClick={async () => {
+                    setLanguage(lang)
+                    if (sessionId) {
+                      await fetch('/api/profile/settings', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId, language: lang }),
+                      }).catch(console.error)
+                    }
+                  }}
+                  className={`px-3 py-1.5 transition-colors ${
+                    language === lang
+                      ? 'bg-[#7C3AED] text-white'
+                      : 'bg-[#0E0F1A] text-[#8A8FA8] hover:text-[#F0F0F5]'
+                  }`}
+                >
+                  {lang === 'en' ? 'EN' : 'PT'}
+                </button>
+              ))}
+            </div>
+            <button onClick={handleLogout} className="text-[#8A8FA8]/40 text-xs hover:text-[#8A8FA8] transition-colors">
+              {isEn ? 'Sign out' : 'Sair'}
+            </button>
+          </div>
         </div>
 
         {/* Learn today input */}
