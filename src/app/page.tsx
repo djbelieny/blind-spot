@@ -213,7 +213,7 @@ export default function Home() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? 'border-b border-[#8A8FA8]/10 backdrop-blur-md bg-[#08090F]/80' : ''
       }`}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <a href="/" aria-label="Blindspot home" className="flex items-center flex-shrink-0">
             <BrandLockup />
@@ -265,7 +265,7 @@ export default function Home() {
           <div className="absolute top-40 left-1/3 w-[300px] h-[200px] bg-[#C026D3]/6 rounded-full blur-[80px]" />
         </div>
 
-        <div className="max-w-3xl mx-auto text-center relative">
+        <div className="relative -mx-4 w-screen px-4 text-center sm:mx-auto sm:w-auto sm:max-w-3xl sm:px-0">
           <div className="mb-7 flex justify-center">
             <BrandLockup size="hero" />
           </div>
@@ -277,9 +277,9 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
             {t.hero.h1a}
-            <span className="block bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent">
+            <span className="block mx-auto max-w-[20rem] bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent sm:max-w-none">
               {t.hero.h1b}
             </span>
           </h1>
