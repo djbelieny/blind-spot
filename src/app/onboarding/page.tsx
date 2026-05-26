@@ -479,7 +479,7 @@ function OnboardingInner() {
                     {language === 'pt-BR' ? "Vamos começar →" : "Let's fix this →"}
                   </button>
                   <button
-                    onClick={() => sessionId && router.push(`/dashboard?sessionId=${sessionId}`)}
+                    onClick={() => router.push('/dashboard')}
                     className="w-full text-[#8A8FA8] text-sm py-3 hover:text-[#F0F0F5] transition-colors"
                   >
                     {language === 'pt-BR' ? 'Ver o plano completo' : 'See the full picture'}

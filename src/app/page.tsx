@@ -4,16 +4,21 @@ import { useRouter } from 'next/navigation'
 
 export default function Home() {
   const [message, setMessage] = useState('')
-  const [focused, setFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  useEffect(() => { inputRef.current?.focus() }, [])
+  useEffect(() => {
+    inputRef.current?.focus()
+    // If already authenticated, go straight to dashboard
+    fetch('/api/auth/me')
+      .then(r => { if (r.ok) router.replace('/dashboard') })
+      .catch(() => {})
+  }, [router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!message.trim()) return
-    router.push(`/onboarding?q=${encodeURIComponent(message.trim())}`)
+    router.push(`/auth/signup?q=${encodeURIComponent(message.trim())}`)
   }
 
   return (
@@ -25,8 +30,6 @@ export default function Home() {
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             placeholder="What are you trying to learn?"
             className="w-full bg-transparent text-[#F0F0F5] text-xl md:text-2xl placeholder-[#8A8FA8]/50 border-b border-[#8A8FA8]/20 focus:border-[#F5A623]/60 outline-none pb-4 transition-colors duration-300"
           />
@@ -41,6 +44,16 @@ export default function Home() {
             </button>
           </div>
         )}
+        <p className="mt-8 text-center text-[#8A8FA8]/30 text-xs">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => router.push('/auth/login')}
+            className="text-[#8A8FA8]/50 hover:text-[#8A8FA8] transition-colors"
+          >
+            Sign in
+          </button>
+        </p>
       </form>
     </main>
   )

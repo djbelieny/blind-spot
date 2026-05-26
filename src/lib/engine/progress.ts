@@ -1,5 +1,5 @@
 import redis from '@/lib/redis'
-import type { LearnerProfile, LearnerProgress } from '@/types/learner'
+import type { LearnerProfile, LearnerProgress, LearnerPillars, TrackProgress } from '@/types/learner'
 
 const PROFILE_TTL = 60 * 60 * 24 * 7 // 7 days
 
@@ -56,6 +56,7 @@ export async function initProgress(sessionId: string): Promise<void> {
     checkpointScores: {},
     studyStreakDays: 0,
     totalMinutesStudied: 0,
+    trackProgress: [],
   }
   await redis.set(key, JSON.stringify(progress), 'EX', PROFILE_TTL)
 }
@@ -69,6 +70,40 @@ export async function getProgress(sessionId: string): Promise<LearnerProgress | 
   } catch {
     return null
   }
+}
+
+function emptyPillars(): LearnerPillars {
+  return { comprehension: 0, application: 0, analysis: 0, synthesis: 0, speed: 0, retention: 0, consistency: 0, precision: 0 }
+}
+
+export async function saveTrackProgress(sessionId: string, tracks: TrackProgress[]): Promise<void> {
+  const progress = await getProgress(sessionId)
+  if (!progress) return
+  progress.trackProgress = tracks
+  await redis.set(progressKey(sessionId), JSON.stringify(progress), 'EX', PROFILE_TTL)
+}
+
+export async function getTrackProgress(sessionId: string): Promise<TrackProgress[]> {
+  const progress = await getProgress(sessionId)
+  return progress?.trackProgress ?? []
+}
+
+export async function updatePillarsFromCheckpoint(
+  sessionId: string,
+  trackId: string,
+  scores: Partial<LearnerPillars>
+): Promise<void> {
+  const progress = await getProgress(sessionId)
+  if (!progress) return
+  const tp = progress.trackProgress.find(t => t.trackId === trackId)
+  if (!tp) return
+  for (const [k, v] of Object.entries(scores)) {
+    const key = k as keyof LearnerPillars
+    tp.pillars[key] = Math.min(100, Math.max(0, v as number))
+  }
+  tp.lastUpdatedAt = new Date().toISOString()
+  tp.totalSessionsCompleted += 1
+  await redis.set(progressKey(sessionId), JSON.stringify(progress), 'EX', PROFILE_TTL)
 }
 
 export async function markNodeComplete(
@@ -87,6 +122,7 @@ export async function markNodeComplete(
       checkpointScores: {},
       studyStreakDays: 0,
       totalMinutesStudied: 0,
+      trackProgress: [],
     }
   } else {
     progress = JSON.parse(raw) as LearnerProgress

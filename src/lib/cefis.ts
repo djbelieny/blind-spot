@@ -28,6 +28,35 @@ async function cefisAuthFetch(path: string, base = BASE_V3) {
   return res.json()
 }
 
+export async function cefisAuthFetchWithToken(path: string, token: string, base = BASE_V3) {
+  const res = await fetch(`${base}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error(`CEFIS API error ${res.status}: ${path}`)
+  return res.json()
+}
+
+export async function loginCEFISUser(email: string, password: string): Promise<string> {
+  const res = await fetch(`${BASE_AUTH}/api/v1/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  if (!res.ok) throw new Error(`CEFIS login failed: ${res.status}`)
+  const data = await res.json()
+  const token = data.api_key ?? data.token ?? data.key
+  if (!token) throw new Error('No token in CEFIS login response')
+  return token
+}
+
+export async function getMeWithToken(token: string) {
+  return cefisAuthFetchWithToken('/api/v1/user/me', token, BASE_AUTH)
+}
+
+export async function getTracksWithToken(token: string) {
+  return cefisAuthFetchWithToken('/tracks', token)
+}
+
 export async function getMe() {
   return cefisAuthFetch('/api/v1/user/me', BASE_AUTH)
 }

@@ -42,6 +42,12 @@ export interface LearnerProfile {
   blindSpotsIdentified: BlindSpot[]
   recommendedCourseIds: string[]
   stage: OnboardingStage
+  userId?: string
+  cefisToken?: string
+  cefisUserId?: string
+  cefisName?: string
+  cefisEmail?: string
+  cefisTrackIds?: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -140,6 +146,26 @@ export interface TextChunk {
   embedding?: number[]
 }
 
+export interface LearnerPillars {
+  comprehension: number   // 0-100
+  application: number
+  analysis: number
+  synthesis: number
+  speed: number
+  retention: number
+  consistency: number
+  precision: number
+}
+
+export interface TrackProgress {
+  trackId: string
+  trackName: string
+  pillars: LearnerPillars
+  lastUpdatedAt: string
+  totalSessionsCompleted: number
+  coursesCompleted: string[]
+}
+
 export interface LearnerProgress {
   sessionId: string
   completedCourseIds: string[]
@@ -149,6 +175,7 @@ export interface LearnerProgress {
   studyStreakDays: number
   lastStudiedAt?: Date
   totalMinutesStudied: number
+  trackProgress: TrackProgress[]
 }
 
 export interface InferredProfile {

@@ -4,6 +4,8 @@ import { searchSimilar } from '@/lib/engine/rag'
 import { synthesizeAnswer } from '@/lib/ai/ragsynth'
 import { streamTutorResponse } from '@/lib/ai/tutorchat'
 
+const RAG_SCORE_THRESHOLD = 0.65
+
 export async function POST(req: NextRequest) {
   const { sessionId, messages } = (await req.json()) as {
     sessionId: string
@@ -13,19 +15,24 @@ export async function POST(req: NextRequest) {
   const profile = await getProfile(sessionId)
   if (!profile) return new Response('Session not found', { status: 404 })
 
-  const lastUserMsg =
-    [...messages].reverse().find(m => m.role === 'user')?.content ?? ''
+  const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content ?? ''
 
-  // RAG: search for relevant transcript chunks (gracefully skipped if unavailable)
+  // Content routing: CEFIS RAG when user has token and relevant content exists
   let ragContext = ''
-  try {
-    const chunks = await searchSimilar(lastUserMsg, 3)
-    if (chunks.length > 0) {
-      const ragAnswer = await synthesizeAnswer(lastUserMsg, chunks, profile)
-      ragContext = `\n\n[COURSE CONTENT CONTEXT]: ${ragAnswer}`
+  let source: 'cefis' | 'general' = 'general'
+
+  if (profile.cefisToken) {
+    try {
+      const chunks = await searchSimilar(lastUserMsg, 4, profile.recommendedCourseIds.length > 0 ? profile.recommendedCourseIds : undefined)
+      const relevantChunks = chunks.filter((c: any) => (c.score ?? 1) >= RAG_SCORE_THRESHOLD)
+      if (relevantChunks.length > 0) {
+        const ragAnswer = await synthesizeAnswer(lastUserMsg, relevantChunks, profile)
+        ragContext = `\n\n[COURSE CONTENT CONTEXT]: ${ragAnswer}`
+        source = 'cefis'
+      }
+    } catch {
+      // RAG unavailable — fall through to general
     }
-  } catch {
-    // RAG is optional — continue without it
   }
 
   const augmentedMessages = ragContext
@@ -38,6 +45,10 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        // Emit source header as first line so client can read it
+        if (source === 'cefis') {
+          controller.enqueue(new TextEncoder().encode('\x00cefis\x00'))
+        }
         for await (const chunk of streamTutorResponse({
           messages: augmentedMessages,
           profile,
@@ -56,6 +67,7 @@ export async function POST(req: NextRequest) {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Accel-Buffering': 'no',
+      'X-Content-Source': source,
     },
   })
 }
