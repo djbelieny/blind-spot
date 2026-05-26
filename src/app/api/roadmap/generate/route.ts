@@ -5,14 +5,17 @@ import { deepseekV3, MODELS } from '@/lib/ai/clients'
 import type { Roadmap, LearningUnit } from '@/types/roadmap'
 
 export async function POST(req: NextRequest) {
-  const { sessionId } = (await req.json()) as { sessionId: string }
+  const { sessionId, topic } = (await req.json()) as { sessionId: string; topic?: string }
   if (!sessionId) return NextResponse.json({ error: 'sessionId required' }, { status: 400 })
 
   const profile = await getProfile(sessionId)
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
-  // Return cached roadmap if exists
-  const existing = await getRoadmap(sessionId)
+  // Use explicit topic or fall back to profile objective
+  const studyTopic = (topic ?? profile.objective).trim()
+
+  // Return cached roadmap if exists — scoped per topic
+  const existing = await getRoadmap(sessionId, studyTopic)
   if (existing) return NextResponse.json({ roadmap: existing })
 
   const lang = profile.language === 'pt-BR' ? 'Brazilian Portuguese' : 'English'
@@ -22,7 +25,7 @@ export async function POST(req: NextRequest) {
   const prompt = `You are a curriculum designer building a personalized learning roadmap.
 
 Learner profile:
-- Goal: ${profile.objective}
+- Topic to master: ${studyTopic}
 - Background level: ${profile.backgroundLevel}
 - Language: ${lang}
 - Identified blind spots: ${blindSpots.map(b => b.name).join(', ') || 'none identified'}
@@ -76,12 +79,12 @@ Return JSON object only — no markdown:
 
     const roadmap: Roadmap = {
       sessionId,
-      objective: profile.objective,
+      objective: studyTopic,
       units,
       generatedAt: new Date().toISOString(),
     }
 
-    await saveRoadmap(roadmap)
+    await saveRoadmap(roadmap, studyTopic)
     return NextResponse.json({ roadmap })
   } catch (err) {
     console.error('[roadmap/generate]', err)

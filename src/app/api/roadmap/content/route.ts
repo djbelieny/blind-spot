@@ -2,38 +2,59 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/lib/engine/progress'
 import { getRoadmap, getUnitContent, saveUnitContent } from '@/lib/engine/roadmap'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
-import type { UnitContent } from '@/types/roadmap'
+import redis from '@/lib/redis'
+import type { UnitContent, Roadmap } from '@/types/roadmap'
+
+// Finds any roadmap for a session that contains a given unitId.
+// Falls back to scanning Redis when the topic-scoped key misses.
+async function findRoadmapWithUnit(sessionId: string, topic: string, unitId: string): Promise<Roadmap | null> {
+  // 1. Try exact scoped key
+  const scoped = await getRoadmap(sessionId, topic)
+  if (scoped?.units.some(u => u.id === unitId)) return scoped
+
+  // 2. Scan all roadmap keys for this session
+  const keys = await redis.keys(`roadmap:${sessionId}:*`)
+  for (const key of keys) {
+    const raw = await redis.get(key)
+    if (!raw) continue
+    try {
+      const r = JSON.parse(raw) as Roadmap
+      if (r.units.some(u => u.id === unitId)) return r
+    } catch {}
+  }
+  return null
+}
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
-  const unitId = req.nextUrl.searchParams.get('unitId')
+  const unitId    = req.nextUrl.searchParams.get('unitId')
+  const topic     = req.nextUrl.searchParams.get('topic') ?? ''
   if (!sessionId || !unitId) {
     return NextResponse.json({ error: 'sessionId and unitId required' }, { status: 400 })
   }
-  const content = await getUnitContent(sessionId, unitId)
+  const content = await getUnitContent(sessionId, unitId, topic)
   return NextResponse.json({ content: content ?? null })
 }
 
 export async function POST(req: NextRequest) {
-  const { sessionId, unitId } = (await req.json()) as { sessionId: string; unitId: string }
+  const { sessionId, unitId, topic = '' } = (await req.json()) as { sessionId: string; unitId: string; topic?: string }
   if (!sessionId || !unitId) {
     return NextResponse.json({ error: 'sessionId and unitId required' }, { status: 400 })
   }
 
-  // Return cached content if exists
-  const cached = await getUnitContent(sessionId, unitId)
+  // Return cached content if exists — scoped per topic
+  const cached = await getUnitContent(sessionId, unitId, topic)
   if (cached) return NextResponse.json({ content: cached })
 
   const [profile, roadmap] = await Promise.all([
     getProfile(sessionId),
-    getRoadmap(sessionId),
+    findRoadmapWithUnit(sessionId, topic, unitId),
   ])
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-  if (!roadmap) return NextResponse.json({ error: 'Roadmap not found' }, { status: 404 })
+  if (!roadmap) return NextResponse.json({ error: 'Roadmap not found for this unit' }, { status: 404 })
 
-  const unit = roadmap.units.find(u => u.id === unitId)
-  if (!unit) return NextResponse.json({ error: 'Unit not found' }, { status: 404 })
+  const unit = roadmap.units.find(u => u.id === unitId)!
 
   const lang = profile.language === 'pt-BR' ? 'Brazilian Portuguese' : 'English'
   const level = profile.backgroundLevel
@@ -96,7 +117,7 @@ Requirements:
       generatedAt: new Date().toISOString(),
     }
 
-    await saveUnitContent(sessionId, content)
+    await saveUnitContent(sessionId, content, topic)
     return NextResponse.json({ content })
   } catch (err) {
     console.error('[roadmap/content]', err)

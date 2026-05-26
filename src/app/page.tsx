@@ -159,7 +159,7 @@ function BrandLockup({ size = 'nav', muted = false }: { size?: 'nav' | 'hero' | 
         />
       </span>
       <span className={`${textClass} font-heading font-semibold tracking-tight ${muted ? '' : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.16)]'}`}>
-        Blindspot
+        blindspot
       </span>
     </span>
   )

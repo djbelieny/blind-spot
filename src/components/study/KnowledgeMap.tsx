@@ -1,30 +1,29 @@
 'use client'
+
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, Html } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { useRef, useMemo } from 'react'
+import * as THREE from 'three'
 import type { LearningUnit } from '@/types/roadmap'
 
 type NodeStatus = 'locked' | 'available' | 'in-progress' | 'completed'
 
-interface Props {
-  units: LearningUnit[]
-  completedIds: string[]
-  activeId?: string | null
-  selectedId?: string | null
-  onSelect: (id: string, title: string) => void
-  rootLabel?: string
+// Solar-system-style orbital radii — wide spacing between tiers
+const TIER_RADIUS: Record<number, number> = { 1: 3.5, 2: 7.0, 3: 11.5, 4: 16.5 }
+
+// Planet sizes — tier 1 biggest (foundation), tier 4 smallest (mastery details)
+const NODE_R: Record<number, number> = { 0: 0.85, 1: 0.60, 2: 0.50, 3: 0.40, 4: 0.32 }
+
+// Status → emissive color (on-brand palette)
+const STATUS_COLOR: Record<NodeStatus, string> = {
+  available:   '#7C3AED',   // violet
+  'in-progress': '#C026D3', // magenta
+  completed:   '#34C785',   // teal-green
+  locked:      '#555870',   // visible gray-blue
 }
 
-const CX = 450
-const CY = 280
-
-// Radii per tier
-const TIER_RADIUS: Record<number, number> = { 1: 90, 2: 180, 3: 268, 4: 340 }
-// Node circle radii
-const NODE_R: Record<number, number> = { 0: 32, 1: 22, 2: 18, 3: 14, 4: 12 }
-
-interface PlacedUnit {
-  unit: LearningUnit
-  cx: number
-  cy: number
-}
+interface PlacedUnit { unit: LearningUnit; x: number; z: number }
 
 function placeUnits(units: LearningUnit[]): PlacedUnit[] {
   const result: PlacedUnit[] = []
@@ -35,21 +34,19 @@ function placeUnits(units: LearningUnit[]): PlacedUnit[] {
   }
   for (const [tierStr, group] of Object.entries(tierGroups)) {
     const tier = Number(tierStr)
-    const r = TIER_RADIUS[tier] ?? 180
+    const r = TIER_RADIUS[tier] ?? 7
     const count = group.length
+    // Offset start angle slightly per tier so labels don't all stack at the top
+    const startOffset = tier % 2 === 0 ? Math.PI / count : 0
     group.forEach((unit, i) => {
-      const angle = -Math.PI / 2 + (2 * Math.PI / count) * i
-      result.push({ unit, cx: CX + Math.cos(angle) * r, cy: CY + Math.sin(angle) * r })
+      const angle = -Math.PI / 2 + startOffset + (2 * Math.PI / count) * i
+      result.push({ unit, x: Math.cos(angle) * r, z: Math.sin(angle) * r })
     })
   }
   return result
 }
 
-function getStatus(
-  unit: LearningUnit,
-  completedIds: Set<string>,
-  activeId: string | null
-): NodeStatus {
+function getStatus(unit: LearningUnit, completedIds: Set<string>, activeId: string | null): NodeStatus {
   if (completedIds.has(unit.id)) return 'completed'
   if (unit.id === activeId) return 'in-progress'
   if (unit.prerequisites.length === 0) return 'available'
@@ -57,265 +54,339 @@ function getStatus(
   return 'locked'
 }
 
-function truncate(text: string, max: number): string {
-  return text.length > max ? text.slice(0, max - 1) + '…' : text
+// ── Star field ────────────────────────────────────────────────────────────────
+function StarField() {
+  const count = 1800
+  const positions = useMemo(() => {
+    const arr = new Float32Array(count * 3)
+    for (let i = 0; i < count; i++) {
+      arr[i * 3]     = (Math.random() - 0.5) * 120
+      arr[i * 3 + 1] = (Math.random() - 0.5) * 60
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 120
+    }
+    return arr
+  }, [])
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial size={0.055} color="#ffffff" transparent opacity={0.55} sizeAttenuation />
+    </points>
+  )
 }
 
-export default function KnowledgeMap({
-  units,
-  completedIds,
-  activeId,
-  selectedId,
-  onSelect,
-  rootLabel = 'Goal',
-}: Props) {
-  const placed = placeUnits(units)
-  const completedSet = new Set(completedIds)
-  const posMap = new Map(placed.map(p => [p.unit.id, p]))
-  const statusMap = new Map(placed.map(p => [p.unit.id, getStatus(p.unit, completedSet, activeId ?? null)]))
+// ── Orbital ring — torus lying flat in XZ plane ───────────────────────────────
+function OrbitalRing({ radius, tier }: { radius: number; tier: number }) {
+  const opacity = tier === 1 ? 0.30 : tier === 2 ? 0.22 : tier === 3 ? 0.16 : 0.12
+  return (
+    <mesh rotation={[Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[radius, 0.015, 4, 256]} />
+      <meshBasicMaterial color="#6B6E92" transparent opacity={opacity} depthWrite={false} />
+    </mesh>
+  )
+}
 
-  // Build edges: unit -> each prerequisite, tier-1 units with no prereqs -> root
-  const edges: Array<{ x1: number; y1: number; x2: number; y2: number; fromId: string; toId: string }> = []
-  for (const p of placed) {
-    if (p.unit.prerequisites.length === 0) {
-      // Connect to root
-      edges.push({ x1: CX, y1: CY, x2: p.cx, y2: p.cy, fromId: 'root', toId: p.unit.id })
-    } else {
-      for (const prereqId of p.unit.prerequisites) {
-        const from = posMap.get(prereqId)
-        if (from) {
-          edges.push({ x1: from.cx, y1: from.cy, x2: p.cx, y2: p.cy, fromId: prereqId, toId: p.unit.id })
-        }
-      }
-    }
-  }
-
-  const tiers = [1, 2, 3, 4].filter(t => units.some(u => u.tier === t))
+// ── Sun / root node ───────────────────────────────────────────────────────────
+function SunNode({ label }: { label: string }) {
+  const innerRef = useRef<THREE.Mesh>(null)
+  useFrame((_, dt) => {
+    if (innerRef.current) innerRef.current.rotation.y += dt * 0.25
+  })
 
   return (
-    <svg viewBox="0 0 900 560" className="w-full h-full select-none" aria-label="Knowledge roadmap map">
-      <defs>
-        <pattern id="km-grid" width="44" height="44" patternUnits="userSpaceOnUse">
-          <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#8A8FA8" strokeWidth="0.4" strokeOpacity="0.05" />
-        </pattern>
-        <filter id="km-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="5" result="b" />
-          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-        <filter id="km-glow-lg" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="14" result="b" />
-          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-        <radialGradient id="km-vignette" cx="50%" cy="50%" r="65%">
-          <stop offset="40%" stopColor="#08090F" stopOpacity="0" />
-          <stop offset="100%" stopColor="#08090F" stopOpacity="0.6" />
-        </radialGradient>
-        <radialGradient id="km-root-fill" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#A855F7" />
-          <stop offset="100%" stopColor="#6D28D9" />
-        </radialGradient>
-        <radialGradient id="km-done-fill" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#059669" />
-        </radialGradient>
-        <radialGradient id="km-active-fill" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#C084FC" />
-          <stop offset="100%" stopColor="#9333EA" />
-        </radialGradient>
-      </defs>
+    <group>
+      {/* Corona layers */}
+      {[1.6, 2.2, 3.2].map((scale, i) => (
+        <mesh key={i}>
+          <sphereGeometry args={[0.85 * scale, 32, 32]} />
+          <meshBasicMaterial
+            color="#7C3AED"
+            transparent
+            opacity={[0.18, 0.08, 0.03][i]}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+      {/* Core */}
+      <mesh ref={innerRef}>
+        <sphereGeometry args={[0.85, 48, 48]} />
+        <meshStandardMaterial
+          color="#0d0620"
+          emissive="#8B5CF6"
+          emissiveIntensity={2.2}
+          roughness={0.15}
+          metalness={0.4}
+        />
+      </mesh>
+      {/* Bright centre dot */}
+      <mesh>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshBasicMaterial color="#E9D5FF" blending={THREE.AdditiveBlending} />
+      </mesh>
+      <Html center position={[0, 1.35, 0]} style={{ pointerEvents: 'none' }} zIndexRange={[50, 0]}>
+        <span style={{
+          fontSize: 13, fontWeight: 700, color: '#E9D5FF',
+          fontFamily: 'system-ui, sans-serif',
+          textShadow: '0 0 12px rgba(124,58,237,0.9), 0 2px 6px #000',
+          whiteSpace: 'nowrap', letterSpacing: '0.02em',
+        }}>
+          {label.length > 20 ? label.slice(0, 19) + '…' : label}
+        </span>
+      </Html>
+    </group>
+  )
+}
 
-      <rect width="900" height="560" fill="url(#km-grid)" />
+// ── Planet node ───────────────────────────────────────────────────────────────
+interface PlanetProps {
+  placed: PlacedUnit
+  status: NodeStatus
+  isSelected: boolean
+  isBlindSpot: boolean
+  r: number
+  onSelect: () => void
+}
 
-      {/* Orbital rings */}
-      {tiers.map(t => (
-        <circle key={t} cx={CX} cy={CY} r={TIER_RADIUS[t]}
-          fill="none" stroke="#8A8FA8" strokeWidth="0.5"
-          strokeOpacity={t === 1 ? 0.1 : t === 2 ? 0.08 : 0.06}
-          strokeDasharray={t === 1 ? '3 9' : t === 2 ? '2 10' : '2 14'}
+function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: PlanetProps) {
+  const surfaceRef = useRef<THREE.Mesh>(null)
+  const phase = useRef(Math.random() * Math.PI * 2)
+
+  useFrame((_, dt) => {
+    if (status === 'available' && surfaceRef.current) {
+      phase.current += dt * 1.1
+      const mat = surfaceRef.current.material as THREE.MeshStandardMaterial
+      mat.emissiveIntensity = 0.75 + Math.sin(phase.current) * 0.25
+    }
+  })
+
+  const accentColor = isBlindSpot && status === 'locked' ? '#22D3EE' : STATUS_COLOR[status]
+  const isActive = status !== 'locked'
+
+  // Surface material props
+  const emissiveIntensity = status === 'locked' ? 0.45 : status === 'available' ? 0.75 : 1.0
+  const baseHex = status === 'locked' ? '#1C1E2E' : status === 'completed' ? '#04180e' : status === 'in-progress' ? '#130320' : '#0b0820'
+
+  // Label styling
+  const labelColor = status === 'locked'
+    ? (isBlindSpot ? '#67E8F9' : '#6B6E8A')
+    : status === 'completed' ? '#6EE7B7'
+    : status === 'in-progress' ? '#E879F9'
+    : '#C4B5FD'
+
+  const labelOpacity = status === 'locked' && !isBlindSpot ? 0.65 : 1
+
+  // Title — clean truncation, 2 lines max
+  const words = placed.unit.title.split(' ')
+  const mid = Math.ceil(words.length / 2)
+  const line1 = words.slice(0, mid).join(' ')
+  const line2 = words.length > 1 ? words.slice(mid).join(' ') : ''
+  const maxW = 13
+  const l1 = line1.length > maxW ? line1.slice(0, maxW - 1) + '…' : line1
+  const l2 = line2.length > maxW ? line2.slice(0, maxW - 1) + '…' : line2
+
+  const clickable = isActive
+
+  return (
+    <group position={[placed.x, 0, placed.z]}>
+
+      {/* Atmosphere glow — only for active planets */}
+      {isActive && (
+        <mesh>
+          <sphereGeometry args={[r * 1.55, 32, 32]} />
+          <meshBasicMaterial
+            color={accentColor}
+            transparent
+            opacity={0.14}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+
+      {/* Outer haze — only for active */}
+      {isActive && (
+        <mesh>
+          <sphereGeometry args={[r * 2.4, 24, 24]} />
+          <meshBasicMaterial
+            color={accentColor}
+            transparent
+            opacity={0.045}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+
+      {/* Selection ring */}
+      {isSelected && (
+        <>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[r * 1.7, 0.035, 12, 96]} />
+            <meshBasicMaterial color="#F0ABFC" blending={THREE.AdditiveBlending} depthWrite={false} />
+          </mesh>
+          <mesh>
+            <sphereGeometry args={[r * 1.7, 32, 32]} />
+            <meshBasicMaterial color="#C026D3" transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
+          </mesh>
+        </>
+      )}
+
+      {/* Blind spot indicator ring */}
+      {isBlindSpot && status === 'locked' && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[r * 1.5, 0.02, 8, 64]} />
+          <meshBasicMaterial color="#22D3EE" transparent opacity={0.55} depthWrite={false} blending={THREE.AdditiveBlending} />
+        </mesh>
+      )}
+
+      {/* Planet surface */}
+      <mesh
+        ref={surfaceRef}
+        onClick={(e) => { e.stopPropagation(); onSelect() }}
+        onPointerEnter={() => { document.body.style.cursor = 'pointer' }}
+        onPointerLeave={() => { document.body.style.cursor = 'auto' }}
+      >
+        <sphereGeometry args={[r, 48, 48]} />
+        <meshStandardMaterial
+          color={baseHex}
+          emissive={accentColor}
+          emissiveIntensity={emissiveIntensity}
+          roughness={status === 'locked' ? 0.9 : 0.2}
+          metalness={status === 'locked' ? 0.0 : 0.5}
+        />
+      </mesh>
+
+      {/* Specular highlight dot on active planets */}
+      {isActive && (
+        <mesh position={[r * 0.35, r * 0.45, r * 0.35]}>
+          <sphereGeometry args={[r * 0.12, 8, 8]} />
+          <meshBasicMaterial color="white" transparent opacity={0.35} blending={THREE.AdditiveBlending} />
+        </mesh>
+      )}
+
+      {/* Label */}
+      <Html
+        center
+        position={[0, -(r + 0.28), 0]}
+        style={{ pointerEvents: 'none', userSelect: 'none' }}
+        distanceFactor={12}
+      zIndexRange={[50, 0]}
+      >
+        <div style={{ textAlign: 'center', opacity: labelOpacity }}>
+          <span style={{
+            display: 'block',
+            fontSize: placed.unit.tier <= 2 ? 11 : 10,
+            fontWeight: 500,
+            color: labelColor,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            textShadow: '0 1px 6px rgba(0,0,0,0.95)',
+            lineHeight: 1.35,
+            whiteSpace: 'nowrap',
+          }}>
+            {l1}
+          </span>
+          {l2 && (
+            <span style={{
+              display: 'block',
+              fontSize: placed.unit.tier <= 2 ? 11 : 10,
+              fontWeight: 500,
+              color: labelColor,
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              textShadow: '0 1px 6px rgba(0,0,0,0.95)',
+              lineHeight: 1.35,
+              whiteSpace: 'nowrap',
+            }}>
+              {l2}
+            </span>
+          )}
+        </div>
+      </Html>
+    </group>
+  )
+}
+
+// ── Scene ─────────────────────────────────────────────────────────────────────
+interface Props {
+  units: LearningUnit[]
+  completedIds: string[]
+  activeId?: string | null
+  selectedId?: string | null
+  onSelect: (id: string, title: string) => void
+  rootLabel?: string
+}
+
+function MapScene({ units, completedIds, activeId, selectedId, onSelect, rootLabel = 'Goal' }: Props) {
+  const placed = useMemo(() => placeUnits(units), [units])
+  const completedSet = useMemo(() => new Set(completedIds), [completedIds])
+  const statusMap = useMemo(
+    () => new Map(placed.map(p => [p.unit.id, getStatus(p.unit, completedSet, activeId ?? null)])),
+    [placed, completedSet, activeId]
+  )
+  const tiers = useMemo(() => [1, 2, 3, 4].filter(t => units.some(u => u.tier === t)), [units])
+
+  return (
+    <>
+      <color attach="background" args={['#05060D']} />
+      <fog attach="fog" args={['#05060D', 28, 60]} />
+
+      {/* Ambient + directional lighting */}
+      <ambientLight intensity={0.15} />
+      <pointLight position={[0, 8, 0]} intensity={6} color="#9F67F5" decay={2} />
+      <pointLight position={[0, -4, 0]} intensity={1} color="#4B0082" decay={2} />
+      <directionalLight position={[10, 10, 5]} intensity={0.4} color="#ffffff" />
+
+      <StarField />
+
+      {tiers.map(t => <OrbitalRing key={t} radius={TIER_RADIUS[t]} tier={t} />)}
+
+      <SunNode label={rootLabel} />
+
+      {placed.map(p => (
+        <Planet
+          key={p.unit.id}
+          placed={p}
+          status={statusMap.get(p.unit.id) ?? 'locked'}
+          isSelected={p.unit.id === selectedId}
+          isBlindSpot={p.unit.isBlindSpot}
+          r={NODE_R[p.unit.tier] ?? 0.40}
+          onSelect={() => onSelect(p.unit.id, p.unit.title)}
         />
       ))}
 
-      {/* Edges */}
-      {edges.map(e => {
-        const fromStatus = e.fromId === 'root' ? 'available' : (statusMap.get(e.fromId) ?? 'locked')
-        const toStatus = statusMap.get(e.toId) ?? 'locked'
-        const locked = toStatus === 'locked'
-        const done = fromStatus === 'completed' && toStatus === 'completed'
-        const live = (fromStatus === 'in-progress' || fromStatus === 'available') && !locked
-        return (
-          <line key={`${e.fromId}-${e.toId}`}
-            x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
-            stroke={done ? '#34C785' : live ? '#7C3AED' : '#8A8FA8'}
-            strokeWidth={done ? 1.5 : !locked ? 1 : 0.7}
-            strokeOpacity={done ? 0.5 : !locked ? 0.3 : 0.1}
-            strokeDasharray={locked ? '4 5' : undefined}
-          />
-        )
-      })}
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.8} intensity={1.6} mipmapBlur />
+      </EffectComposer>
 
-      {/* Root node */}
-      <g>
-        <circle cx={CX} cy={CY} r={NODE_R[0] + 18} fill="#7C3AED" opacity={0.1} />
-        <circle cx={CX} cy={CY} r={NODE_R[0]}
-          fill="url(#km-root-fill)" stroke="#9F67F5" strokeWidth={2}
-          filter="url(#km-glow)"
-        />
-        <circle cx={CX} cy={CY} r={5} fill="rgba(255,255,255,0.35)" />
-        {(() => {
-          const fs = 11
-          const labelY = CY + NODE_R[0] + fs + 4
-          const words = rootLabel.split(' ')
-          const half = Math.ceil(words.length / 2)
-          const l1 = truncate(words.slice(0, half).join(' '), 16)
-          const l2 = words.length > 1 ? truncate(words.slice(half).join(' '), 16) : ''
-          return (
-            <>
-              <text x={CX} y={labelY} textAnchor="middle" fontSize={fs} fill="#E9D5FF"
-                style={{ fontFamily: 'system-ui,-apple-system,sans-serif', fontWeight: '500' }}>
-                {l1}
-              </text>
-              {l2 && (
-                <text x={CX} y={labelY + fs * 1.45} textAnchor="middle" fontSize={fs} fill="#E9D5FF"
-                  style={{ fontFamily: 'system-ui,-apple-system,sans-serif', fontWeight: '500' }}>
-                  {l2}
-                </text>
-              )}
-            </>
-          )
-        })()}
-      </g>
+      <OrbitControls
+        enablePan
+        enableZoom
+        enableRotate
+        minDistance={4}
+        maxDistance={55}
+        makeDefault
+      />
+    </>
+  )
+}
 
-      {/* Unit nodes — render tier 4 first (outermost), root last */}
-      {([4, 3, 2, 1] as const).flatMap(tier =>
-        placed.filter(p => p.unit.tier === tier).map(p => {
-          const { unit, cx, cy } = p
-          const status = statusMap.get(unit.id) ?? 'locked'
-          const isSelected = unit.id === selectedId
-          const isBlindSpot = unit.isBlindSpot
-          const r = NODE_R[tier] ?? 14
-          const clickable = status !== 'locked'
+// ── Export ────────────────────────────────────────────────────────────────────
+export default function KnowledgeMap(props: Props) {
+  if (!props.units?.length) return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="text-[#8A8FA8] text-sm">Generating your map…</span>
+    </div>
+  )
 
-          // Fill color
-          const fill =
-            status === 'completed'   ? 'url(#km-done-fill)' :
-            status === 'in-progress' ? 'url(#km-active-fill)' :
-            status === 'available'   ? '#141525' :
-            '#0C0D18'
-
-          // Stroke color — blind spot units get teal accent even when locked
-          const stroke =
-            status === 'completed'   ? '#34C785' :
-            status === 'in-progress' ? '#C026D3' :
-            isBlindSpot              ? '#22D3EE' :
-            status === 'available'   ? '#7C3AED' :
-            '#1C1D2E'
-
-          const labelColor =
-            status === 'completed'   ? '#A7F3D0' :
-            status === 'in-progress' ? '#DDD6FE' :
-            status === 'available'   ? '#C4C6DA' :
-            isBlindSpot              ? '#67E8F9' :
-            '#282938'
-
-          const showLabel = tier <= 2 || status === 'available' || status === 'in-progress' || status === 'completed'
-          const maxC = tier === 1 ? 13 : tier === 2 ? 11 : 9
-          const words = unit.title.split(' ')
-          const half = Math.ceil(words.length / 2)
-          const l1 = truncate(words.slice(0, half).join(' '), maxC)
-          const l2 = words.length > 1 ? truncate(words.slice(half).join(' '), maxC) : ''
-          const fs = tier === 1 ? 9.5 : tier === 2 ? 8.5 : 7.5
-          const labelY = cy + r + fs + 4
-
-          return (
-            <g key={unit.id}
-              onClick={() => clickable && onSelect(unit.id, unit.title)}
-              style={{ cursor: clickable ? 'pointer' : 'default', opacity: status === 'locked' && !isBlindSpot ? 0.35 : status === 'locked' ? 0.5 : 1 }}
-            >
-              {/* Ambient glow for non-locked */}
-              {status !== 'locked' && (
-                <circle cx={cx} cy={cy} r={r + 18}
-                  fill={status === 'completed' ? '#34C785' : status === 'in-progress' ? '#C026D3' : '#7C3AED'}
-                  opacity={0.06}
-                />
-              )}
-
-              {/* Blind spot indicator ring — always visible even when locked */}
-              {isBlindSpot && status === 'locked' && (
-                <circle cx={cx} cy={cy} r={r + 6}
-                  fill="none" stroke="#22D3EE" strokeWidth={1}
-                  strokeOpacity={0.4} strokeDasharray="3 4"
-                />
-              )}
-
-              {/* Pulse ring for available nodes */}
-              {status === 'available' && (
-                <circle cx={cx} cy={cy} r={r + 9}
-                  fill="none"
-                  stroke={isBlindSpot ? '#22D3EE' : '#7C3AED'}
-                  strokeWidth={1.2} className="km-pulse"
-                />
-              )}
-
-              {/* Selection ring */}
-              {isSelected && (
-                <circle cx={cx} cy={cy} r={r + 10}
-                  fill="none" stroke="#C026D3" strokeWidth={1.8} strokeOpacity={0.8}
-                  filter="url(#km-glow)"
-                />
-              )}
-
-              {/* Main circle */}
-              <circle cx={cx} cy={cy} r={r}
-                fill={fill} stroke={stroke}
-                strokeWidth={isSelected ? 2 : isBlindSpot && status === 'locked' ? 1.5 : 1.5}
-                filter={status !== 'locked' ? 'url(#km-glow)' : undefined}
-              />
-
-              {/* Checkmark for completed */}
-              {status === 'completed' && (
-                <path
-                  d={`M ${cx - r * 0.36} ${cy} L ${cx - r * 0.08} ${cy + r * 0.32} L ${cx + r * 0.42} ${cy - r * 0.32}`}
-                  fill="none" stroke="#08090F" strokeWidth={r * 0.11}
-                  strokeLinecap="round" strokeLinejoin="round"
-                />
-              )}
-
-              {/* In-progress dot */}
-              {status === 'in-progress' && (
-                <circle cx={cx + r * 0.6} cy={cy - r * 0.6} r={r * 0.22} fill="#F0ABFC" />
-              )}
-
-              {/* Blind spot teal dot for available blind spots */}
-              {isBlindSpot && status === 'available' && (
-                <circle cx={cx + r * 0.55} cy={cy - r * 0.55} r={r * 0.25} fill="#22D3EE" />
-              )}
-
-              {/* Labels */}
-              {showLabel && (
-                <>
-                  <text x={cx} y={labelY} textAnchor="middle" fontSize={fs} fill={labelColor}
-                    style={{ fontFamily: 'system-ui,-apple-system,sans-serif', fontWeight: '500' }}>
-                    {l1}
-                  </text>
-                  {l2 && (
-                    <text x={cx} y={labelY + fs * 1.45} textAnchor="middle" fontSize={fs} fill={labelColor}
-                      style={{ fontFamily: 'system-ui,-apple-system,sans-serif', fontWeight: '500' }}>
-                      {l2}
-                    </text>
-                  )}
-                </>
-              )}
-            </g>
-          )
-        })
-      )}
-
-      <rect width="900" height="560" fill="url(#km-vignette)" />
-
-      <style>{`
-        .km-pulse { animation: km-pulse-anim 2.5s ease-in-out infinite; }
-        @keyframes km-pulse-anim { 0%,100%{opacity:0.4} 50%{opacity:0.07} }
-      `}</style>
-    </svg>
+  return (
+    <Canvas
+      camera={{ position: [0, 20, 26], fov: 50, near: 0.1, far: 200 }}
+      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+      dpr={[1, 2]}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <MapScene {...props} />
+    </Canvas>
   )
 }

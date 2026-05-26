@@ -5,9 +5,11 @@ import { Suspense } from 'react'
 import ChatBubble from '@/components/onboarding/ChatBubble'
 import VoiceToggle from '@/components/study/VoiceToggle'
 import CheckpointModal from '@/components/study/CheckpointModal'
-import KnowledgeMap from '@/components/study/KnowledgeMap'
+import dynamic from 'next/dynamic'
 import { ArrowLeft, X, MessageCircle } from 'lucide-react'
-import type { LearnerProfile, BlindSpot } from '@/types/learner'
+const KnowledgeMap = dynamic(() => import('@/components/study/KnowledgeMap'), { ssr: false })
+import RadarChart from '@/components/RadarChart'
+import type { LearnerProfile, BlindSpot, LearnerPillars, StudyTopic } from '@/types/learner'
 import type { Roadmap, UnitContent } from '@/types/roadmap'
 
 // ─── Checkpoint types ─────────────────────────────────────────────────────────
@@ -53,6 +55,102 @@ function parseVideoSections(script: string): Array<{ label: string; text: string
   return sections
 }
 
+// ─── Map legend with hover tooltips ──────────────────────────────────────────
+
+const LEGEND_ITEMS = (isEn: boolean) => [
+  {
+    color: '#34C785',
+    label: isEn ? 'Completed'         : 'Concluído',
+    title: isEn ? 'Completed'         : 'Concluído',
+    desc:  isEn
+      ? 'You\'ve finished this topic. All prerequisite content has been consumed and/or the checkpoint was passed.'
+      : 'Você concluiu este tópico. Todo o conteúdo pré-requisito foi consumido e/ou o checkpoint foi aprovado.',
+  },
+  {
+    color: '#7C3AED',
+    label: isEn ? 'Available'         : 'Disponível',
+    title: isEn ? 'Available'         : 'Disponível',
+    desc:  isEn
+      ? 'This topic is ready to study. Its prerequisites are complete (or it has none). Click to open.'
+      : 'Este tópico está pronto para estudo. Seus pré-requisitos estão completos (ou não há nenhum). Clique para abrir.',
+  },
+  {
+    color: '#C026D3',
+    label: isEn ? 'In progress'       : 'Em progresso',
+    title: isEn ? 'Currently selected': 'Selecionado',
+    desc:  isEn
+      ? 'The topic currently open in the content panel. Your activity here updates your proficiency radar in real time.'
+      : 'O tópico atualmente aberto no painel de conteúdo. Sua atividade aqui atualiza seu radar de proficiência em tempo real.',
+  },
+  {
+    color: '#555870',
+    label: isEn ? 'Locked'            : 'Bloqueado',
+    title: isEn ? 'Locked'            : 'Bloqueado',
+    desc:  isEn
+      ? 'Prerequisites for this topic are not yet complete. Click it to take an unlock challenge — prove you already know the prerequisites and skip ahead.'
+      : 'Os pré-requisitos deste tópico ainda não foram concluídos. Clique para tentar um desafio de desbloqueio — prove que já conhece os pré-requisitos e avance.',
+  },
+  {
+    color: '#22D3EE',
+    label: isEn ? 'Blind spot'        : 'Ponto cego',
+    title: isEn ? 'Blind spot'        : 'Ponto cego',
+    desc:  isEn
+      ? 'A gap in your knowledge identified during onboarding. Prioritise these — they\'re what\'s holding back your overall proficiency.'
+      : 'Uma lacuna no seu conhecimento identificada durante o onboarding. Priorize estes — são eles que estão limitando sua proficiência geral.',
+  },
+]
+
+function MapLegend({ isEn }: { isEn: boolean }) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+  const items = LEGEND_ITEMS(isEn)
+
+  return (
+    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+      {/* Tooltip card */}
+      <div className={`transition-all duration-200 ${hoveredIdx !== null ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}`}>
+        {hoveredIdx !== null && (
+          <div
+            className="bg-[#0E0F1A] border rounded-2xl px-5 py-4 max-w-xs text-center shadow-xl shadow-black/50"
+            style={{ borderColor: `${items[hoveredIdx].color}40` }}
+          >
+            <p className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: items[hoveredIdx].color }}>
+              {items[hoveredIdx].title}
+            </p>
+            <p className="text-[#C8C9D8] text-xs leading-relaxed">{items[hoveredIdx].desc}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Legend pill */}
+      <div className="flex items-center gap-4 bg-[#0A0B14]/85 backdrop-blur-md border border-[#8A8FA8]/10 rounded-full px-5 py-2">
+        {items.map(({ color, label }, i) => (
+          <div
+            key={label}
+            className="flex items-center gap-1.5 cursor-default"
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+          >
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0 transition-transform duration-150"
+              style={{
+                backgroundColor: color,
+                boxShadow: hoveredIdx === i ? `0 0 10px ${color}` : `0 0 5px ${color}80`,
+                transform: hoveredIdx === i ? 'scale(1.4)' : 'scale(1)',
+              }}
+            />
+            <span
+              className="text-[10px] whitespace-nowrap transition-colors duration-150"
+              style={{ color: hoveredIdx === i ? '#F0F0F5' : 'rgba(138,143,168,0.7)' }}
+            >
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main study component ─────────────────────────────────────────────────────
 
 function StudyInner() {
@@ -93,8 +191,13 @@ function StudyInner() {
   // Podcast state
   const [podcastPlaying, setPodcastPlaying] = useState(false)
   const [podcastLoading, setPodcastLoading] = useState(false)
+  const [podcastGenerating, setPodcastGenerating] = useState(false)
+  const [podcastGeneratePhase, setPodcastGeneratePhase] = useState<'script' | 'voices' | null>(null)
   const [podcastProgress, setPodcastProgress] = useState(0)
+  const [podcastError, setPodcastError] = useState<string | null>(null)
+  const [podcastDialogue, setPodcastDialogue] = useState<{ speaker: 'A' | 'B'; name: string; text: string }[] | null>(null)
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null)
+  const podcastUnitRef = useRef<string | null>(null)
 
   // Map state
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
@@ -102,10 +205,22 @@ function StudyInner() {
   const [contentPanelOpen, setContentPanelOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
 
-  // Checkpoint / reflection
+  // Radar overlay
+  const [topicPillars, setTopicPillars] = useState<LearnerPillars | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
+  const [radarOpen, setRadarOpen] = useState(false)
+
+  // Track which (unitId, interactionType) pairs have already been recorded this session
+  const firedInteractionsRef = useRef<Record<string, Set<string>>>({})
+
+  // Checkpoint / unlock challenge
   const [showCheckpoint, setShowCheckpoint] = useState(false)
+  const [checkpointMode, setCheckpointMode] = useState<'checkpoint' | 'unlock'>('checkpoint')
   const [checkpointQuestions, setCheckpointQuestions] = useState<CheckpointQuestion[]>([])
   const [lastCheckpointScore, setLastCheckpointScore] = useState<number | null>(null)
+  const [unlockTargetId, setUnlockTargetId] = useState<string | null>(null)
+  const [unlockLoading, setUnlockLoading] = useState(false)
+  const [unlockFailCounts, setUnlockFailCounts] = useState<Record<string, number>>({})
   const [showReflection, setShowReflection] = useState(false)
   const [reflectionText, setReflectionText] = useState('')
 
@@ -120,12 +235,20 @@ function StudyInner() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
 
-  // Load profile
+  // Load profile + topic pillars
   useEffect(() => {
     if (!sessionId) return
     fetch(`/api/study/profile?sessionId=${sessionId}`)
       .then(r => r.ok ? r.json() : null)
       .then((data: LearnerProfile | null) => setProfile(data))
+      .catch(console.error)
+    fetch(`/api/topics?sessionId=${sessionId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { topics: StudyTopic[] } | null) => {
+        const first = data?.topics?.[0]
+        if (first?.pillars) setTopicPillars(first.pillars)
+        if (first?.id) setTopicId(first.id)
+      })
       .catch(console.error)
   }, [sessionId])
 
@@ -151,21 +274,23 @@ function StudyInner() {
       .catch(console.error)
   }, [sessionId])
 
-  // Generate roadmap after profile loads
+  // Generate roadmap after profile loads — scoped to the current topic
   useEffect(() => {
-    if (!profile || !sessionId || roadmap) return
+    if (!profile || !sessionId) return
+    const topic = initialTopic || profile.objective
+    setRoadmap(null)
     setRoadmapLoading(true)
     fetch('/api/roadmap/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
+      body: JSON.stringify({ sessionId, topic }),
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.roadmap) setRoadmap(data.roadmap) })
       .catch(console.error)
       .finally(() => setRoadmapLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile, sessionId])
+  }, [profile, sessionId, initialTopic])
 
   // Set welcome message once profile loads
   useEffect(() => {
@@ -190,10 +315,17 @@ function StudyInner() {
   }, [profile])
 
   // Load unit content when selectedNodeId changes
-  useEffect(() => {
-    if (!selectedNodeId || !sessionId) return
+  // IMPORTANT: always use `initialTopic` (the main study subject from the URL) for cache keys,
+  // NOT `currentTopic` which gets overwritten with the unit title when a node is opened.
+  const [contentGenerating, setContentGenerating] = useState(false)
+  const [contentError, setContentError] = useState<string | null>(null)
+
+  const loadUnitContent = useCallback(async (unitId: string) => {
+    if (!sessionId) return
     setUnitContent(null)
+    setContentError(null)
     setContentLoading(true)
+    setContentGenerating(false)
     setContentTab('overview')
     setFlashcardIdx(0)
     setFlashcardFlipped(false)
@@ -203,46 +335,181 @@ function StudyInner() {
     setQuizScore(0)
     setQuizDone(false)
 
-    // Try GET first, then POST to generate
-    fetch(`/api/roadmap/content?sessionId=${sessionId}&unitId=${selectedNodeId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data?.content) return data
-        // Not cached — generate
-        return fetch('/api/roadmap/content', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, unitId: selectedNodeId }),
-        }).then(r => r.ok ? r.json() : null)
+    // Use initialTopic for all cache key operations — it is the stable study subject
+    const studyTopic = initialTopic || ''
+    const topicParam = encodeURIComponent(studyTopic)
+
+    try {
+      // 1. Check cache
+      const cacheRes = await fetch(
+        `/api/roadmap/content?sessionId=${sessionId}&unitId=${unitId}&topic=${topicParam}`
+      )
+      if (cacheRes.ok) {
+        const cached = await cacheRes.json()
+        if (cached?.content) {
+          setUnitContent(cached.content)
+          setContentLoading(false)
+          return
+        }
+      }
+
+      // 2. Not cached — generate (may take several seconds)
+      setContentLoading(false)
+      setContentGenerating(true)
+      const genRes = await fetch('/api/roadmap/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, unitId, topic: studyTopic }),
       })
-      .then(data => { if (data?.content) setUnitContent(data.content) })
-      .catch(console.error)
-      .finally(() => setContentLoading(false))
-  }, [selectedNodeId, sessionId])
-
-  // Auto-checkpoint every 8 messages
-  useEffect(() => {
-    const total = messages.length
-    if (total === 0 || total % 8 !== 0) return
-    if (checkpointTriggeredRef.current.has(total)) return
-    checkpointTriggeredRef.current.add(total)
-    triggerCheckpoint()
+      const genData = await genRes.json()
+      if (genRes.ok && genData?.content) {
+        setUnitContent(genData.content)
+      } else {
+        const msg = genData?.error ?? `HTTP ${genRes.status}`
+        console.error('[content generate]', msg, { sessionId, unitId, studyTopic })
+        setContentError(msg)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Network error'
+      console.error('[content load]', msg)
+      setContentError(msg)
+    } finally {
+      setContentLoading(false)
+      setContentGenerating(false)
+    }
+  // initialTopic is a stable constant from searchParams
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length])
+  }, [sessionId, initialTopic])
 
-  const handleNodeSelect = useCallback((id: string, label: string) => {
-    setSelectedNodeId(id)
-    setCurrentTopic(label)
-    setContentPanelOpen(true)
-    const unit = roadmap?.units.find(u => u.id === id)
-    if (unit) {
-      const nudge = isEn
-        ? `Switching to **${label}**. ${unit.description}`
-        : `Mudando para **${label}**. ${unit.description}`
-      setMessages(prev => [...prev, { role: 'tutor', content: nudge }])
+  useEffect(() => {
+    if (!selectedNodeId) return
+    loadUnitContent(selectedNodeId)
+    // Reset podcast state when unit changes
+    if (podcastUnitRef.current !== selectedNodeId) {
+      podcastAudioRef.current?.pause()
+      podcastAudioRef.current = null
+      setPodcastPlaying(false)
+      setPodcastProgress(0)
+      setPodcastDialogue(null)
+      setPodcastError(null)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNodeId, sessionId])
+
+
+  const isUnitLocked = useCallback((unitId: string): boolean => {
+    const unit = roadmap?.units.find(u => u.id === unitId)
+    if (!unit) return true
+    if (completedNodeIds.includes(unitId)) return false
+    if (unit.prerequisites.length === 0) return false
+    return unit.prerequisites.some(p => !completedNodeIds.includes(p))
+  }, [roadmap, completedNodeIds])
+
+  const openUnit = useCallback((id: string, title: string) => {
+    setSelectedNodeId(id)
+    setCurrentTopic(title)
+    setContentPanelOpen(true)
+    // Reset fired interactions for this new unit so all tabs get recorded fresh
+    firedInteractionsRef.current[id] ??= new Set()
+    const unit = roadmap?.units.find(u => u.id === id)
+    if (unit) {
+      setMessages(prev => [...prev, { role: 'tutor', content: isEn
+        ? `Switching to **${title}**. ${unit.description}`
+        : `Mudando para **${title}**. ${unit.description}` }])
+    }
   }, [roadmap, isEn])
+
+  const recordInteraction = useCallback(async (
+    type: 'read' | 'cards' | 'quiz' | 'listen' | 'watch',
+    opts?: { score?: number; minutesSpent?: number; force?: boolean }
+  ) => {
+    if (!selectedNodeId || !sessionId) return
+    // De-duplicate per unit per type (quiz is always re-recorded)
+    if (type !== 'quiz' && !opts?.force) {
+      const bucket = firedInteractionsRef.current[selectedNodeId] ??= new Set()
+      if (bucket.has(type)) return
+      bucket.add(type)
+    }
+    try {
+      const res = await fetch('/api/study/interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          unitId: selectedNodeId,
+          topicId,
+          interactionType: type,
+          score: opts?.score,
+          minutesSpent: opts?.minutesSpent,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.pillars) setTopicPillars(data.pillars)
+        if (data.completedCourseIds) setCompletedNodeIds(data.completedCourseIds)
+      }
+    } catch {}
+  }, [selectedNodeId, sessionId, topicId])
+
+  const handleNodeSelect = useCallback(async (id: string, label: string) => {
+    if (!isUnitLocked(id)) {
+      openUnit(id, label)
+      return
+    }
+
+    // 3-strike rule: if failed 3+ times, require completing a prerequisite first
+    const failCount = unlockFailCounts[id] ?? 0
+    if (failCount >= 3) {
+      const unit = roadmap?.units.find(u => u.id === id)
+      const incomplete = (unit?.prerequisites ?? [])
+        .filter(p => !completedNodeIds.includes(p))
+        .map(p => roadmap?.units.find(u => u.id === p))
+        .filter((u): u is NonNullable<typeof u> => Boolean(u))
+        .sort((a, b) => a.tier - b.tier)
+      const prereqTodo = incomplete[0]
+      setMessages(prev => [...prev, { role: 'tutor', content: isEn
+        ? `You've tried unlocking **${label}** ${failCount} times. Complete at least one more lesson on **${prereqTodo?.title ?? 'a prerequisite topic'}** before trying again — it'll make a real difference.`
+        : `Você tentou desbloquear **${label}** ${failCount} vezes. Conclua pelo menos uma aula sobre **${prereqTodo?.title ?? 'um tópico pré-requisito'}** antes de tentar novamente.` }])
+      if (prereqTodo) openUnit(prereqTodo.id, prereqTodo.title)
+      return
+    }
+
+    // Locked node — generate prerequisite challenge
+    const unit = roadmap?.units.find(u => u.id === id)
+    if (!unit) return
+
+    const incompletePrereqs = unit.prerequisites
+      .filter(p => !completedNodeIds.includes(p))
+      .map(p => roadmap?.units.find(u => u.id === p))
+      .filter((u): u is NonNullable<typeof u> => Boolean(u))
+
+    const conceptsCovered = incompletePrereqs.flatMap(u => u.conceptTags ?? [])
+    const prereqName = incompletePrereqs.map(u => u.title).join(', ') || label
+
+    setMessages(prev => [...prev, { role: 'tutor', content: isEn
+      ? `**${label}** is locked. Answer a few questions to see if you already know the prerequisites — you might be able to skip ahead!`
+      : `**${label}** está bloqueado. Responda algumas perguntas para ver se você já conhece os pré-requisitos — você pode pular adiante!` }])
+
+    setUnlockLoading(true)
+    try {
+      const res = await fetch('/api/study/checkpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, courseName: prereqName, conceptsCovered }),
+      })
+      if (!res.ok) return
+      const data = await res.json() as { questions: CheckpointQuestion[] }
+      if (data.questions?.length) {
+        setUnlockTargetId(id)
+        setCheckpointQuestions(data.questions)
+        setCheckpointMode('unlock')
+        setShowCheckpoint(true)
+      }
+    } catch {} finally {
+      setUnlockLoading(false)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roadmap, isEn, completedNodeIds, sessionId, isUnitLocked, openUnit, unlockFailCounts])
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
@@ -336,38 +603,82 @@ function StudyInner() {
   }
 
   // Podcast controls
-  const togglePodcast = async () => {
-    if (!unitContent?.podcastScript) return
+  const togglePodcast = () => {
+    if (!podcastAudioRef.current) return
     if (podcastPlaying) {
-      podcastAudioRef.current?.pause()
+      podcastAudioRef.current.pause()
       setPodcastPlaying(false)
-      return
+    } else {
+      podcastAudioRef.current.play()
+      setPodcastPlaying(true)
     }
-    if (podcastAudioRef.current) {
+  }
+
+  const generatePodcast = async () => {
+    if (!selectedNodeId || !unitContent) return
+    // If audio already generated for this unit, just play
+    if (podcastAudioRef.current && podcastUnitRef.current === selectedNodeId) {
+      podcastAudioRef.current.currentTime = 0
       podcastAudioRef.current.play()
       setPodcastPlaying(true)
       return
     }
-    setPodcastLoading(true)
+
+    setPodcastError(null)
+    setPodcastGenerating(true)
+    setPodcastGeneratePhase('script')
+
     try {
-      const res = await fetch('/api/voice/tts', {
+      // Phase 1: check if dialogue script is already cached
+      const studyTopic = initialTopic || ''
+      const topicParam = encodeURIComponent(studyTopic)
+      const checkRes = await fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+      if (checkRes.ok) {
+        const checkData = await checkRes.json()
+        if (checkData.dialogue?.length) setPodcastDialogue(checkData.dialogue)
+      }
+
+      // Phase 2: synthesize (includes script generation if not cached)
+      setPodcastGeneratePhase('voices')
+      const res = await fetch('/api/podcast/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: unitContent.podcastScript.slice(0, 4900),
-          persona: profile?.persona ?? 'encorajador',
-        }),
+        body: JSON.stringify({ sessionId, unitId: selectedNodeId, topic: studyTopic }),
       })
-      if (!res.ok) return
-      const audio = new Audio(URL.createObjectURL(await res.blob()))
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+        setPodcastError(err.error ?? 'Generation failed')
+        return
+      }
+
+      // If dialogue wasn't pre-loaded, try to get it now
+      if (!podcastDialogue) {
+        const scriptRes = await fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+        if (scriptRes.ok) {
+          const sd = await scriptRes.json()
+          if (sd.dialogue?.length) setPodcastDialogue(sd.dialogue)
+        }
+      }
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const audio = new Audio(url)
       podcastAudioRef.current = audio
+      podcastUnitRef.current = selectedNodeId
       audio.ontimeupdate = () => {
         if (audio.duration) setPodcastProgress(audio.currentTime / audio.duration)
       }
       audio.onended = () => { setPodcastPlaying(false); setPodcastProgress(0) }
       audio.play()
       setPodcastPlaying(true)
-    } catch {} finally { setPodcastLoading(false) }
+      recordInteraction('listen', { minutesSpent: 8 })
+    } catch (err) {
+      setPodcastError(err instanceof Error ? err.message : 'Network error')
+    } finally {
+      setPodcastGenerating(false)
+      setPodcastGeneratePhase(null)
+    }
   }
 
   // Flashcard shuffle
@@ -391,23 +702,89 @@ function StudyInner() {
   return (
     <main className="h-screen bg-[#08090F] flex flex-col overflow-hidden">
 
+      {/* Unlock challenge loading overlay */}
+      {unlockLoading && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#08090F]/80 backdrop-blur-sm px-4">
+          <div className="bg-[#0E0F1A] border border-[#22D3EE]/20 rounded-2xl p-8 flex flex-col items-center gap-5 max-w-sm w-full text-center">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-2 border-[#22D3EE]/15" />
+              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#22D3EE] animate-spin" />
+              <div className="absolute inset-[6px] rounded-full border border-[#7C3AED]/20 border-t-[#7C3AED] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }} />
+            </div>
+            <div>
+              <p className="text-[#22D3EE] text-[10px] uppercase tracking-widest mb-1.5">
+                {isEn ? 'Unlock challenge' : 'Desafio de desbloqueio'}
+              </p>
+              <p className="text-[#F0F0F5] text-base font-light">
+                {isEn ? 'Preparing your challenge…' : 'Preparando seu desafio…'}
+              </p>
+              <p className="text-[#8A8FA8]/60 text-xs mt-2">
+                {isEn ? 'Generating questions based on prerequisites' : 'Gerando perguntas com base nos pré-requisitos'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCheckpoint && (
         <CheckpointModal
           questions={checkpointQuestions}
-          courseName={selectedUnit?.title ?? currentTopic}
+          courseName={unlockTargetId
+            ? (roadmap?.units.find(u => u.id === unlockTargetId)?.title ?? currentTopic)
+            : (selectedUnit?.title ?? currentTopic)}
           language={profile?.language ?? 'en'}
+          mode={checkpointMode}
+          onCancel={() => {
+            setShowCheckpoint(false)
+            setCheckpointMode('checkpoint')
+            setUnlockTargetId(null)
+          }}
           onComplete={(score) => {
             setShowCheckpoint(false)
             setLastCheckpointScore(score)
-            if (score >= 70 && selectedNodeId) {
-              setCompletedNodeIds(prev => [...prev, selectedNodeId])
+
+            if (checkpointMode === 'unlock' && unlockTargetId) {
+              const targetUnit = roadmap?.units.find(u => u.id === unlockTargetId)
+              if (score >= 70) {
+                // Pass — mark prerequisites as known, open the locked topic
+                const prereqIds = targetUnit?.prerequisites ?? []
+                setCompletedNodeIds(prev => [...new Set([...prev, ...prereqIds])])
+                openUnit(unlockTargetId, targetUnit?.title ?? '')
+                setMessages(prev => [...prev, { role: 'tutor', content: isEn
+                  ? `You proved it! **${targetUnit?.title}** is now unlocked.`
+                  : `Você provou! **${targetUnit?.title}** está desbloqueado agora.` }])
+              } else {
+                // Fail — increment fail count, redirect to most foundational prereq
+                setUnlockFailCounts(prev => ({ ...prev, [unlockTargetId]: (prev[unlockTargetId] ?? 0) + 1 }))
+                const incomplete = (targetUnit?.prerequisites ?? [])
+                  .filter(p => !completedNodeIds.includes(p))
+                  .map(p => roadmap?.units.find(u => u.id === p))
+                  .filter((u): u is NonNullable<typeof u> => Boolean(u))
+                  .sort((a, b) => a.tier - b.tier)
+                const redirect = incomplete[0]
+                const newCount = (unlockFailCounts[unlockTargetId] ?? 0) + 1
+                const attemptsLeft = Math.max(0, 3 - newCount)
+                if (redirect) {
+                  openUnit(redirect.id, redirect.title)
+                  setMessages(prev => [...prev, { role: 'tutor', content: isEn
+                    ? `Not quite! Let's master **${redirect.title}** first.${attemptsLeft > 0 ? ` (${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} left before a lesson is required)` : ''}`
+                    : `Quase lá! Vamos dominar **${redirect.title}** primeiro.${attemptsLeft > 0 ? ` (${attemptsLeft} tentativa${attemptsLeft === 1 ? '' : 's'} restante${attemptsLeft === 1 ? '' : 's'} antes de uma aula ser necessária)` : ''}` }])
+                }
+              }
+              setUnlockTargetId(null)
+              setCheckpointMode('checkpoint')
+            } else {
+              // Normal checkpoint
+              if (score >= 70 && selectedNodeId) {
+                setCompletedNodeIds(prev => [...prev, selectedNodeId])
+              }
+              fetch('/api/study/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, courseId: selectedNodeId ?? 'current', checkpointScore: score }),
+              }).catch(console.error)
+              if (score >= 80) setShowReflection(true)
             }
-            fetch('/api/study/progress', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sessionId, courseId: selectedNodeId ?? 'current', checkpointScore: score }),
-            }).catch(console.error)
-            if (score >= 80) setShowReflection(true)
           }}
         />
       )}
@@ -510,6 +887,53 @@ function StudyInner() {
               {isEn ? 'View materials' : 'Ver materiais'}
             </button>
           )}
+
+          {/* ── Map legend — bottom center ── */}
+          {mapUnits.length > 0 && (
+            <MapLegend isEn={isEn} />
+          )}
+
+          {/* ── Floating radar — top-right ── */}
+          {topicPillars && (
+            <div className="absolute top-4 right-4 z-10">
+              {radarOpen ? (
+                <div className="bg-[#0E0F1A]/95 backdrop-blur-md border border-[#7C3AED]/20 rounded-2xl p-3 shadow-xl shadow-black/40">
+                  <div className="flex items-center justify-between mb-1 px-1">
+                    <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest">
+                      {isEn ? 'Your proficiency' : 'Sua proficiência'}
+                    </p>
+                    <button
+                      onClick={() => setRadarOpen(false)}
+                      className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors ml-4"
+                      aria-label="Close radar"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <RadarChart
+                    pillars={topicPillars}
+                    label=""
+                    language={profile?.language ?? 'en'}
+                    size={170}
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => setRadarOpen(true)}
+                  className="flex items-center gap-1.5 bg-[#0E0F1A]/80 backdrop-blur-sm border border-[#7C3AED]/20 hover:border-[#7C3AED]/50 rounded-full px-3 py-1.5 transition-all group"
+                  aria-label="Show proficiency radar"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#7C3AED]">
+                    <polygon points="6,1 11,4.5 9,10 3,10 1,4.5" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
+                    <polygon points="6,3.5 8.5,5.5 7.5,8.5 4.5,8.5 3.5,5.5" fill="currentColor" opacity="0.4"/>
+                  </svg>
+                  <span className="text-[#8A8FA8] text-[10px] group-hover:text-[#F0F0F5] transition-colors">
+                    {isEn ? 'Proficiency' : 'Proficiência'}
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Content panel — left sidebar ── */}
@@ -537,7 +961,14 @@ function StudyInner() {
           {/* Tab bar */}
           <div className="flex border-b border-[#8A8FA8]/8 flex-shrink-0">
             {(Object.keys(tabLabels) as ContentTab[]).map(tab => (
-              <button key={tab} onClick={() => setContentTab(tab)}
+              <button key={tab} onClick={() => {
+                setContentTab(tab)
+                const typeMap: Partial<Record<ContentTab, 'read' | 'cards' | 'listen' | 'watch'>> = {
+                  overview: 'read', cards: 'cards', listen: 'listen', watch: 'watch',
+                }
+                const interactionType = typeMap[tab]
+                if (interactionType) recordInteraction(interactionType)
+              }}
                 className={`flex-1 py-2.5 text-[10px] uppercase tracking-widest transition-colors ${
                   contentTab === tab
                     ? 'text-[#7C3AED] border-b border-[#7C3AED]'
@@ -549,19 +980,86 @@ function StudyInner() {
           </div>
 
           {/* Content area */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto relative">
 
-            {/* Loading skeleton */}
-            {contentLoading && (
-              <div className="p-4 space-y-3">
-                {[0, 1, 2].map(i => (
-                  <div key={i} className="h-16 bg-[#8A8FA8]/5 rounded-2xl animate-pulse" />
-                ))}
+            {/* Loading skeleton — stays visible during both cache-check and generation */}
+            {(contentLoading || contentGenerating) && (
+              <div className="p-4 space-y-5 animate-pulse">
+                {/* Tag pills */}
+                <div className="flex gap-2">
+                  <div className="h-5 w-14 rounded-full bg-[#7C3AED]/15" />
+                  <div className="h-5 w-10 rounded-full bg-[#8A8FA8]/10" />
+                  <div className="h-5 w-16 rounded-full bg-[#22D3EE]/10" />
+                </div>
+
+                {/* Key points block */}
+                <div className="space-y-2.5">
+                  <div className="h-2.5 w-20 rounded bg-[#8A8FA8]/15" />
+                  {[100, 88, 95, 76].map((w, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/30 mt-1.5 flex-shrink-0" />
+                      <div className={`h-2.5 rounded bg-[#8A8FA8]/10`} style={{ width: `${w}%` }} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Explanation block */}
+                <div className="space-y-2">
+                  <div className="h-2.5 w-24 rounded bg-[#8A8FA8]/15" />
+                  {[100, 94, 100, 88, 72, 60].map((w, i) => (
+                    <div key={i} className="h-2 rounded bg-[#8A8FA8]/8" style={{ width: `${w}%` }} />
+                  ))}
+                </div>
+
+                {/* Bottom card shimmer */}
+                <div className="rounded-2xl border border-[#8A8FA8]/8 bg-[#8A8FA8]/4 h-20" />
+              </div>
+            )}
+
+            {/* Generating overlay — shown on top of skeleton while AI produces content */}
+            {contentGenerating && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#0E0F1A]/90 backdrop-blur-sm z-10">
+                <div className="relative w-12 h-12">
+                  <div className="absolute inset-0 rounded-full border-2 border-[#7C3AED]/20" />
+                  <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#7C3AED] animate-spin" />
+                  <div className="absolute inset-[5px] rounded-full border border-transparent border-t-[#C026D3] animate-spin" style={{ animationDuration: '1.4s', animationDirection: 'reverse' }} />
+                </div>
+                <div className="text-center px-4">
+                  <p className="text-[#F0F0F5] text-sm font-light mb-1">
+                    {isEn ? 'Preparing your materials…' : 'Preparando seus materiais…'}
+                  </p>
+                  <p className="text-[#8A8FA8]/60 text-[11px]">
+                    {isEn ? 'Generating content for this topic' : 'Gerando conteúdo para este tópico'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error state with retry */}
+            {!contentLoading && !contentGenerating && !unitContent && contentError && (
+              <div className="p-6 flex flex-col items-center gap-4 text-center">
+                <div className="w-10 h-10 rounded-full border border-red-500/30 flex items-center justify-center">
+                  <span className="text-red-400 text-base">!</span>
+                </div>
+                <div>
+                  <p className="text-[#F0F0F5] text-sm mb-1">
+                    {isEn ? 'Content failed to load' : 'Erro ao carregar conteúdo'}
+                  </p>
+                  <p className="text-[#8A8FA8]/50 text-[11px] leading-relaxed mb-4">
+                    {contentError}
+                  </p>
+                  <button
+                    onClick={() => selectedNodeId && loadUnitContent(selectedNodeId)}
+                    className="text-[#7C3AED] text-xs border border-[#7C3AED]/30 rounded-full px-4 py-1.5 hover:bg-[#7C3AED]/10 transition-colors"
+                  >
+                    {isEn ? 'Try again' : 'Tentar novamente'}
+                  </button>
+                </div>
               </div>
             )}
 
             {/* No unit selected */}
-            {!contentLoading && !unitContent && (
+            {!contentLoading && !contentGenerating && !unitContent && !contentError && (
               <div className="p-6 text-center">
                 <p className="text-[#8A8FA8]/40 text-xs">
                   {isEn ? 'Select a node to load content.' : 'Selecione um nó para carregar o conteúdo.'}
@@ -782,6 +1280,8 @@ function StudyInner() {
                           onClick={() => {
                             if (quizIdx + 1 >= unitContent.quiz.length) {
                               setQuizDone(true)
+                              const pct = Math.round(((quizScore + (quizSelected === unitContent.quiz[quizIdx].answer ? 1 : 0)) / unitContent.quiz.length) * 100)
+                              recordInteraction('quiz', { score: pct, minutesSpent: Math.round(unitContent.quiz.length * 1.5), force: true })
                             } else {
                               setQuizIdx(v => v + 1)
                               setQuizSelected(null)
@@ -801,65 +1301,158 @@ function StudyInner() {
               </div>
             )}
 
-            {/* LISTEN TAB (Podcast) */}
+            {/* LISTEN TAB (Two-host Podcast) */}
             {!contentLoading && unitContent && contentTab === 'listen' && (
               <div className="p-4 flex flex-col gap-4">
+
+                {/* Episode card */}
                 <div className="bg-[#08090F] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#34C785]/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[#34C785] text-base">♪</span>
+
+                  {/* Two hosts row */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex -space-x-2">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#22D3EE] flex items-center justify-center text-[#F0F0F5] text-xs font-semibold ring-2 ring-[#08090F] z-10">
+                        {isEn ? 'A' : 'C'}
+                      </div>
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#34C785] to-[#F59E0B] flex items-center justify-center text-[#08090F] text-xs font-semibold ring-2 ring-[#08090F]">
+                        {isEn ? 'S' : 'M'}
+                      </div>
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-[#F0F0F5] text-sm font-medium leading-snug truncate">
                         {selectedUnit?.title ?? currentTopic}
                       </p>
-                      <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">~6 min</p>
+                      <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">
+                        {isEn ? `${isEn ? 'Alex' : 'Carlos'} & ${isEn ? 'Sam' : 'Marina'} · ~10 min` : `Carlos & Marina · ~10 min`}
+                      </p>
+                    </div>
+                    <div className="text-[#7C3AED]/70 text-[10px] uppercase tracking-widest border border-[#7C3AED]/20 px-2 py-0.5 rounded-full flex-shrink-0">
+                      {isEn ? 'AI Podcast' : 'Podcast IA'}
                     </div>
                   </div>
-
-                  {/* Description */}
-                  <p className="text-[#8A8FA8]/60 text-xs leading-relaxed line-clamp-2">
-                    {unitContent.podcastScript.slice(0, 120)}…
-                  </p>
 
                   {/* Progress bar */}
                   <div className="h-1 bg-[#8A8FA8]/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#34C785] rounded-full transition-all"
+                      className="h-full bg-gradient-to-r from-[#7C3AED] to-[#34C785] rounded-full transition-all duration-300"
                       style={{ width: `${podcastProgress * 100}%` }}
                     />
                   </div>
 
-                  {/* Play button */}
-                  <button
-                    onClick={togglePodcast}
-                    disabled={podcastLoading}
-                    className="flex items-center gap-3 text-[#34C785] hover:opacity-80 transition-opacity disabled:opacity-40"
-                  >
-                    <span className="w-10 h-10 rounded-full border border-[#34C785]/40 flex items-center justify-center flex-shrink-0">
-                      {podcastLoading ? (
-                        <span className="w-4 h-4 border border-[#34C785]/40 border-t-[#34C785] rounded-full animate-spin" />
-                      ) : podcastPlaying ? '⏸' : '▶'}
-                    </span>
-                    <span className="text-sm">
-                      {podcastLoading
-                        ? (isEn ? 'Loading audio…' : 'Carregando áudio…')
-                        : podcastPlaying
-                          ? (isEn ? 'Pause' : 'Pausar')
-                          : (isEn ? 'Play podcast episode' : 'Ouvir episódio')}
-                    </span>
-                  </button>
+                  {/* Generating overlay */}
+                  {podcastGenerating && (
+                    <div className="flex flex-col items-center gap-3 py-3">
+                      <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-2 border-[#7C3AED]/15" />
+                        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#7C3AED] animate-spin" />
+                        <div className="absolute inset-[5px] rounded-full border border-[#34C785]/20 border-t-[#34C785] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.1s' }} />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[#F0F0F5] text-xs font-medium">
+                          {podcastGeneratePhase === 'script'
+                            ? (isEn ? 'Writing the discussion script…' : 'Escrevendo o roteiro…')
+                            : (isEn ? 'Synthesizing voices…' : 'Sintetizando vozes…')}
+                        </p>
+                        <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">
+                          {podcastGeneratePhase === 'voices'
+                            ? (isEn ? 'This takes ~20–30 seconds' : 'Isso leva ~20–30 segundos')
+                            : (isEn ? 'Crafting the perfect conversation' : 'Criando a conversa perfeita')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error state */}
+                  {podcastError && !podcastGenerating && (
+                    <div className="flex items-center gap-2 text-[#F87171] text-xs bg-[#F87171]/8 rounded-xl px-3 py-2.5">
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <span className="flex-1">{podcastError.includes('API key') ? (isEn ? 'ElevenLabs API key not configured' : 'Chave ElevenLabs não configurada') : podcastError}</span>
+                    </div>
+                  )}
+
+                  {/* Controls */}
+                  {!podcastGenerating && (
+                    <div className="flex items-center gap-3">
+                      {podcastAudioRef.current && podcastUnitRef.current === selectedNodeId ? (
+                        <>
+                          <button
+                            onClick={togglePodcast}
+                            className="w-11 h-11 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors flex items-center justify-center flex-shrink-0 cursor-pointer"
+                          >
+                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              {podcastPlaying
+                                ? <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                : <path d="M8 5v14l11-7z" />}
+                            </svg>
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[#F0F0F5] text-xs font-medium">
+                              {podcastPlaying ? (isEn ? 'Playing…' : 'Tocando…') : (isEn ? 'Paused' : 'Pausado')}
+                            </p>
+                            <p className="text-[#8A8FA8]/50 text-[10px]">
+                              {isEn ? 'Tap to pause/resume' : 'Toque para pausar/continuar'}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <button
+                          onClick={generatePodcast}
+                          className="flex items-center gap-3 text-[#7C3AED] hover:opacity-80 transition-opacity cursor-pointer"
+                        >
+                          <span className="w-11 h-11 rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/8 hover:bg-[#7C3AED]/15 transition-colors flex items-center justify-center flex-shrink-0">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                          </span>
+                          <span className="text-sm">
+                            {isEn ? 'Create & play podcast' : 'Criar e ouvir podcast'}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Waveform decoration */}
+                {/* Waveform */}
                 <div className="flex items-center gap-0.5 h-8 px-2">
                   {Array.from({ length: 32 }).map((_, i) => (
                     <div key={i}
-                      className={`rounded-full flex-1 transition-all duration-150 ${podcastPlaying ? 'bg-[#34C785]' : 'bg-[#34C785]/25'}`}
-                      style={{ height: podcastPlaying ? `${20 + Math.abs(Math.sin(i * 0.7 + Date.now() / 200)) * 70}%` : '25%' }}
+                      className="rounded-full flex-1 transition-all duration-150"
+                      style={{
+                        height: podcastPlaying ? `${20 + Math.abs(Math.sin(i * 0.7 + Date.now() / 200)) * 70}%` : '20%',
+                        backgroundColor: i % 2 === 0 ? (podcastPlaying ? '#7C3AED' : '#7C3AED44') : (podcastPlaying ? '#34C785' : '#34C78544'),
+                      }}
                     />
                   ))}
                 </div>
+
+                {/* Transcript */}
+                {podcastDialogue && podcastDialogue.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-[#8A8FA8]/50 text-[10px] uppercase tracking-widest px-1">
+                      {isEn ? 'Transcript' : 'Transcrição'}
+                    </p>
+                    {podcastDialogue.map((turn, i) => (
+                      <div key={i} className={`flex gap-2.5 ${turn.speaker === 'B' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-semibold ring-1 mt-0.5 ${
+                          turn.speaker === 'A'
+                            ? 'bg-gradient-to-br from-[#7C3AED] to-[#22D3EE] text-[#F0F0F5] ring-[#7C3AED]/30'
+                            : 'bg-gradient-to-br from-[#34C785] to-[#F59E0B] text-[#08090F] ring-[#34C785]/30'
+                        }`}>
+                          {turn.name[0]}
+                        </div>
+                        <div className={`flex-1 rounded-xl px-3.5 py-2.5 ${
+                          turn.speaker === 'A'
+                            ? 'bg-[#7C3AED]/8 border border-[#7C3AED]/15'
+                            : 'bg-[#34C785]/8 border border-[#34C785]/15'
+                        }`}>
+                          <p className={`text-[10px] font-medium mb-1 ${turn.speaker === 'A' ? 'text-[#7C3AED]' : 'text-[#34C785]'}`}>
+                            {turn.name}
+                          </p>
+                          <p className="text-[#C4C6DA] text-xs leading-relaxed">{turn.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

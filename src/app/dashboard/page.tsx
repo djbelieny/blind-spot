@@ -21,12 +21,114 @@ interface PendingQuiz {
   startedAt: number
 }
 
-const DNA_META: Record<string, { symbol: string; en: { name: string; tagline: string }; pt: { name: string; tagline: string } }> = {
-  explorador: { symbol: '◎', en: { name: 'Practical Explorer', tagline: 'You learn by doing, not by reading.' },           pt: { name: 'Explorador Prático',  tagline: 'Você aprende fazendo, não lendo.' } },
-  absorvedor: { symbol: '◈', en: { name: 'Visual Absorber',    tagline: 'You retain what you can picture.' },               pt: { name: 'Absorvedor Visual',    tagline: 'Você retém o que consegue visualizar.' } },
-  construtor: { symbol: '▦', en: { name: 'Methodical Builder', tagline: 'You need structure to move forward.' },            pt: { name: 'Construtor Metódico',  tagline: 'Você precisa de estrutura para avançar.' } },
-  conector:   { symbol: '⬡', en: { name: 'Conceptual Connector', tagline: 'You need the "why" before the "how".' },        pt: { name: 'Conector Conceitual',  tagline: 'Você precisa do "porquê" antes do "como".' } },
-  sprint:     { symbol: '⚡', en: { name: 'Intense Sprinter',   tagline: 'Short focus, high intensity — you peak fast.' },  pt: { name: 'Sprint Intenso',       tagline: 'Foco curto, alta intensidade.' } },
+const DNA_META: Record<string, {
+  symbol: string
+  color: string
+  en: { name: string; tagline: string; description: string; strengths: string[]; watchOut: string }
+  pt: { name: string; tagline: string; description: string; strengths: string[]; watchOut: string }
+}> = {
+  explorador: {
+    symbol: '◎', color: '#7C3AED',
+    en: {
+      name: 'Practical Explorer', tagline: 'You learn by doing, not by reading.',
+      description: 'You process information best through hands-on experience. Passive reading doesn\'t stick — you need to try things, make mistakes, and iterate. Your understanding solidifies through doing, not observing.',
+      strengths: ['Learns fast through trial and error', 'Retains applied knowledge deeply', 'Builds real skills, not just theory'],
+      watchOut: 'Skipping foundational concepts when jumping straight to practice.',
+    },
+    pt: {
+      name: 'Explorador Prático', tagline: 'Você aprende fazendo, não lendo.',
+      description: 'Você processa melhor a informação pela experiência prática. Leitura passiva não fica — você precisa tentar, errar e iterar. Seu entendimento se consolida fazendo, não observando.',
+      strengths: ['Aprende rápido por tentativa e erro', 'Retém conhecimento aplicado com profundidade', 'Constrói habilidades reais, não só teoria'],
+      watchOut: 'Pular conceitos fundamentais ao ir direto à prática.',
+    },
+  },
+  absorvedor: {
+    symbol: '◈', color: '#0EA5E9',
+    en: {
+      name: 'Visual Absorber', tagline: 'You retain what you can picture.',
+      description: 'Your memory is visual. Diagrams, videos, and spatial representations stay with you long after text fades. You build mental models by seeing concepts, not just reading about them.',
+      strengths: ['Exceptional visual memory', 'Maps complex systems with diagrams', 'Understands patterns quickly'],
+      watchOut: 'Struggling with purely abstract or text-heavy material.',
+    },
+    pt: {
+      name: 'Absorvedor Visual', tagline: 'Você retém o que consegue visualizar.',
+      description: 'Sua memória é visual. Diagramas, vídeos e representações espaciais ficam com você muito depois do texto desaparecer. Você constrói modelos mentais vendo conceitos, não só lendo sobre eles.',
+      strengths: ['Memória visual excepcional', 'Mapeia sistemas complexos com diagramas', 'Reconhece padrões rapidamente'],
+      watchOut: 'Dificuldade com material puramente abstrato ou muito textual.',
+    },
+  },
+  construtor: {
+    symbol: '▦', color: '#F59E0B',
+    en: {
+      name: 'Methodical Builder', tagline: 'You need structure to move forward.',
+      description: 'You need a clear foundation before building up. Random or out-of-sequence information frustrates you. Once you have the structure, you\'re unstoppable — you execute systematically and thoroughly.',
+      strengths: ['Deep, durable understanding', 'Systematic and reliable executor', 'Catches gaps others miss'],
+      watchOut: 'Getting stuck perfecting one layer before moving to the next.',
+    },
+    pt: {
+      name: 'Construtor Metódico', tagline: 'Você precisa de estrutura para avançar.',
+      description: 'Você precisa de uma base clara antes de construir. Informação fora de sequência te frustra. Uma vez com a estrutura, é imparável — executa de forma sistemática e completa.',
+      strengths: ['Entendimento profundo e duradouro', 'Executor sistemático e confiável', 'Detecta lacunas que outros perdem'],
+      watchOut: 'Ficar travado perfeccionando uma camada antes de avançar.',
+    },
+  },
+  conector: {
+    symbol: '⬡', color: '#10B981',
+    en: {
+      name: 'Conceptual Connector', tagline: 'You need the "why" before the "how".',
+      description: 'You learn by connecting new ideas to what you already know. The why has to come before the how. Once you understand the context and purpose, everything else clicks rapidly.',
+      strengths: ['Builds rich mental models', 'Transfers knowledge across domains', 'Understands systems, not just parts'],
+      watchOut: 'Over-thinking context before taking action.',
+    },
+    pt: {
+      name: 'Conector Conceitual', tagline: 'Você precisa do "porquê" antes do "como".',
+      description: 'Você aprende conectando novas ideias ao que já sabe. O porquê tem que vir antes do como. Assim que entende o contexto e propósito, todo o resto se encaixa rapidamente.',
+      strengths: ['Constrói modelos mentais ricos', 'Transfere conhecimento entre domínios', 'Entende sistemas, não só partes'],
+      watchOut: 'Pensar demais no contexto antes de agir.',
+    },
+  },
+  sprint: {
+    symbol: '⚡', color: '#C026D3',
+    en: {
+      name: 'Intense Sprinter', tagline: 'Short focus, high intensity — you peak fast.',
+      description: 'You operate in intense bursts. Long sessions drain you, but 15-25 minute focused sprints are where you peak. You absorb dense material fast and need to move before boredom sets in.',
+      strengths: ['Rapid absorption in short windows', 'High-intensity focus when engaged', 'Learns efficiently under time pressure'],
+      watchOut: 'Losing depth when sprints are too disconnected.',
+    },
+    pt: {
+      name: 'Sprint Intenso', tagline: 'Foco curto, alta intensidade.',
+      description: 'Você opera em rajadas intensas. Sessões longas te drenam, mas sprints de 15-25 minutos são onde você performa melhor. Você absorve material denso rápido e precisa seguir antes do tédio.',
+      strengths: ['Absorção rápida em janelas curtas', 'Foco de alta intensidade quando engajado', 'Aprende com eficiência sob pressão de tempo'],
+      watchOut: 'Perder profundidade quando os sprints são muito desconectados.',
+    },
+  },
+}
+
+const BACKGROUND_META: Record<string, { en: string; pt: string; icon: string }> = {
+  novice:       { en: 'Beginner',     pt: 'Iniciante',      icon: '○' },
+  intermediate: { en: 'Intermediate', pt: 'Intermediário',   icon: '◑' },
+  expert:       { en: 'Advanced',     pt: 'Avançado',        icon: '●' },
+}
+const URGENCY_META: Record<string, { en: string; pt: string; icon: string }> = {
+  immediate:      { en: 'Urgent',      pt: 'Urgente',       icon: '⚡' },
+  'medium-term':  { en: 'Medium-term', pt: 'Médio prazo',   icon: '◈' },
+  exploratory:    { en: 'Exploratory', pt: 'Exploratório',  icon: '◎' },
+}
+const MOTIVATION_META: Record<string, { en: string; pt: string; icon: string }> = {
+  career:    { en: 'Career growth', pt: 'Crescimento profissional', icon: '↗' },
+  curiosity: { en: 'Curiosity',     pt: 'Curiosidade',              icon: '◎' },
+  academic:  { en: 'Academic',      pt: 'Acadêmico',                icon: '▦' },
+  survival:  { en: 'Survival mode', pt: 'Modo sobrevivência',       icon: '!' },
+}
+const STYLE_META: Record<string, { en: string; pt: string; icon: string }> = {
+  visual:   { en: 'Visual',   pt: 'Visual',   icon: '◈' },
+  reading:  { en: 'Reading',  pt: 'Leitura',  icon: '▭' },
+  practice: { en: 'Practice', pt: 'Prática',  icon: '◉' },
+  auditory: { en: 'Auditory', pt: 'Auditivo', icon: '♪' },
+}
+const RHYTHM_META: Record<string, { en: string; pt: string; icon: string }> = {
+  sprints:     { en: 'Short sprints', pt: 'Sprints curtos', icon: '⚡' },
+  'deep-dive': { en: 'Deep focus',   pt: 'Foco profundo',  icon: '◈' },
 }
 
 const PERSONA_META: Record<string, { en: string; pt: string; icon: string }> = {
@@ -46,39 +148,144 @@ function Dots() {
 }
 
 function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolean }) {
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const dna = profile.dnaType ? DNA_META[profile.dnaType] : null
   const persona = profile.persona ? PERSONA_META[profile.persona] : null
   if (!dna) return null
 
+  const dnaContent = isEn ? dna.en : dna.pt
+  const bgMeta    = BACKGROUND_META[profile.backgroundLevel]
+  const urgMeta   = URGENCY_META[profile.urgency]
+  const motMeta   = MOTIVATION_META[profile.motivationType]
+  const styleMeta = STYLE_META[profile.learningStyle]
+  const rhtMeta   = RHYTHM_META[profile.rhythm]
+
+  const traits = [
+    { label: isEn ? 'Level'      : 'Nível',      icon: bgMeta?.icon,  value: isEn ? bgMeta?.en  : bgMeta?.pt  },
+    { label: isEn ? 'Urgency'    : 'Urgência',   icon: urgMeta?.icon, value: isEn ? urgMeta?.en : urgMeta?.pt },
+    { label: isEn ? 'Style'      : 'Estilo',     icon: styleMeta?.icon, value: isEn ? styleMeta?.en : styleMeta?.pt },
+    { label: isEn ? 'Rhythm'     : 'Ritmo',      icon: rhtMeta?.icon, value: isEn ? rhtMeta?.en : rhtMeta?.pt },
+    { label: isEn ? 'Motivation' : 'Motivação',  icon: motMeta?.icon, value: isEn ? motMeta?.en : motMeta?.pt },
+  ]
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#7C3AED]/12 bg-gradient-to-r from-[#7C3AED]/5 to-transparent px-7 py-5 flex items-center gap-5 mb-8">
-      <span className="text-3xl text-[#7C3AED] leading-none flex-shrink-0">{dna.symbol}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-0.5">
-          {isEn ? 'Learning DNA' : 'DNA de aprendizado'}
-        </p>
-        <p className="text-[#F0F0F5] text-base font-light leading-tight truncate">
-          {isEn ? dna.en.name : dna.pt.name}
-          <span className="text-[#8A8FA8] ml-2 text-sm">— {isEn ? dna.en.tagline : dna.pt.tagline}</span>
-        </p>
+    <>
+      {/* Strip button */}
+      <button
+        onClick={() => setDrawerOpen(o => !o)}
+        className="group relative w-full overflow-hidden rounded-2xl border border-[#7C3AED]/12 hover:border-[#7C3AED]/30 bg-gradient-to-r from-[#7C3AED]/5 to-transparent px-7 py-5 flex items-center gap-5 mb-1 cursor-pointer transition-all duration-200 text-left"
+        aria-label={isEn ? 'View learning DNA' : 'Ver DNA de aprendizado'}
+      >
+        <span className="text-3xl leading-none flex-shrink-0" style={{ color: dna.color }}>{dna.symbol}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-0.5">
+            {isEn ? 'Learning DNA' : 'DNA de aprendizado'}
+          </p>
+          <p className="text-[#F0F0F5] text-base font-light leading-tight truncate">
+            {dnaContent.name}
+            <span className="text-[#8A8FA8] ml-2 text-sm">— {dnaContent.tagline}</span>
+          </p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0 items-center">
+          {persona && (
+            <span className="flex items-center gap-1 border border-[#8A8FA8]/15 rounded-full px-3 py-1 text-xs text-[#F0F0F5]">
+              <span style={{ color: dna.color }}>{persona.icon}</span>
+              {isEn ? persona.en : persona.pt}
+            </span>
+          )}
+          {profile.minutesPerDay > 0 && (
+            <span className="flex items-center gap-1 border border-[#8A8FA8]/15 rounded-full px-3 py-1 text-xs text-[#8A8FA8]">
+              ◷ {profile.minutesPerDay}{isEn ? 'min/day' : 'min/dia'}
+            </span>
+          )}
+          <span className={`text-[#8A8FA8]/40 text-sm group-hover:text-[#8A8FA8]/70 transition-all duration-300 ml-1 ${drawerOpen ? 'rotate-90' : ''}`}>›</span>
+        </div>
+        <span className="absolute right-5 top-2 text-[72px] leading-none text-[#7C3AED]/4 select-none pointer-events-none">
+          {dna.symbol}
+        </span>
+      </button>
+
+      {/* Inline expand panel */}
+      <div className={`grid transition-all duration-300 ease-out mb-8 ${drawerOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <div className="bg-[#0A0B14] border border-[#8A8FA8]/10 rounded-2xl -mt-4 pt-6 pb-7 px-7 flex flex-col gap-7">
+
+            {/* Description */}
+            <p className="text-[#C8C9D8] text-sm leading-relaxed">{dnaContent.description}</p>
+
+            {/* Strengths + Watch out side by side on wider screens */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-3">
+                  {isEn ? 'Strengths' : 'Pontos fortes'}
+                </p>
+                <ul className="space-y-2">
+                  {dnaContent.strengths.map((s, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#F0F0F5]">
+                      <span style={{ color: dna.color }} className="mt-0.5 flex-shrink-0">◆</span>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-2xl px-5 py-4">
+                  <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1.5">
+                    {isEn ? 'Watch out for' : 'Atenção'}
+                  </p>
+                  <p className="text-[#C8C9D8] text-sm leading-relaxed">{dnaContent.watchOut}</p>
+                </div>
+
+                {profile.objective && (
+                  <div>
+                    <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1.5">
+                      {isEn ? 'Goal' : 'Objetivo'}
+                    </p>
+                    <p className="text-[#C8C9D8] text-sm leading-relaxed italic">"{profile.objective}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Trait grid */}
+            <div>
+              <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-3">
+                {isEn ? 'Learning profile' : 'Perfil de aprendizado'}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {traits.map((t, i) => t.value && (
+                  <div key={i} className="bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-xl px-4 py-3">
+                    <p className="text-[#8A8FA8] text-[10px] mb-1">{t.label}</p>
+                    <p className="text-[#F0F0F5] text-sm flex items-center gap-1.5">
+                      <span className="text-[#8A8FA8]">{t.icon}</span>
+                      {t.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="flex gap-3">
+              {profile.minutesPerDay > 0 && (
+                <div className="flex-1 bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-xl px-4 py-3 text-center">
+                  <p className="text-[#F0F0F5] text-xl font-medium tabular-nums">{profile.minutesPerDay}</p>
+                  <p className="text-[#8A8FA8] text-[10px] mt-0.5">{isEn ? 'min / day' : 'min / dia'}</p>
+                </div>
+              )}
+              {profile.blindSpotsIdentified.length > 0 && (
+                <div className="flex-1 bg-[#0E0F1A] border border-[#22D3EE]/12 rounded-xl px-4 py-3 text-center">
+                  <p className="text-[#22D3EE] text-xl font-medium tabular-nums">{profile.blindSpotsIdentified.length}</p>
+                  <p className="text-[#8A8FA8] text-[10px] mt-0.5">{isEn ? 'blind spots' : 'pontos cegos'}</p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2 flex-shrink-0">
-        {persona && (
-          <span className="flex items-center gap-1 border border-[#8A8FA8]/15 rounded-full px-3 py-1 text-xs text-[#F0F0F5]">
-            <span className="text-[#7C3AED]">{persona.icon}</span>
-            {isEn ? persona.en : persona.pt}
-          </span>
-        )}
-        {profile.minutesPerDay > 0 && (
-          <span className="flex items-center gap-1 border border-[#8A8FA8]/15 rounded-full px-3 py-1 text-xs text-[#8A8FA8]">
-            ◷ {profile.minutesPerDay}{isEn ? 'min/day' : 'min/dia'}
-          </span>
-        )}
-      </div>
-      <span className="absolute right-5 top-2 text-[72px] leading-none text-[#7C3AED]/4 select-none pointer-events-none">
-        {dna.symbol}
-      </span>
-    </div>
+    </>
   )
 }
 
@@ -156,75 +363,81 @@ function TopicQuizCard({
 // ─── Topic card ────────────────────────────────────────────────────────────────
 
 function TopicCard({
-  topic, isEn, language, onStudy,
+  topic, isEn, onStudy,
 }: {
   topic: StudyTopic
   isEn: boolean
   language: Language
   onStudy: (topic: StudyTopic) => void
 }) {
-  const blindSpots = topic.blindSpots.slice(0, 3)
-  const hasProgress = Object.values(topic.pillars).some(v => v > 5)
+  const vals = Object.values(topic.pillars)
+  const proficiency = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)
+  const hasProgress = vals.some(v => v > 5)
 
   return (
-    <div
-      className="bg-[#0E0F1A] border border-[#8A8FA8]/10 hover:border-[#7C3AED]/30 hover:bg-[#0F1025] rounded-3xl p-7 flex flex-col gap-6 transition-all duration-200 cursor-pointer group"
+    <button
+      className="group w-full text-left bg-[#0E0F1A] border border-[#8A8FA8]/10 hover:border-[#7C3AED]/40 hover:bg-[#0F1025] rounded-3xl p-7 flex flex-col gap-5 transition-all duration-200"
       onClick={() => onStudy(topic)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onStudy(topic)}
       aria-label={`Study ${topic.name}`}
     >
-      <h3 className="text-[#F0F0F5] text-lg font-medium leading-snug line-clamp-2 group-hover:text-white transition-colors">{topic.name}</h3>
-
-      {blindSpots.length > 0 && (
-        <div>
-          <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-4">
-            {isEn ? "What we're working on" : 'O que estamos trabalhando'}
-          </p>
-          <div className="space-y-4">
-            {blindSpots.map((bs, i) => (
-              <div key={bs.id} className="flex gap-3 items-start">
-                <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${i === 0 ? 'bg-[#7C3AED]' : 'bg-[#8A8FA8]/25'}`} />
-                <div>
-                  <p className="text-[#F0F0F5] text-sm font-medium leading-snug">{bs.name}</p>
-                  <p className="text-[#8A8FA8] text-xs leading-relaxed mt-1">{bs.impact}</p>
-                </div>
-              </div>
-            ))}
+      {/* Header row */}
+      <div className="flex items-start justify-between">
+        <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mt-1">
+          {isEn ? 'Learning path' : 'Trilha de aprendizado'}
+        </p>
+        {hasProgress ? (
+          <div className="text-right flex-shrink-0">
+            <p className="text-[22px] font-bold text-[#7C3AED] leading-none tabular-nums">{proficiency}%</p>
+            <p className="text-[#8A8FA8] text-[10px] mt-0.5">
+              {isEn ? 'proficiency' : 'proficiência'}
+            </p>
           </div>
+        ) : (
+          <span className="flex-shrink-0 text-[10px] text-[#8A8FA8]/50 border border-[#8A8FA8]/15 rounded-full px-2.5 py-0.5">
+            {isEn ? 'New' : 'Novo'}
+          </span>
+        )}
+      </div>
+
+      {/* Title */}
+      <h3 className="text-[#F0F0F5] text-xl font-medium leading-snug group-hover:text-white transition-colors">
+        {topic.name}
+      </h3>
+
+      {/* Proficiency bar */}
+      {hasProgress && (
+        <div className="h-px bg-[#8A8FA8]/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#7C3AED] to-[#C026D3] rounded-full transition-all duration-700"
+            style={{ width: `${proficiency}%` }}
+          />
         </div>
       )}
 
-      <div className="flex justify-center">
-        <RadarChart
-          pillars={topic.pillars}
-          label={hasProgress ? (isEn ? 'Your progress' : 'Seu progresso') : (isEn ? 'Starting point' : 'Ponto de partida')}
-          language={language}
-          size={220}
-        />
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-1">
+        <span className="text-[#7C3AED] text-sm group-hover:text-[#9D5CF7] transition-colors">
+          {isEn ? 'Open learning map →' : 'Abrir mapa de aprendizado →'}
+        </span>
+        {topic.blindSpots.length > 0 && (
+          <span className="text-[#22D3EE]/50 text-[10px]">
+            {topic.blindSpots.length} {isEn ? 'blind spots' : 'pontos cegos'}
+          </span>
+        )}
       </div>
-
-      <span className="text-[#7C3AED] text-sm group-hover:text-[#9D5CF7] transition-colors self-start">
-        {isEn ? 'Continue studying →' : 'Continuar estudando →'}
-      </span>
-    </div>
+    </button>
   )
 }
 
 function TopicCardSkeleton() {
   return (
-    <div className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-6 animate-pulse">
-      <div className="h-6 bg-[#8A8FA8]/10 rounded-lg w-3/4" />
-      <div>
-        <div className="h-3 bg-[#8A8FA8]/8 rounded w-1/3 mb-4" />
-        <div className="space-y-3">
-          {[0,1,2].map(i => <div key={i} className="h-4 bg-[#8A8FA8]/8 rounded w-full" />)}
-        </div>
+    <div className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-5 animate-pulse">
+      <div className="flex items-start justify-between">
+        <div className="h-2.5 bg-[#8A8FA8]/10 rounded w-24" />
+        <div className="h-6 bg-[#7C3AED]/15 rounded w-14" />
       </div>
-      <div className="flex justify-center">
-        <div className="w-[220px] h-[220px] rounded-full bg-[#8A8FA8]/5" />
-      </div>
+      <div className="h-6 bg-[#8A8FA8]/10 rounded-lg w-4/5" />
+      <div className="h-px bg-[#8A8FA8]/8 rounded-full" />
       <div className="h-4 bg-[#7C3AED]/15 rounded w-1/3" />
     </div>
   )
