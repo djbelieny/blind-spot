@@ -1,4 +1,4 @@
-import { claude, MODELS } from './clients'
+import { deepseekV3, MODELS } from './clients'
 import type { LearnerProfile, Language } from '@/types/learner'
 
 const DNA_NAMES: Record<string, { en: string; pt: string }> = {
@@ -49,11 +49,11 @@ Termine com: "E tem uma coisa que você ainda não sabe que não sabe..."
 
 Escreva em português brasileiro. Texto simples, sem markdown.`
 
-  const res = await claude.messages.create({
-    model: MODELS.HAIKU,
+  const res = await deepseekV3.chat.completions.create({
+    model: MODELS.V3,
     max_tokens: 400,
     messages: [{ role: 'user', content: prompt }],
   })
 
-  return res.content[0].type === 'text' ? res.content[0].text : ''
+  return res.choices[0]?.message?.content ?? ''
 }

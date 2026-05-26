@@ -1,4 +1,4 @@
-import { deepseekV3, claude, MODELS } from './clients'
+import { deepseekV3, MODELS } from './clients'
 import type { LearnerProfile, OnboardingStage, Language } from '@/types/learner'
 
 const PERSONA_INSTRUCTIONS: Record<string, Record<Language, string>> = {
@@ -47,35 +47,18 @@ export async function* streamTutorResponse(params: {
   stage: OnboardingStage
 }): AsyncGenerator<string> {
   const { messages, profile, stage } = params
-  const useClaudeForStage = stage === 'dna_reveal' || stage === 'blind_spot_reveal'
-
-  if (useClaudeForStage) {
-    const systemPrompt = buildSystemPrompt(profile, stage)
-    const stream = claude.messages.stream({
-      model: MODELS.HAIKU,
-      max_tokens: 600,
-      system: systemPrompt,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
-    })
-    for await (const event of stream) {
-      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-        yield event.delta.text
-      }
-    }
-  } else {
-    const systemPrompt = buildSystemPrompt(profile, stage)
-    const stream = await deepseekV3.chat.completions.create({
-      model: MODELS.V3,
-      stream: true,
-      max_tokens: 600,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-      ],
-    })
-    for await (const chunk of stream) {
-      const delta = chunk.choices[0]?.delta?.content
-      if (delta) yield delta
-    }
+  const systemPrompt = buildSystemPrompt(profile, stage)
+  const stream = await deepseekV3.chat.completions.create({
+    model: MODELS.V3,
+    stream: true,
+    max_tokens: 600,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    ],
+  })
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content
+    if (delta) yield delta
   }
 }
