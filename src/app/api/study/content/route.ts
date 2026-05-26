@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/lib/engine/progress'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
+import redis from '@/lib/redis'
 import type { ContentCard, DNAType } from '@/types/learner'
 
 const DNA_CARD_WEIGHTS: Record<DNAType, string> = {
@@ -17,6 +18,17 @@ export async function POST(req: NextRequest) {
 
   const profile = await getProfile(sessionId)
   if (!profile) return NextResponse.json({ cards: [] })
+
+  // Cache key — skip caching when context is present (mid-conversation personalized refresh)
+  const topicKey = Buffer.from(topic.slice(0, 200)).toString('base64').replace(/[+/=]/g, '').slice(0, 64)
+  const cacheKey = `cards:${sessionId}:${profile.language}:${topicKey}`
+
+  if (!context) {
+    try {
+      const hit = await redis.get(cacheKey)
+      if (hit) return NextResponse.json({ cards: JSON.parse(hit), cached: true })
+    } catch {}
+  }
 
   const dnaType = (profile.dnaType ?? 'explorador') as DNAType
   const dnaGuidance = DNA_CARD_WEIGHTS[dnaType]
@@ -75,7 +87,11 @@ Return ONLY a valid JSON array.`
   try {
     const parsed = JSON.parse(raw)
     const cards: ContentCard[] = Array.isArray(parsed) ? parsed : (parsed.cards ?? [])
-    return NextResponse.json({ cards: cards.slice(0, 4) })
+    const result = cards.slice(0, 4)
+    if (!context) {
+      redis.setex(cacheKey, 86400, JSON.stringify(result)).catch(() => {})
+    }
+    return NextResponse.json({ cards: result })
   } catch {
     return NextResponse.json({ cards: [] })
   }

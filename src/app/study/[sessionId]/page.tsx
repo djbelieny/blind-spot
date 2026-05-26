@@ -7,7 +7,7 @@ import VoiceToggle from '@/components/study/VoiceToggle'
 import CheckpointModal from '@/components/study/CheckpointModal'
 import KnowledgeMap from '@/components/study/KnowledgeMap'
 import { ArrowLeft, RotateCw, X, MessageCircle } from 'lucide-react'
-import type { LearnerProfile, ContentCard } from '@/types/learner'
+import type { LearnerProfile, ContentCard, BlindSpot } from '@/types/learner'
 
 // ─── Content card badges ──────────────────────────────────────────────────────
 
@@ -181,6 +181,8 @@ function StudyInner() {
   const [cardsLoading, setCardsLoading] = useState(false)
   const [currentTopic, setCurrentTopic] = useState(initialTopic)
 
+  const [translatedSpots, setTranslatedSpots] = useState<BlindSpot[]>([])
+
   // Knowledge map state
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [completedNodeIds, setCompletedNodeIds] = useState<string[]>([])
@@ -213,6 +215,15 @@ function StudyInner() {
       .then((data: LearnerProfile | null) => setProfile(data))
       .catch(console.error)
   }, [sessionId])
+
+  // Fetch translated blind spot labels whenever language is known/changed
+  useEffect(() => {
+    if (!sessionId || !profile?.language) return
+    fetch(`/api/translate/blindspots?sessionId=${sessionId}&lang=${profile.language}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.blindSpots?.length) setTranslatedSpots(data.blindSpots) })
+      .catch(console.error)
+  }, [sessionId, profile?.language])
 
   const loadContentCards = useCallback(async (topic: string, context?: string) => {
     if (!sessionId || !topic) return
@@ -288,10 +299,10 @@ function StudyInner() {
     setCurrentTopic(label)
     setContentPanelOpen(true)
     loadContentCards(label, messages.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n'))
-    // Add a tutor nudge in chat
+    const bs = translatedSpots.find(b => b.id === id) ?? profile?.blindSpotsIdentified?.find(b => b.id === id)
     const nudge = isEn
-      ? `Switching focus to **${label}**. ${profile?.blindSpotsIdentified?.find(b => b.id === id)?.description ?? ''}`
-      : `Mudando foco para **${label}**. ${profile?.blindSpotsIdentified?.find(b => b.id === id)?.description ?? ''}`
+      ? `Switching focus to **${label}**. ${bs?.description ?? ''}`
+      : `Mudando foco para **${label}**. ${bs?.description ?? ''}`
     setMessages(prev => [...prev, { role: 'tutor', content: nudge }])
   }
 
@@ -387,7 +398,7 @@ function StudyInner() {
       .catch(console.error)
   }
 
-  const blindSpots = profile?.blindSpotsIdentified ?? []
+  const blindSpots = translatedSpots.length > 0 ? translatedSpots : (profile?.blindSpotsIdentified ?? [])
   const HEADER_H = 52 // px — keep in sync with header className
 
   return (
