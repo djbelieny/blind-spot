@@ -19,7 +19,7 @@ export function buildKnowledgeGraph(courses: CEFISCourse[]): KnowledgeGraph {
       id: course.id,
       name: course.title ?? course.id,
       prerequisites: [],
-      estimatedMinutes: course.lessons?.reduce((sum, l) => sum + (l.durationSeconds ?? 0) / 60, 0) ?? 30,
+      estimatedMinutes: course.duration ?? 30,
     })
   }
 
