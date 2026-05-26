@@ -6,148 +6,9 @@ import ChatBubble from '@/components/onboarding/ChatBubble'
 import VoiceToggle from '@/components/study/VoiceToggle'
 import CheckpointModal from '@/components/study/CheckpointModal'
 import KnowledgeMap from '@/components/study/KnowledgeMap'
-import { ArrowLeft, RotateCw, X, MessageCircle } from 'lucide-react'
-import type { LearnerProfile, ContentCard, BlindSpot } from '@/types/learner'
-
-// ─── Content card badges ──────────────────────────────────────────────────────
-
-function CardBadge({ type }: { type: ContentCard['type'] }) {
-  const map = {
-    text:     { label: 'Read',     color: 'text-[#7C3AED]',  bg: 'bg-[#7C3AED]/8'  },
-    video:    { label: 'Watch',    color: 'text-[#22D3EE]',  bg: 'bg-[#22D3EE]/8'  },
-    audio:    { label: 'Listen',   color: 'text-[#34C785]',  bg: 'bg-[#34C785]/8'  },
-    exercise: { label: 'Practice', color: 'text-[#C026D3]',  bg: 'bg-[#C026D3]/8'  },
-  }
-  const m = map[type]
-  return (
-    <span className={`text-[10px] uppercase tracking-widest font-medium px-2 py-0.5 rounded-full ${m.color} ${m.bg}`}>
-      {m.label}
-    </span>
-  )
-}
-
-function TextCard({ card, onAskTutor }: { card: ContentCard; onAskTutor: (t: string) => void }) {
-  const [expanded, setExpanded] = useState(false)
-  return (
-    <div className="bg-[#08090F] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <CardBadge type="text" />
-        <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
-      </div>
-      <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-      {card.body && (
-        <p className={`text-[#8A8FA8] text-xs leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}>
-          {card.body}
-        </p>
-      )}
-      <div className="flex items-center gap-3 pt-1">
-        {card.body && (
-          <button onClick={() => setExpanded(v => !v)} className="text-[#8A8FA8]/50 text-xs hover:text-[#8A8FA8] transition-colors">
-            {expanded ? 'Show less' : 'Read more'}
-          </button>
-        )}
-        <button
-          onClick={() => onAskTutor(`Tell me more about: ${card.title}`)}
-          className="text-[#7C3AED] text-xs hover:opacity-80 transition-opacity ml-auto"
-        >
-          Ask tutor →
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function VideoCard({ card }: { card: ContentCard }) {
-  const ytUrl = card.searchQuery
-    ? `https://www.youtube.com/results?search_query=${encodeURIComponent(card.searchQuery)}`
-    : null
-  return (
-    <div className="bg-[#08090F] border border-[#22D3EE]/12 rounded-2xl p-5 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <CardBadge type="video" />
-        <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
-      </div>
-      <div className="w-full aspect-video bg-[#0E0F1A] rounded-xl flex items-center justify-center border border-[#8A8FA8]/8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#22D3EE]/5 to-transparent" />
-        <div className="w-10 h-10 rounded-full bg-[#22D3EE]/15 flex items-center justify-center">
-          <span className="text-[#22D3EE] text-lg ml-0.5">▶</span>
-        </div>
-      </div>
-      <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-      {ytUrl && (
-        <a href={ytUrl} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] text-xs hover:opacity-80 transition-opacity self-start">
-          Watch on YouTube →
-        </a>
-      )}
-    </div>
-  )
-}
-
-function AudioCard({ card, persona }: { card: ContentCard; persona: string }) {
-  const [playing, setPlaying] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  const toggle = async () => {
-    if (playing) { audioRef.current?.pause(); setPlaying(false); return }
-    if (audioRef.current) { audioRef.current.play(); setPlaying(true); return }
-    if (!card.audioScript) return
-    setLoading(true)
-    try {
-      const res = await fetch('/api/voice/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: card.audioScript, persona }),
-      })
-      if (!res.ok) return
-      const audio = new Audio(URL.createObjectURL(await res.blob()))
-      audioRef.current = audio
-      audio.onended = () => setPlaying(false)
-      audio.play()
-      setPlaying(true)
-    } catch {} finally { setLoading(false) }
-  }
-
-  return (
-    <div className="bg-[#08090F] border border-[#34C785]/12 rounded-2xl p-5 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <CardBadge type="audio" />
-        <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
-      </div>
-      <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-      <div className="flex items-center gap-0.5 h-8">
-        {Array.from({ length: 24 }).map((_, i) => (
-          <div key={i} className={`rounded-full flex-1 transition-all ${playing ? 'bg-[#34C785]' : 'bg-[#34C785]/25'}`}
-            style={{ height: playing ? `${30 + Math.sin(i * 0.8) * 50}%` : '25%' }} />
-        ))}
-      </div>
-      <button onClick={toggle} disabled={loading}
-        className="flex items-center gap-2 text-[#34C785] text-xs hover:opacity-80 transition-opacity self-start disabled:opacity-40">
-        <span className="w-6 h-6 rounded-full border border-[#34C785]/40 flex items-center justify-center">
-          {loading ? '…' : playing ? '⏸' : '▶'}
-        </span>
-        {loading ? 'Loading…' : playing ? 'Pause' : 'Play explanation'}
-      </button>
-    </div>
-  )
-}
-
-function ExerciseCard({ card, onSend }: { card: ContentCard; onSend: (t: string) => void }) {
-  return (
-    <div className="bg-[#08090F] border border-[#C026D3]/12 rounded-2xl p-5 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <CardBadge type="exercise" />
-        <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
-      </div>
-      <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-      {card.exercisePrompt && <p className="text-[#8A8FA8] text-xs leading-relaxed">{card.exercisePrompt}</p>}
-      <button onClick={() => onSend(card.exercisePrompt ?? card.title)}
-        className="text-[#C026D3] text-xs hover:opacity-80 transition-opacity self-start mt-1">
-        Try with tutor →
-      </button>
-    </div>
-  )
-}
+import { ArrowLeft, X, MessageCircle } from 'lucide-react'
+import type { LearnerProfile, BlindSpot } from '@/types/learner'
+import type { Roadmap, UnitContent } from '@/types/roadmap'
 
 // ─── Checkpoint types ─────────────────────────────────────────────────────────
 
@@ -161,6 +22,35 @@ interface CheckpointQuestion {
 interface Message {
   role: 'tutor' | 'user'
   content: string
+}
+
+// ─── Tab types ────────────────────────────────────────────────────────────────
+
+type ContentTab = 'overview' | 'cards' | 'quiz' | 'listen' | 'watch'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function parseVideoSections(script: string): Array<{ label: string; text: string }> {
+  const labels = ['HOOK', 'CORE CONCEPT', 'EXAMPLE', 'TAKEAWAY']
+  const sections: Array<{ label: string; text: string }> = []
+  let remaining = script
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i]
+    const nextLabel = labels[i + 1]
+    const startTag = `[${label}`
+    const startIdx = remaining.indexOf(startTag)
+    if (startIdx === -1) continue
+    const contentStart = remaining.indexOf(']', startIdx) + 1
+    const endIdx = nextLabel ? remaining.indexOf(`[${nextLabel}`) : remaining.length
+    const text = remaining.slice(contentStart, endIdx === -1 ? remaining.length : endIdx).trim()
+    sections.push({ label, text })
+    remaining = remaining.slice(endIdx === -1 ? remaining.length : endIdx)
+  }
+  // Fallback: if no tags found, show the whole script as one block
+  if (sections.length === 0) {
+    sections.push({ label: 'SCRIPT', text: script })
+  }
+  return sections
 }
 
 // ─── Main study component ─────────────────────────────────────────────────────
@@ -177,13 +67,36 @@ function StudyInner() {
   const [isLoading, setIsLoading] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
 
-  const [cards, setCards] = useState<ContentCard[]>([])
-  const [cardsLoading, setCardsLoading] = useState(false)
   const [currentTopic, setCurrentTopic] = useState(initialTopic)
-
   const [translatedSpots, setTranslatedSpots] = useState<BlindSpot[]>([])
 
-  // Knowledge map state
+  // Roadmap state
+  const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
+  const [roadmapLoading, setRoadmapLoading] = useState(false)
+
+  // Unit content state
+  const [unitContent, setUnitContent] = useState<UnitContent | null>(null)
+  const [contentLoading, setContentLoading] = useState(false)
+  const [contentTab, setContentTab] = useState<ContentTab>('overview')
+
+  // Flashcard state
+  const [flashcardIdx, setFlashcardIdx] = useState(0)
+  const [flashcardFlipped, setFlashcardFlipped] = useState(false)
+
+  // Quiz state
+  const [quizIdx, setQuizIdx] = useState(0)
+  const [quizSelected, setQuizSelected] = useState<string | null>(null)
+  const [quizAnswered, setQuizAnswered] = useState(false)
+  const [quizScore, setQuizScore] = useState(0)
+  const [quizDone, setQuizDone] = useState(false)
+
+  // Podcast state
+  const [podcastPlaying, setPodcastPlaying] = useState(false)
+  const [podcastLoading, setPodcastLoading] = useState(false)
+  const [podcastProgress, setPodcastProgress] = useState(0)
+  const podcastAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  // Map state
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [completedNodeIds, setCompletedNodeIds] = useState<string[]>([])
   const [contentPanelOpen, setContentPanelOpen] = useState(false)
@@ -199,7 +112,6 @@ function StudyInner() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const welcomeSetRef = useRef(false)
   const checkpointTriggeredRef = useRef<Set<number>>(new Set())
-  const cardRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const chatInputRef = useRef<HTMLInputElement>(null)
 
   const isEn = profile?.language !== 'pt-BR'
@@ -208,6 +120,7 @@ function StudyInner() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
 
+  // Load profile
   useEffect(() => {
     if (!sessionId) return
     fetch(`/api/study/profile?sessionId=${sessionId}`)
@@ -216,7 +129,7 @@ function StudyInner() {
       .catch(console.error)
   }, [sessionId])
 
-  // Fetch translated blind spot labels whenever language is known/changed
+  // Load translated blind spot labels (kept for backward compat; not used for map)
   useEffect(() => {
     if (!sessionId || !profile?.language) return
     fetch(`/api/translate/blindspots?sessionId=${sessionId}&lang=${profile.language}`)
@@ -225,51 +138,87 @@ function StudyInner() {
       .catch(console.error)
   }, [sessionId, profile?.language])
 
-  const loadContentCards = useCallback(async (topic: string, context?: string) => {
-    if (!sessionId || !topic) return
-    setCardsLoading(true)
-    try {
-      const res = await fetch('/api/study/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, topic, context }),
+  // Load progress (completed unit IDs)
+  useEffect(() => {
+    if (!sessionId) return
+    fetch(`/api/study/progress?sessionId=${sessionId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.completedCourseIds?.length) {
+          setCompletedNodeIds(data.completedCourseIds)
+        }
       })
-      if (res.ok) {
-        const { cards: newCards } = await res.json()
-        setCards(newCards ?? [])
-      }
-    } catch {} finally { setCardsLoading(false) }
+      .catch(console.error)
   }, [sessionId])
 
-  // Set up welcome + initial node selection
+  // Generate roadmap after profile loads
+  useEffect(() => {
+    if (!profile || !sessionId || roadmap) return
+    setRoadmapLoading(true)
+    fetch('/api/roadmap/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.roadmap) setRoadmap(data.roadmap) })
+      .catch(console.error)
+      .finally(() => setRoadmapLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, sessionId])
+
+  // Set welcome message once profile loads
   useEffect(() => {
     if (!profile || welcomeSetRef.current) return
     welcomeSetRef.current = true
 
-    const topic = initialTopic || profile.blindSpotsIdentified?.[0]?.name || profile.objective
+    const topic = initialTopic || profile.objective
     setCurrentTopic(topic)
-
-    // Auto-select first blind spot node
-    const firstNode = profile.blindSpotsIdentified?.[0]
-    if (firstNode) {
-      setSelectedNodeId(firstNode.id)
-      setContentPanelOpen(true)
-      loadContentCards(firstNode.name)
-    }
 
     if (initialTopic) {
       const welcome = isEn
         ? `Let's explore **${initialTopic}**. What do you already know about this?`
         : `Vamos explorar **${initialTopic}**. O que você já sabe sobre isso?`
       setMessages([{ role: 'tutor', content: welcome }])
-    } else if (firstNode) {
+    } else {
       const welcome = isEn
-        ? `Let's work on **${firstNode.name}**. ${firstNode.description} Ready to start?`
-        : `Vamos trabalhar em **${firstNode.name}**. ${firstNode.description} Pronto para começar?`
+        ? `Your personalized learning roadmap is being built. Tap any node on the map to start learning.`
+        : `Seu roteiro de aprendizagem personalizado está sendo criado. Toque em qualquer nó do mapa para começar.`
       setMessages([{ role: 'tutor', content: welcome }])
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
+
+  // Load unit content when selectedNodeId changes
+  useEffect(() => {
+    if (!selectedNodeId || !sessionId) return
+    setUnitContent(null)
+    setContentLoading(true)
+    setContentTab('overview')
+    setFlashcardIdx(0)
+    setFlashcardFlipped(false)
+    setQuizIdx(0)
+    setQuizSelected(null)
+    setQuizAnswered(false)
+    setQuizScore(0)
+    setQuizDone(false)
+
+    // Try GET first, then POST to generate
+    fetch(`/api/roadmap/content?sessionId=${sessionId}&unitId=${selectedNodeId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.content) return data
+        // Not cached — generate
+        return fetch('/api/roadmap/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, unitId: selectedNodeId }),
+        }).then(r => r.ok ? r.json() : null)
+      })
+      .then(data => { if (data?.content) setUnitContent(data.content) })
+      .catch(console.error)
+      .finally(() => setContentLoading(false))
+  }, [selectedNodeId, sessionId])
 
   // Auto-checkpoint every 8 messages
   useEffect(() => {
@@ -281,30 +230,19 @@ function StudyInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length])
 
-  // Refresh cards every 3 user messages
-  useEffect(() => {
-    const userMessages = messages.filter(m => m.role === 'user')
-    if (userMessages.length === 0 || userMessages.length % 3 !== 0) return
-    if (cardRefreshTimerRef.current) clearTimeout(cardRefreshTimerRef.current)
-    cardRefreshTimerRef.current = setTimeout(() => {
-      const context = messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n')
-      loadContentCards(currentTopic, context)
-    }, 500)
-    return () => { if (cardRefreshTimerRef.current) clearTimeout(cardRefreshTimerRef.current) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length])
-
-  const handleNodeSelect = (id: string, label: string) => {
+  const handleNodeSelect = useCallback((id: string, label: string) => {
     setSelectedNodeId(id)
     setCurrentTopic(label)
     setContentPanelOpen(true)
-    loadContentCards(label, messages.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n'))
-    const bs = translatedSpots.find(b => b.id === id) ?? profile?.blindSpotsIdentified?.find(b => b.id === id)
-    const nudge = isEn
-      ? `Switching focus to **${label}**. ${bs?.description ?? ''}`
-      : `Mudando foco para **${label}**. ${bs?.description ?? ''}`
-    setMessages(prev => [...prev, { role: 'tutor', content: nudge }])
-  }
+    const unit = roadmap?.units.find(u => u.id === id)
+    if (unit) {
+      const nudge = isEn
+        ? `Switching to **${label}**. ${unit.description}`
+        : `Mudando para **${label}**. ${unit.description}`
+      setMessages(prev => [...prev, { role: 'tutor', content: nudge }])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roadmap, isEn])
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
@@ -352,16 +290,15 @@ function StudyInner() {
   }
 
   const triggerCheckpoint = async () => {
-    const bs = profile?.blindSpotsIdentified?.find(b => b.id === selectedNodeId)
-      ?? profile?.blindSpotsIdentified?.[0]
+    const unit = roadmap?.units.find(u => u.id === selectedNodeId)
     try {
       const res = await fetch('/api/study/checkpoint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          courseName: bs?.name ?? currentTopic,
-          conceptsCovered: bs ? [bs.conceptTag] : [],
+          courseName: unit?.title ?? currentTopic,
+          conceptsCovered: unit?.conceptTags ?? [],
         }),
       })
       if (!res.ok) return
@@ -398,8 +335,58 @@ function StudyInner() {
       .catch(console.error)
   }
 
-  const blindSpots = translatedSpots.length > 0 ? translatedSpots : (profile?.blindSpotsIdentified ?? [])
-  const HEADER_H = 52 // px — keep in sync with header className
+  // Podcast controls
+  const togglePodcast = async () => {
+    if (!unitContent?.podcastScript) return
+    if (podcastPlaying) {
+      podcastAudioRef.current?.pause()
+      setPodcastPlaying(false)
+      return
+    }
+    if (podcastAudioRef.current) {
+      podcastAudioRef.current.play()
+      setPodcastPlaying(true)
+      return
+    }
+    setPodcastLoading(true)
+    try {
+      const res = await fetch('/api/voice/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: unitContent.podcastScript.slice(0, 4900),
+          persona: profile?.persona ?? 'encorajador',
+        }),
+      })
+      if (!res.ok) return
+      const audio = new Audio(URL.createObjectURL(await res.blob()))
+      podcastAudioRef.current = audio
+      audio.ontimeupdate = () => {
+        if (audio.duration) setPodcastProgress(audio.currentTime / audio.duration)
+      }
+      audio.onended = () => { setPodcastPlaying(false); setPodcastProgress(0) }
+      audio.play()
+      setPodcastPlaying(true)
+    } catch {} finally { setPodcastLoading(false) }
+  }
+
+  // Flashcard shuffle
+  const shuffleFlashcards = useCallback(() => {
+    setFlashcardIdx(0)
+    setFlashcardFlipped(false)
+  }, [])
+
+  const mapUnits = roadmap?.units ?? []
+  const selectedUnit = roadmap?.units.find(u => u.id === selectedNodeId) ?? null
+  const HEADER_H = 52
+
+  const tabLabels: Record<ContentTab, { icon: string; en: string; pt: string }> = {
+    overview: { icon: '★', en: 'overview', pt: 'visão' },
+    cards:    { icon: '⧉', en: 'cards', pt: 'fichas' },
+    quiz:     { icon: '?', en: 'quiz', pt: 'quiz' },
+    listen:   { icon: '♪', en: 'listen', pt: 'ouvir' },
+    watch:    { icon: '▶', en: 'watch', pt: 'assistir' },
+  }
 
   return (
     <main className="h-screen bg-[#08090F] flex flex-col overflow-hidden">
@@ -407,7 +394,7 @@ function StudyInner() {
       {showCheckpoint && (
         <CheckpointModal
           questions={checkpointQuestions}
-          courseName={profile?.blindSpotsIdentified?.find(b => b.id === selectedNodeId)?.name ?? currentTopic}
+          courseName={selectedUnit?.title ?? currentTopic}
           language={profile?.language ?? 'en'}
           onComplete={(score) => {
             setShowCheckpoint(false)
@@ -428,11 +415,14 @@ function StudyInner() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b border-[#8A8FA8]/8 bg-[#08090F]/90 backdrop-blur-sm"
         style={{ height: HEADER_H }}>
-        <button onClick={() => router.push('/dashboard')} aria-label="Back to dashboard" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors flex-shrink-0 p-1 rounded-lg">
+        <button onClick={() => router.push('/dashboard')} aria-label="Back to dashboard"
+          className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors flex-shrink-0 p-1 rounded-lg">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest leading-none mb-0.5">Blind Spot</p>
+          <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest leading-none mb-0.5">
+            {isEn ? 'Learning Path' : 'Roteiro de Aprendizagem'}
+          </p>
           <p className="text-[#F0F0F5] text-sm truncate leading-none">
             {currentTopic || profile?.objective || (isEn ? 'Study session' : 'Sessão de estudo')}
           </p>
@@ -459,11 +449,11 @@ function StudyInner() {
       {/* ── Main area: map + panels ─────────────────────────────────────────── */}
       <div className="flex-1 relative overflow-hidden">
 
-        {/* ── Knowledge Map — fills entire area ── */}
+        {/* ── Knowledge Map ── */}
         <div className="absolute inset-0">
-          {blindSpots.length > 0 ? (
+          {mapUnits.length > 0 ? (
             <KnowledgeMap
-              blindSpots={blindSpots}
+              units={mapUnits}
               completedIds={completedNodeIds}
               activeId={selectedNodeId}
               selectedId={selectedNodeId}
@@ -471,17 +461,36 @@ function StudyInner() {
               rootLabel={currentTopic || profile?.objective || '···'}
             />
           ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
-                {isEn
-                  ? 'Complete the onboarding diagnostic to unlock your knowledge map.'
-                  : 'Complete o diagnóstico de integração para desbloquear seu mapa de conhecimento.'}
+            <div className="h-full flex items-center justify-center relative">
+              {roadmapLoading ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 rounded-full border-2 border-[#7C3AED]/30 border-t-[#7C3AED] animate-spin" />
+                  <p className="text-[#8A8FA8]/60 text-sm">
+                    {isEn ? 'Building your learning path…' : 'Criando seu caminho de aprendizagem…'}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
+                  {isEn
+                    ? 'Complete the onboarding diagnostic to unlock your learning roadmap.'
+                    : 'Complete o diagnóstico de integração para desbloquear seu roteiro.'}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Roadmap loading overlay (shown while loading when units may be stale) */}
+          {roadmapLoading && mapUnits.length === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="w-8 h-8 rounded-full border-2 border-[#7C3AED]/30 border-t-[#7C3AED] animate-spin" />
+              <p className="text-[#8A8FA8]/60 text-sm">
+                {isEn ? 'Building your learning path…' : 'Criando seu caminho de aprendizagem…'}
               </p>
             </div>
           )}
 
-          {/* Floating hint — only when nothing selected */}
-          {!selectedNodeId && blindSpots.length > 0 && (
+          {/* Floating hint */}
+          {!selectedNodeId && mapUnits.length > 0 && (
             <div className="absolute top-4 left-5 pointer-events-none">
               <p className="text-[#7C3AED]/70 text-[10px] uppercase tracking-widest">
                 {isEn ? 'Knowledge map' : 'Mapa de conhecimento'}
@@ -492,7 +501,7 @@ function StudyInner() {
             </div>
           )}
 
-          {/* View materials pill — shows when node selected but panel closed */}
+          {/* View materials pill */}
           {selectedNodeId && !contentPanelOpen && (
             <button
               onClick={() => setContentPanelOpen(true)}
@@ -503,7 +512,7 @@ function StudyInner() {
           )}
         </div>
 
-        {/* ── Content panel — left sidebar (slides in) ── */}
+        {/* ── Content panel — left sidebar ── */}
         <div
           className={`absolute inset-y-0 left-0 w-full sm:w-[340px] bg-[#0E0F1A] border-r border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
             contentPanelOpen && selectedNodeId ? 'translate-x-0' : '-translate-x-full'
@@ -516,49 +525,371 @@ function StudyInner() {
                 {isEn ? 'Learning materials' : 'Materiais de estudo'}
               </p>
               <p className="text-[#F0F0F5] text-sm truncate font-medium mt-0.5">
-                {blindSpots.find(b => b.id === selectedNodeId)?.name ?? currentTopic}
+                {selectedUnit?.title ?? currentTopic}
               </p>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <button
-                onClick={() => loadContentCards(currentTopic, messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n'))}
-                disabled={cardsLoading}
-                aria-label="Refresh materials"
-                className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors disabled:opacity-30 p-1.5 rounded-lg hover:bg-[#8A8FA8]/5"
-              >
-                <RotateCw className={`w-3.5 h-3.5 ${cardsLoading ? 'animate-spin' : ''}`} />
-              </button>
-              <button onClick={() => setContentPanelOpen(false)} aria-label="Close panel" className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <button onClick={() => setContentPanelOpen(false)} aria-label="Close panel"
+              className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5 flex-shrink-0">
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Cards */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {cardsLoading && cards.length === 0 && (
-              <>
-                {[0,1,2,3].map(i => (
-                  <div key={i} className="bg-[#08090F] border border-[#8A8FA8]/8 rounded-2xl p-5 animate-pulse">
-                    <div className="h-3 bg-[#8A8FA8]/10 rounded w-1/4 mb-3" />
-                    <div className="h-4 bg-[#8A8FA8]/10 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-[#8A8FA8]/8 rounded w-full mb-1" />
-                    <div className="h-3 bg-[#8A8FA8]/8 rounded w-2/3" />
+          {/* Tab bar */}
+          <div className="flex border-b border-[#8A8FA8]/8 flex-shrink-0">
+            {(Object.keys(tabLabels) as ContentTab[]).map(tab => (
+              <button key={tab} onClick={() => setContentTab(tab)}
+                className={`flex-1 py-2.5 text-[10px] uppercase tracking-widest transition-colors ${
+                  contentTab === tab
+                    ? 'text-[#7C3AED] border-b border-[#7C3AED]'
+                    : 'text-[#8A8FA8]/50 hover:text-[#8A8FA8]'
+                }`}>
+                {tabLabels[tab].icon}{' '}{isEn ? tabLabels[tab].en : tabLabels[tab].pt}
+              </button>
+            ))}
+          </div>
+
+          {/* Content area */}
+          <div className="flex-1 overflow-y-auto">
+
+            {/* Loading skeleton */}
+            {contentLoading && (
+              <div className="p-4 space-y-3">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="h-16 bg-[#8A8FA8]/5 rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {/* No unit selected */}
+            {!contentLoading && !unitContent && (
+              <div className="p-6 text-center">
+                <p className="text-[#8A8FA8]/40 text-xs">
+                  {isEn ? 'Select a node to load content.' : 'Selecione um nó para carregar o conteúdo.'}
+                </p>
+              </div>
+            )}
+
+            {/* OVERVIEW TAB */}
+            {!contentLoading && unitContent && contentTab === 'overview' && (
+              <div className="p-4 space-y-4">
+                {/* Unit metadata */}
+                <div className="flex flex-wrap gap-2">
+                  {selectedUnit && (
+                    <span className="text-[#7C3AED]/70 text-[10px] border border-[#7C3AED]/20 rounded-full px-2.5 py-0.5">
+                      {isEn ? `Tier ${selectedUnit.tier}` : `Nível ${selectedUnit.tier}`}
+                    </span>
+                  )}
+                  {selectedUnit && (
+                    <span className="text-[#8A8FA8]/60 text-[10px] border border-[#8A8FA8]/15 rounded-full px-2.5 py-0.5">
+                      ~{selectedUnit.estimatedMinutes} min
+                    </span>
+                  )}
+                  {selectedUnit?.isBlindSpot && (
+                    <span className="text-[#22D3EE]/80 text-[10px] border border-[#22D3EE]/25 rounded-full px-2.5 py-0.5">
+                      {isEn ? 'Blind Spot' : 'Ponto Cego'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Key points */}
+                {unitContent.keyPoints.length > 0 && (
+                  <div>
+                    <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-2.5">
+                      {isEn ? 'Key Points' : 'Pontos-Chave'}
+                    </p>
+                    <ul className="space-y-2">
+                      {unitContent.keyPoints.map((pt, i) => (
+                        <li key={i} className="flex gap-2.5 items-start">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mt-1.5 flex-shrink-0" />
+                          <span className="text-[#F0F0F5] text-xs leading-relaxed">{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Explanation */}
+                <div>
+                  <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-2.5">
+                    {isEn ? 'Explanation' : 'Explicação'}
+                  </p>
+                  <p className="text-[#C4C6DA] text-xs leading-[1.7]">{unitContent.explanation}</p>
+                </div>
+
+                {/* Concept tags */}
+                {selectedUnit?.conceptTags && selectedUnit.conceptTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {selectedUnit.conceptTags.map(tag => (
+                      <span key={tag} className="text-[#8A8FA8]/50 text-[10px] bg-[#8A8FA8]/5 rounded px-2 py-0.5">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CARDS TAB (Flashcards) */}
+            {!contentLoading && unitContent && contentTab === 'cards' && (
+              <div className="p-4 flex flex-col gap-4">
+                {unitContent.flashcards.length === 0 ? (
+                  <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
+                    {isEn ? 'No flashcards available.' : 'Nenhum flashcard disponível.'}
+                  </p>
+                ) : (
+                  <>
+                    {/* Counter */}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[#8A8FA8]/50 text-[11px]">
+                        {flashcardIdx + 1} / {unitContent.flashcards.length}
+                      </p>
+                      <button onClick={shuffleFlashcards}
+                        className="text-[#8A8FA8]/50 text-[11px] hover:text-[#8A8FA8] transition-colors">
+                        {isEn ? 'Reset' : 'Reiniciar'}
+                      </button>
+                    </div>
+
+                    {/* Card */}
+                    <button
+                      onClick={() => setFlashcardFlipped(v => !v)}
+                      className="min-h-[180px] w-full rounded-2xl border border-[#8A8FA8]/15 flex flex-col items-center justify-center gap-3 p-5 text-center transition-all duration-200 active:scale-[0.98]"
+                      style={{
+                        background: flashcardFlipped ? '#141525' : '#0C0D18',
+                        borderColor: flashcardFlipped ? 'rgba(124,58,237,0.25)' : 'rgba(138,143,168,0.12)',
+                      }}
+                    >
+                      <p className="text-[#8A8FA8]/40 text-[10px] uppercase tracking-widest">
+                        {flashcardFlipped ? (isEn ? 'Answer' : 'Resposta') : (isEn ? 'Question' : 'Pergunta')}
+                      </p>
+                      <p className={`leading-relaxed transition-all duration-200 ${
+                        flashcardFlipped ? 'text-[#C4C6DA] text-sm' : 'text-[#F0F0F5] text-base font-medium'
+                      }`}>
+                        {flashcardFlipped
+                          ? unitContent.flashcards[flashcardIdx].back
+                          : unitContent.flashcards[flashcardIdx].front}
+                      </p>
+                      <p className="text-[#8A8FA8]/30 text-[10px]">
+                        {isEn ? 'Tap to flip' : 'Toque para virar'}
+                      </p>
+                    </button>
+
+                    {/* Navigation */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => { setFlashcardIdx(v => Math.max(0, v - 1)); setFlashcardFlipped(false) }}
+                        disabled={flashcardIdx === 0}
+                        className="flex-1 py-2.5 rounded-xl border border-[#8A8FA8]/12 text-[#8A8FA8]/60 text-sm hover:border-[#8A8FA8]/25 hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+                      >
+                        ←
+                      </button>
+                      <button
+                        onClick={() => { setFlashcardIdx(v => Math.min(unitContent.flashcards.length - 1, v + 1)); setFlashcardFlipped(false) }}
+                        disabled={flashcardIdx === unitContent.flashcards.length - 1}
+                        className="flex-1 py-2.5 rounded-xl border border-[#8A8FA8]/12 text-[#8A8FA8]/60 text-sm hover:border-[#8A8FA8]/25 hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* QUIZ TAB */}
+            {!contentLoading && unitContent && contentTab === 'quiz' && (
+              <div className="p-4 flex flex-col gap-4">
+                {unitContent.quiz.length === 0 ? (
+                  <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
+                    {isEn ? 'No quiz available.' : 'Nenhum quiz disponível.'}
+                  </p>
+                ) : quizDone ? (
+                  // Score summary
+                  <div className="flex flex-col items-center gap-4 py-8">
+                    <div className="w-16 h-16 rounded-full border-2 border-[#7C3AED]/40 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-[#7C3AED]">{quizScore}/{unitContent.quiz.length}</span>
+                    </div>
+                    <p className="text-[#F0F0F5] text-base font-medium">
+                      {isEn ? 'Quiz complete!' : 'Quiz concluído!'}
+                    </p>
+                    <p className="text-[#8A8FA8]/60 text-xs text-center">
+                      {quizScore === unitContent.quiz.length
+                        ? (isEn ? 'Perfect score!' : 'Pontuação perfeita!')
+                        : quizScore >= Math.ceil(unitContent.quiz.length * 0.75)
+                          ? (isEn ? 'Great job!' : 'Ótimo trabalho!')
+                          : (isEn ? 'Keep practicing!' : 'Continue praticando!')}
+                    </p>
+                    <button
+                      onClick={() => { setQuizIdx(0); setQuizSelected(null); setQuizAnswered(false); setQuizScore(0); setQuizDone(false) }}
+                      className="px-5 py-2.5 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/25 text-[#7C3AED] text-sm hover:bg-[#7C3AED]/20 transition-colors"
+                    >
+                      {isEn ? 'Try again' : 'Tentar novamente'}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Progress */}
+                    <p className="text-[#8A8FA8]/50 text-[11px]">
+                      {isEn ? `Question ${quizIdx + 1} of ${unitContent.quiz.length}` : `Pergunta ${quizIdx + 1} de ${unitContent.quiz.length}`}
+                    </p>
+
+                    {/* Question */}
+                    <p className="text-[#F0F0F5] text-sm leading-relaxed">
+                      {unitContent.quiz[quizIdx].question}
+                    </p>
+
+                    {/* Options */}
+                    <div className="space-y-2">
+                      {unitContent.quiz[quizIdx].options.map(option => {
+                        const isCorrect = option === unitContent.quiz[quizIdx].answer
+                        const isChosen = option === quizSelected
+                        let borderColor = 'border-[#8A8FA8]/15'
+                        let textColor = 'text-[#C4C6DA]'
+                        let bgColor = ''
+                        if (quizAnswered) {
+                          if (isCorrect) { borderColor = 'border-[#34C785]/50'; textColor = 'text-[#34C785]'; bgColor = 'bg-[#34C785]/5' }
+                          else if (isChosen) { borderColor = 'border-red-500/50'; textColor = 'text-red-400'; bgColor = 'bg-red-500/5' }
+                        }
+                        return (
+                          <button key={option}
+                            onClick={() => {
+                              if (quizAnswered) return
+                              setQuizSelected(option)
+                              setQuizAnswered(true)
+                              if (option === unitContent.quiz[quizIdx].answer) {
+                                setQuizScore(v => v + 1)
+                              }
+                            }}
+                            className={`w-full text-left px-4 py-3 rounded-xl border text-xs leading-relaxed transition-colors ${borderColor} ${textColor} ${bgColor} ${!quizAnswered ? 'hover:border-[#8A8FA8]/30 hover:text-[#F0F0F5]' : ''}`}
+                          >
+                            {option}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Explanation + Next */}
+                    {quizAnswered && (
+                      <div className="space-y-3">
+                        <div className="bg-[#08090F] rounded-xl p-3 border border-[#8A8FA8]/8">
+                          <p className="text-[#8A8FA8]/60 text-[10px] uppercase tracking-widest mb-1">
+                            {isEn ? 'Explanation' : 'Explicação'}
+                          </p>
+                          <p className="text-[#C4C6DA] text-xs leading-relaxed">
+                            {unitContent.quiz[quizIdx].explanation}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (quizIdx + 1 >= unitContent.quiz.length) {
+                              setQuizDone(true)
+                            } else {
+                              setQuizIdx(v => v + 1)
+                              setQuizSelected(null)
+                              setQuizAnswered(false)
+                            }
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-[#7C3AED] text-white text-sm hover:opacity-90 transition-opacity"
+                        >
+                          {quizIdx + 1 >= unitContent.quiz.length
+                            ? (isEn ? 'See results' : 'Ver resultados')
+                            : (isEn ? 'Next question' : 'Próxima pergunta')}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* LISTEN TAB (Podcast) */}
+            {!contentLoading && unitContent && contentTab === 'listen' && (
+              <div className="p-4 flex flex-col gap-4">
+                <div className="bg-[#08090F] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#34C785]/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#34C785] text-base">♪</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[#F0F0F5] text-sm font-medium leading-snug truncate">
+                        {selectedUnit?.title ?? currentTopic}
+                      </p>
+                      <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">~6 min</p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-[#8A8FA8]/60 text-xs leading-relaxed line-clamp-2">
+                    {unitContent.podcastScript.slice(0, 120)}…
+                  </p>
+
+                  {/* Progress bar */}
+                  <div className="h-1 bg-[#8A8FA8]/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#34C785] rounded-full transition-all"
+                      style={{ width: `${podcastProgress * 100}%` }}
+                    />
+                  </div>
+
+                  {/* Play button */}
+                  <button
+                    onClick={togglePodcast}
+                    disabled={podcastLoading}
+                    className="flex items-center gap-3 text-[#34C785] hover:opacity-80 transition-opacity disabled:opacity-40"
+                  >
+                    <span className="w-10 h-10 rounded-full border border-[#34C785]/40 flex items-center justify-center flex-shrink-0">
+                      {podcastLoading ? (
+                        <span className="w-4 h-4 border border-[#34C785]/40 border-t-[#34C785] rounded-full animate-spin" />
+                      ) : podcastPlaying ? '⏸' : '▶'}
+                    </span>
+                    <span className="text-sm">
+                      {podcastLoading
+                        ? (isEn ? 'Loading audio…' : 'Carregando áudio…')
+                        : podcastPlaying
+                          ? (isEn ? 'Pause' : 'Pausar')
+                          : (isEn ? 'Play podcast episode' : 'Ouvir episódio')}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Waveform decoration */}
+                <div className="flex items-center gap-0.5 h-8 px-2">
+                  {Array.from({ length: 32 }).map((_, i) => (
+                    <div key={i}
+                      className={`rounded-full flex-1 transition-all duration-150 ${podcastPlaying ? 'bg-[#34C785]' : 'bg-[#34C785]/25'}`}
+                      style={{ height: podcastPlaying ? `${20 + Math.abs(Math.sin(i * 0.7 + Date.now() / 200)) * 70}%` : '25%' }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* WATCH TAB (Video Script) */}
+            {!contentLoading && unitContent && contentTab === 'watch' && (
+              <div className="p-4 flex flex-col gap-4">
+                {/* Badge */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[#F59E0B] text-[10px] uppercase tracking-widest font-medium border border-[#F59E0B]/30 px-2.5 py-0.5 rounded-full">
+                    HYPERFRAME READY
+                  </span>
+                </div>
+
+                {/* Script sections */}
+                {parseVideoSections(unitContent.videoScript).map(section => (
+                  <div key={section.label} className="bg-[#08090F] border border-[#8A8FA8]/10 rounded-xl p-4">
+                    <p className="text-[#F59E0B]/70 text-[10px] uppercase tracking-widest mb-2">
+                      {section.label}
+                    </p>
+                    <p className="text-[#C4C6DA] text-xs leading-relaxed">{section.text}</p>
                   </div>
                 ))}
-              </>
-            )}
-            {cards.map(card => {
-              if (card.type === 'text')     return <TextCard     key={card.id} card={card} onAskTutor={(t) => { sendMessage(t); setChatOpen(true) }} />
-              if (card.type === 'video')    return <VideoCard    key={card.id} card={card} />
-              if (card.type === 'audio')    return <AudioCard    key={card.id} card={card} persona={profile?.persona ?? 'encorajador'} />
-              if (card.type === 'exercise') return <ExerciseCard key={card.id} card={card} onSend={(t) => { sendMessage(t); setChatOpen(true) }} />
-              return null
-            })}
-            {!cardsLoading && cards.length === 0 && (
-              <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
-                {isEn ? 'Tap a node to load materials.' : 'Toque em um nó para carregar os materiais.'}
-              </p>
+
+                {/* Note */}
+                <p className="text-[#8A8FA8]/40 text-[10px] leading-relaxed text-center">
+                  {isEn
+                    ? 'Video generation powered by Hyperframe — connect your API key to auto-generate.'
+                    : 'Geração de vídeo via Hyperframe — conecte sua chave de API para gerar automaticamente.'}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -601,9 +932,9 @@ function StudyInner() {
               {streamingContent && <ChatBubble role="tutor" content={streamingContent} isStreaming />}
               {isLoading && !streamingContent && (
                 <div className="flex gap-1 px-2 py-2">
-                  {[0,1,2].map(i => (
+                  {[0, 1, 2].map(i => (
                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce"
-                      style={{ animationDelay: `${i*150}ms` }} />
+                      style={{ animationDelay: `${i * 150}ms` }} />
                   ))}
                 </div>
               )}

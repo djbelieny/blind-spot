@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 type Lang = 'en' | 'pt-BR'
@@ -13,7 +14,7 @@ const T = {
     hero: {
       h1a: 'Stop guessing',
       h1b: "what you don't know",
-      sub: 'Blind Spot maps your knowledge gaps in real time and gives you an AI tutor that knows exactly where to focus — so you stop wasting time on what you already know.',
+      sub: 'Blindspot maps your knowledge gaps in real time and gives you an AI tutor that knows exactly where to focus — so you stop wasting time on what you already know.',
       placeholder: 'What are you trying to learn?',
       cta: 'Start for free →',
       hasAccount: 'Already have an account?',
@@ -35,7 +36,7 @@ const T = {
         { icon: '◉', title: 'See your knowledge gap in real time', desc: 'Your personal knowledge radar updates as you study. Watch your blind spots close and your weak areas strengthen — session by session, concept by concept. No more guessing where you stand.', accent: 'violet' as const },
         { icon: '⬡', title: "AI tutoring that knows what you don't know", desc: "Your AI tutor has a complete picture of your knowledge — what you know, what you almost know, and what you've never seen. Every explanation is calibrated to fill the exact gap you have, not a generic lesson.", accent: 'teal' as const },
         { icon: '⚡', title: 'Adaptive diagnostic, not a test', desc: 'The diagnostic feels like a conversation, not an exam. It learns from how you answer — speed, confidence, patterns — to build a precise map of your knowledge in minutes.', accent: 'magenta' as const },
-        { icon: '◷', title: 'Built for your schedule', desc: 'Ten minutes or an hour, Blind Spot adapts. Sessions are designed to maximize progress in whatever time you have — no fluff, no filler, no wasted minutes.', accent: 'green' as const },
+        { icon: '◷', title: 'Built for your schedule', desc: 'Ten minutes or an hour, Blindspot adapts. Sessions are designed to maximize progress in whatever time you have — no fluff, no filler, no wasted minutes.', accent: 'green' as const },
       ],
     },
     stats: [
@@ -48,10 +49,10 @@ const T = {
       label: 'FAQ',
       title: 'Questions, answered',
       items: [
-        { q: 'What is a blind spot in learning?', a: "A blind spot is a gap in your knowledge that you don't know you have. It's the thing you skipped over, misunderstood, or never encountered — and it quietly blocks your progress. Blind Spot identifies these gaps before they cost you." },
-        { q: 'How is this different from regular tutoring?', a: "Traditional tutoring assumes you know what you need help with. Blind Spot diagnoses what you actually don't know — even the things you're not aware of — and builds your study plan around closing those specific gaps. No wasted time on what you already know." },
-        { q: 'Do I need a CEFIS account?', a: "No. Blind Spot works for any subject or learning goal, with or without a CEFIS account. If you do have one, connecting it gives you deeper integration with your existing course tracks and progress data." },
-        { q: 'What subjects are supported?', a: 'Blind Spot works across all subjects — from math and sciences to language learning, professional certifications, and exam prep. The AI adapts to whatever topic you bring to it.' },
+        { q: 'What is a blind spot in learning?', a: "A blind spot is a gap in your knowledge that you don't know you have. It's the thing you skipped over, misunderstood, or never encountered — and it quietly blocks your progress. Blindspot identifies these gaps before they cost you." },
+        { q: 'How is this different from regular tutoring?', a: "Traditional tutoring assumes you know what you need help with. Blindspot diagnoses what you actually don't know — even the things you're not aware of — and builds your study plan around closing those specific gaps. No wasted time on what you already know." },
+        { q: 'Do I need a CEFIS account?', a: "No. Blindspot works for any subject or learning goal, with or without a CEFIS account. If you do have one, connecting it gives you deeper integration with your existing course tracks and progress data." },
+        { q: 'What subjects are supported?', a: 'Blindspot works across all subjects — from math and sciences to language learning, professional certifications, and exam prep. The AI adapts to whatever topic you bring to it.' },
         { q: 'Is it free to start?', a: 'Yes. You can start for free, go through the diagnostic, and start closing your blind spots with no credit card required. Premium features are available for users who want deeper analysis and extended session history.' },
       ],
     },
@@ -70,7 +71,7 @@ const T = {
     hero: {
       h1a: 'Pare de adivinhar',
       h1b: 'o que você não sabe',
-      sub: 'O Blind Spot mapeia suas lacunas de conhecimento em tempo real e oferece um tutor de IA que sabe exatamente onde focar — para você parar de desperdiçar tempo com o que já domina.',
+      sub: 'O Blindspot mapeia suas lacunas de conhecimento em tempo real e oferece um tutor de IA que sabe exatamente onde focar — para você parar de desperdiçar tempo com o que já domina.',
       placeholder: 'O que você quer aprender?',
       cta: 'Começar de graça →',
       hasAccount: 'Já tem uma conta?',
@@ -92,7 +93,7 @@ const T = {
         { icon: '◉', title: 'Veja sua lacuna de conhecimento em tempo real', desc: 'Seu radar pessoal de conhecimento se atualiza conforme você estuda. Veja seus pontos cegos fechando e suas áreas fracas se fortalecendo — sessão por sessão, conceito por conceito.', accent: 'violet' as const },
         { icon: '⬡', title: 'Tutoria de IA que sabe o que você não sabe', desc: 'Seu tutor de IA tem uma visão completa do seu conhecimento — o que você sabe, o que quase sabe e o que nunca viu. Cada explicação é calibrada para preencher exatamente sua lacuna.', accent: 'teal' as const },
         { icon: '⚡', title: 'Diagnóstico adaptativo, não uma prova', desc: 'O diagnóstico parece uma conversa, não um exame. Ele aprende com a forma como você responde — velocidade, confiança, padrões — para construir um mapa preciso do seu conhecimento em minutos.', accent: 'magenta' as const },
-        { icon: '◷', title: 'Feito para sua rotina', desc: 'Dez minutos ou uma hora, o Blind Spot se adapta. As sessões são projetadas para maximizar o progresso com o tempo que você tem — sem enrolação, sem desperdício.', accent: 'green' as const },
+        { icon: '◷', title: 'Feito para sua rotina', desc: 'Dez minutos ou uma hora, o Blindspot se adapta. As sessões são projetadas para maximizar o progresso com o tempo que você tem — sem enrolação, sem desperdício.', accent: 'green' as const },
       ],
     },
     stats: [
@@ -105,10 +106,10 @@ const T = {
       label: 'FAQ',
       title: 'Perguntas respondidas',
       items: [
-        { q: 'O que é um ponto cego no aprendizado?', a: 'Um ponto cego é uma lacuna no seu conhecimento que você não sabe que tem. É aquilo que você pulou, entendeu errado ou nunca encontrou — e que silenciosamente bloqueia seu progresso. O Blind Spot identifica essas lacunas antes que elas te custem caro.' },
-        { q: 'Como isso é diferente de tutoria tradicional?', a: 'A tutoria tradicional assume que você sabe o que precisa de ajuda. O Blind Spot diagnostica o que você realmente não sabe — inclusive as coisas que você não percebe — e constrói seu plano de estudo focando em fechar essas lacunas específicas.' },
-        { q: 'Preciso de uma conta CEFIS?', a: 'Não. O Blind Spot funciona para qualquer matéria ou objetivo de aprendizado, com ou sem conta CEFIS. Se você tiver uma, conectá-la oferece integração mais profunda com suas trilhas de cursos e dados de progresso existentes.' },
-        { q: 'Quais matérias são suportadas?', a: 'O Blind Spot funciona em todas as áreas — de matemática e ciências até aprendizado de idiomas, certificações profissionais e preparação para exames. A IA se adapta a qualquer tema que você trouxer.' },
+        { q: 'O que é um ponto cego no aprendizado?', a: 'Um ponto cego é uma lacuna no seu conhecimento que você não sabe que tem. É aquilo que você pulou, entendeu errado ou nunca encontrou — e que silenciosamente bloqueia seu progresso. O Blindspot identifica essas lacunas antes que elas te custem caro.' },
+        { q: 'Como isso é diferente de tutoria tradicional?', a: 'A tutoria tradicional assume que você sabe o que precisa de ajuda. O Blindspot diagnostica o que você realmente não sabe — inclusive as coisas que você não percebe — e constrói seu plano de estudo focando em fechar essas lacunas específicas.' },
+        { q: 'Preciso de uma conta CEFIS?', a: 'Não. O Blindspot funciona para qualquer matéria ou objetivo de aprendizado, com ou sem conta CEFIS. Se você tiver uma, conectá-la oferece integração mais profunda com suas trilhas de cursos e dados de progresso existentes.' },
+        { q: 'Quais matérias são suportadas?', a: 'O Blindspot funciona em todas as áreas — de matemática e ciências até aprendizado de idiomas, certificações profissionais e preparação para exames. A IA se adapta a qualquer tema que você trouxer.' },
         { q: 'É gratuito para começar?', a: 'Sim. Você pode começar de graça, fazer o diagnóstico e começar a fechar seus pontos cegos sem precisar de cartão de crédito. Recursos premium estão disponíveis para usuários que queiram análises mais profundas e histórico estendido de sessões.' },
       ],
     },
@@ -134,6 +135,35 @@ const STAT_COLORS = [
   'text-[#C026D3]',
   'text-[#34C785]',
 ]
+
+function BrandLockup({ size = 'nav', muted = false }: { size?: 'nav' | 'hero' | 'footer'; muted?: boolean }) {
+  const isHero = size === 'hero'
+  const markClass = isHero ? 'h-14 w-16 sm:h-16 sm:w-[74px]' : size === 'footer' ? 'h-7 w-8' : 'h-7 w-8 sm:h-8 sm:w-9'
+  const textClass = isHero
+    ? 'text-2xl sm:text-3xl md:text-4xl text-white'
+    : size === 'footer'
+      ? 'text-sm text-[#8A8FA8]/50'
+      : 'text-base sm:text-lg text-white'
+
+  return (
+    <span className={`inline-flex items-center ${isHero ? 'gap-3' : 'gap-2'}`}>
+      <span className={`${markClass} relative inline-flex flex-shrink-0 items-center justify-center`}>
+        <Image
+          src="/blindspot-mark-gradient.png"
+          alt=""
+          width={540}
+          height={465}
+          priority={isHero}
+          aria-hidden="true"
+          className="h-full w-full object-contain drop-shadow-[0_0_18px_rgba(192,38,211,0.28)]"
+        />
+      </span>
+      <span className={`${textClass} font-heading font-semibold tracking-tight ${muted ? '' : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.16)]'}`}>
+        Blindspot
+      </span>
+    </span>
+  )
+}
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false)
@@ -177,17 +207,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08090F] text-[#F0F0F5]">
+    <div className="min-h-screen overflow-x-hidden bg-[#08090F] text-[#F0F0F5]">
 
       {/* ── Nav ────────────────────────────────────────────────────────────── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? 'border-b border-[#8A8FA8]/10 backdrop-blur-md bg-[#08090F]/80' : ''
       }`}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-1.5 text-white font-semibold text-lg tracking-tight flex-shrink-0">
-            blindspot
-            <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mb-3 flex-shrink-0" />
+          <a href="/" aria-label="Blindspot home" className="flex items-center flex-shrink-0">
+            <BrandLockup />
           </a>
 
           {/* Links */}
@@ -212,7 +241,7 @@ export default function Home() {
             {/* Login */}
             <button
               onClick={() => router.push('/auth/login')}
-              className="hidden sm:block text-[#8A8FA8] hover:text-[#F0F0F5] text-sm transition-colors"
+            className="hidden sm:block text-[#8A8FA8] hover:text-[#F0F0F5] text-sm transition-colors"
             >
               {t.nav.login}
             </button>
@@ -220,7 +249,7 @@ export default function Home() {
             {/* Get started */}
             <button
               onClick={() => router.push('/auth/signup')}
-              className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white text-sm font-medium px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+              className="hidden sm:block bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white text-sm font-heading font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
             >
               {t.nav.getStarted}
             </button>
@@ -229,7 +258,7 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
-      <section className="pt-32 pb-24 px-6 relative overflow-hidden">
+      <section className="pt-32 pb-24 px-4 sm:px-6 relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#7C3AED]/8 rounded-full blur-[100px]" />
@@ -237,6 +266,10 @@ export default function Home() {
         </div>
 
         <div className="max-w-3xl mx-auto text-center relative">
+          <div className="mb-7 flex justify-center">
+            <BrandLockup size="hero" />
+          </div>
+
           <div className="inline-flex items-center gap-2 bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-full px-4 py-1.5 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#34C785] animate-pulse" />
             <span className="text-[#7C3AED] text-xs tracking-wide">
@@ -244,9 +277,9 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
-            {t.hero.h1a}{' '}
-            <span className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent">
+          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
+            {t.hero.h1a}
+            <span className="block bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent">
               {t.hero.h1b}
             </span>
           </h1>
@@ -262,11 +295,11 @@ export default function Home() {
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder={t.hero.placeholder}
-                className="flex-1 bg-[#0E0F1A] border border-[#7C3AED]/20 text-[#F0F0F5] placeholder-[#8A8FA8]/50 rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#7C3AED]/50 transition-colors"
+                className="flex-1 min-w-0 bg-[#0E0F1A] border border-[#7C3AED]/20 text-[#F0F0F5] placeholder-[#8A8FA8]/50 rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#7C3AED]/50 transition-colors"
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-semibold px-6 py-4 rounded-2xl hover:opacity-90 transition-opacity text-sm whitespace-nowrap"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-heading font-semibold px-6 py-4 rounded-2xl hover:opacity-90 transition-opacity text-sm whitespace-nowrap"
               >
                 {t.hero.cta}
               </button>
@@ -291,7 +324,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.hiw.label}</p>
-            <h2 className="text-3xl md:text-4xl font-bold">{t.hiw.title}</h2>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.hiw.title}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {t.hiw.steps.map((item, idx) => (
@@ -301,7 +334,7 @@ export default function Home() {
                   <span className={`text-2xl ${idx === 0 ? 'text-[#7C3AED]' : idx === 1 ? 'text-[#C026D3]' : 'text-[#22D3EE]'}`}>{item.icon}</span>
                   <span className={`text-xs font-mono font-bold tracking-widest ${idx === 0 ? 'text-[#7C3AED]/40' : idx === 1 ? 'text-[#C026D3]/40' : 'text-[#22D3EE]/40'}`}>{item.step}</span>
                 </div>
-                <h3 className="text-[#F0F0F5] text-lg font-semibold leading-snug relative">{item.title}</h3>
+                <h3 className="font-heading text-[#F0F0F5] text-lg font-semibold leading-snug relative">{item.title}</h3>
                 <p className="text-[#8A8FA8] text-sm leading-relaxed relative">{item.desc}</p>
               </div>
             ))}
@@ -314,7 +347,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.features.label}</p>
-            <h2 className="text-3xl md:text-4xl font-bold">{t.features.title}</h2>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.features.title}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {t.features.items.map(item => {
@@ -325,7 +358,7 @@ export default function Home() {
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${a.icon}`}>
                     <span className="text-lg">{item.icon}</span>
                   </div>
-                  <h3 className="text-[#F0F0F5] text-xl font-semibold leading-snug">{item.title}</h3>
+                  <h3 className="font-heading text-[#F0F0F5] text-xl font-semibold leading-snug">{item.title}</h3>
                   <p className="text-[#8A8FA8] text-sm leading-relaxed">{item.desc}</p>
                 </div>
               )
@@ -340,7 +373,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#8A8FA8]/10">
             {t.stats.map((s, i) => (
               <div key={i} className="px-8 py-6 text-center first:pl-0 last:pr-0">
-                <p className={`text-3xl md:text-4xl font-bold mb-1 ${STAT_COLORS[i]}`}>{s.number}</p>
+                <p className={`font-heading text-3xl md:text-4xl font-bold mb-1 ${STAT_COLORS[i]}`}>{s.number}</p>
                 <p className="text-[#8A8FA8] text-xs leading-relaxed">{s.label}</p>
               </div>
             ))}
@@ -353,7 +386,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.faq.label}</p>
-            <h2 className="text-3xl md:text-4xl font-bold">{t.faq.title}</h2>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.faq.title}</h2>
           </div>
           <div>
             {t.faq.items.map((item, i) => (
@@ -370,13 +403,13 @@ export default function Home() {
           <div className="absolute bottom-0 right-1/4 w-[300px] h-[200px] bg-[#7C3AED]/6 rounded-full blur-[60px]" />
         </div>
         <div className="max-w-2xl mx-auto text-center relative">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#22D3EE] mb-5 leading-tight">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#22D3EE] mb-5 leading-tight">
             {t.footer.cta}
           </h2>
           <p className="text-[#8A8FA8] text-lg mb-10 leading-relaxed">{t.footer.sub}</p>
           <button
             onClick={() => router.push('/auth/signup')}
-            className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-opacity text-base"
+            className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-heading font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-opacity text-base"
           >
             {t.footer.btn}
           </button>
@@ -387,7 +420,7 @@ export default function Home() {
       <footer className="py-8 px-6 border-t border-[#8A8FA8]/10">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <span className="text-[#8A8FA8]/50 text-xs">
-            &copy; {new Date().getFullYear()} Blind Spot. {t.footer.rights}
+            &copy; {new Date().getFullYear()} Blindspot. {t.footer.rights}
           </span>
           <div className="flex items-center gap-4">
             <div className="flex rounded-full border border-[#8A8FA8]/15 overflow-hidden text-[11px]">
@@ -398,10 +431,7 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#8A8FA8]/50 text-sm font-semibold tracking-tight">blindspot</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mb-2 flex-shrink-0" />
-            </div>
+            <BrandLockup size="footer" muted />
           </div>
         </div>
       </footer>
