@@ -5,9 +5,10 @@ import { Suspense } from 'react'
 import ChatBubble from '@/components/onboarding/ChatBubble'
 import VoiceToggle from '@/components/study/VoiceToggle'
 import CheckpointModal from '@/components/study/CheckpointModal'
+import KnowledgeMap from '@/components/study/KnowledgeMap'
 import type { LearnerProfile, ContentCard } from '@/types/learner'
 
-// ─── Content card components ──────────────────────────────────────────────────
+// ─── Content card badges ──────────────────────────────────────────────────────
 
 function CardBadge({ type }: { type: ContentCard['type'] }) {
   const map = {
@@ -27,7 +28,7 @@ function CardBadge({ type }: { type: ContentCard['type'] }) {
 function TextCard({ card, onAskTutor }: { card: ContentCard; onAskTutor: (t: string) => void }) {
   const [expanded, setExpanded] = useState(false)
   return (
-    <div className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-3">
+    <div className="bg-[#08090F] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <CardBadge type="text" />
         <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
@@ -40,10 +41,7 @@ function TextCard({ card, onAskTutor }: { card: ContentCard; onAskTutor: (t: str
       )}
       <div className="flex items-center gap-3 pt-1">
         {card.body && (
-          <button
-            onClick={() => setExpanded(v => !v)}
-            className="text-[#8A8FA8]/50 text-xs hover:text-[#8A8FA8] transition-colors"
-          >
+          <button onClick={() => setExpanded(v => !v)} className="text-[#8A8FA8]/50 text-xs hover:text-[#8A8FA8] transition-colors">
             {expanded ? 'Show less' : 'Read more'}
           </button>
         )}
@@ -62,15 +60,13 @@ function VideoCard({ card }: { card: ContentCard }) {
   const ytUrl = card.searchQuery
     ? `https://www.youtube.com/results?search_query=${encodeURIComponent(card.searchQuery)}`
     : null
-
   return (
-    <div className="bg-[#0E0F1A] border border-[#22D3EE]/12 rounded-2xl p-5 flex flex-col gap-3">
+    <div className="bg-[#08090F] border border-[#22D3EE]/12 rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <CardBadge type="video" />
         <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
       </div>
-      {/* Thumbnail placeholder */}
-      <div className="w-full aspect-video bg-[#08090F] rounded-xl flex items-center justify-center border border-[#8A8FA8]/8 relative overflow-hidden">
+      <div className="w-full aspect-video bg-[#0E0F1A] rounded-xl flex items-center justify-center border border-[#8A8FA8]/8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#22D3EE]/5 to-transparent" />
         <div className="w-10 h-10 rounded-full bg-[#22D3EE]/15 flex items-center justify-center">
           <span className="text-[#22D3EE] text-lg ml-0.5">▶</span>
@@ -78,12 +74,7 @@ function VideoCard({ card }: { card: ContentCard }) {
       </div>
       <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
       {ytUrl && (
-        <a
-          href={ytUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#22D3EE] text-xs hover:opacity-80 transition-opacity self-start"
-        >
+        <a href={ytUrl} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] text-xs hover:opacity-80 transition-opacity self-start">
           Watch on YouTube →
         </a>
       )}
@@ -91,27 +82,14 @@ function VideoCard({ card }: { card: ContentCard }) {
   )
 }
 
-function AudioCard({
-  card, persona,
-}: {
-  card: ContentCard
-  persona: string
-}) {
+function AudioCard({ card, persona }: { card: ContentCard; persona: string }) {
   const [playing, setPlaying] = useState(false)
   const [loading, setLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const toggle = async () => {
-    if (playing) {
-      audioRef.current?.pause()
-      setPlaying(false)
-      return
-    }
-    if (audioRef.current) {
-      audioRef.current.play()
-      setPlaying(true)
-      return
-    }
+    if (playing) { audioRef.current?.pause(); setPlaying(false); return }
+    if (audioRef.current) { audioRef.current.play(); setPlaying(true); return }
     if (!card.audioScript) return
     setLoading(true)
     try {
@@ -121,47 +99,29 @@ function AudioCard({
         body: JSON.stringify({ text: card.audioScript, persona }),
       })
       if (!res.ok) return
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
+      const audio = new Audio(URL.createObjectURL(await res.blob()))
       audioRef.current = audio
       audio.onended = () => setPlaying(false)
       audio.play()
       setPlaying(true)
-    } catch {
-    } finally {
-      setLoading(false)
-    }
+    } catch {} finally { setLoading(false) }
   }
 
   return (
-    <div className="bg-[#0E0F1A] border border-[#34C785]/12 rounded-2xl p-5 flex flex-col gap-3">
+    <div className="bg-[#08090F] border border-[#34C785]/12 rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <CardBadge type="audio" />
         <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
       </div>
       <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-
-      {/* Waveform visualizer */}
       <div className="flex items-center gap-0.5 h-8">
         {Array.from({ length: 24 }).map((_, i) => (
-          <div
-            key={i}
-            className={`rounded-full flex-1 transition-all ${playing ? 'bg-[#34C785]' : 'bg-[#34C785]/25'}`}
-            style={{
-              height: playing ? `${30 + Math.sin(i * 0.8) * 50}%` : '25%',
-              animationDelay: `${i * 40}ms`,
-              ...(playing ? { animation: `pulse 0.8s ease-in-out ${i * 40}ms infinite alternate` } : {}),
-            }}
-          />
+          <div key={i} className={`rounded-full flex-1 transition-all ${playing ? 'bg-[#34C785]' : 'bg-[#34C785]/25'}`}
+            style={{ height: playing ? `${30 + Math.sin(i * 0.8) * 50}%` : '25%' }} />
         ))}
       </div>
-
-      <button
-        onClick={toggle}
-        disabled={loading}
-        className="flex items-center gap-2 text-[#34C785] text-xs hover:opacity-80 transition-opacity self-start disabled:opacity-40"
-      >
+      <button onClick={toggle} disabled={loading}
+        className="flex items-center gap-2 text-[#34C785] text-xs hover:opacity-80 transition-opacity self-start disabled:opacity-40">
         <span className="w-6 h-6 rounded-full border border-[#34C785]/40 flex items-center justify-center">
           {loading ? '…' : playing ? '⏸' : '▶'}
         </span>
@@ -173,80 +133,22 @@ function AudioCard({
 
 function ExerciseCard({ card, onSend }: { card: ContentCard; onSend: (t: string) => void }) {
   return (
-    <div className="bg-[#0E0F1A] border border-[#C026D3]/12 rounded-2xl p-5 flex flex-col gap-3">
+    <div className="bg-[#08090F] border border-[#C026D3]/12 rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <CardBadge type="exercise" />
         <span className="text-[#8A8FA8]/50 text-[10px]">{card.duration}</span>
       </div>
       <h4 className="text-[#F0F0F5] text-sm font-medium leading-snug">{card.title}</h4>
-      {card.exercisePrompt && (
-        <p className="text-[#8A8FA8] text-xs leading-relaxed">{card.exercisePrompt}</p>
-      )}
-      <button
-        onClick={() => onSend(card.exercisePrompt ?? card.title)}
-        className="text-[#C026D3] text-xs hover:opacity-80 transition-opacity self-start mt-1"
-      >
+      {card.exercisePrompt && <p className="text-[#8A8FA8] text-xs leading-relaxed">{card.exercisePrompt}</p>}
+      <button onClick={() => onSend(card.exercisePrompt ?? card.title)}
+        className="text-[#C026D3] text-xs hover:opacity-80 transition-opacity self-start mt-1">
         Try with tutor →
       </button>
     </div>
   )
 }
 
-function ContentPanel({
-  cards, loading, persona, onAskTutor, onRefresh,
-}: {
-  cards: ContentCard[]
-  loading: boolean
-  persona: string
-  onAskTutor: (text: string) => void
-  onRefresh: () => void
-}) {
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#8A8FA8]/8 flex-shrink-0">
-        <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest">Learning materials</p>
-        <button
-          onClick={onRefresh}
-          disabled={loading}
-          className="text-[#8A8FA8]/40 text-xs hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
-        >
-          {loading ? '…' : '↻ refresh'}
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {loading && cards.length === 0 && (
-          <>
-            {[0,1,2,3].map(i => (
-              <div key={i} className="bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-2xl p-5 animate-pulse">
-                <div className="h-3 bg-[#8A8FA8]/10 rounded w-1/4 mb-3" />
-                <div className="h-4 bg-[#8A8FA8]/10 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-[#8A8FA8]/8 rounded w-full mb-1" />
-                <div className="h-3 bg-[#8A8FA8]/8 rounded w-2/3" />
-              </div>
-            ))}
-          </>
-        )}
-
-        {cards.map(card => {
-          if (card.type === 'text')     return <TextCard     key={card.id} card={card} onAskTutor={onAskTutor} />
-          if (card.type === 'video')    return <VideoCard    key={card.id} card={card} />
-          if (card.type === 'audio')    return <AudioCard    key={card.id} card={card} persona={persona} />
-          if (card.type === 'exercise') return <ExerciseCard key={card.id} card={card} onSend={onAskTutor} />
-          return null
-        })}
-
-        {!loading && cards.length === 0 && (
-          <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
-            No materials yet — start chatting to generate content.
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── Main study component ─────────────────────────────────────────────────────
+// ─── Checkpoint types ─────────────────────────────────────────────────────────
 
 interface CheckpointQuestion {
   id: string
@@ -260,6 +162,8 @@ interface Message {
   content: string
 }
 
+// ─── Main study component ─────────────────────────────────────────────────────
+
 function StudyInner() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const searchParams = useSearchParams()
@@ -272,15 +176,19 @@ function StudyInner() {
   const [isLoading, setIsLoading] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
 
-  // Multimodal content state
   const [cards, setCards] = useState<ContentCard[]>([])
   const [cardsLoading, setCardsLoading] = useState(false)
   const [currentTopic, setCurrentTopic] = useState(initialTopic)
 
-  // Checkpoint state
+  // Knowledge map state
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [completedNodeIds, setCompletedNodeIds] = useState<string[]>([])
+  const [contentPanelOpen, setContentPanelOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
+
+  // Checkpoint / reflection
   const [showCheckpoint, setShowCheckpoint] = useState(false)
   const [checkpointQuestions, setCheckpointQuestions] = useState<CheckpointQuestion[]>([])
-  const [completedNodes, setCompletedNodes] = useState<string[]>([])
   const [lastCheckpointScore, setLastCheckpointScore] = useState<number | null>(null)
   const [showReflection, setShowReflection] = useState(false)
   const [reflectionText, setReflectionText] = useState('')
@@ -289,6 +197,9 @@ function StudyInner() {
   const welcomeSetRef = useRef(false)
   const checkpointTriggeredRef = useRef<Set<number>>(new Set())
   const cardRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const chatInputRef = useRef<HTMLInputElement>(null)
+
+  const isEn = profile?.language !== 'pt-BR'
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -315,13 +226,10 @@ function StudyInner() {
         const { cards: newCards } = await res.json()
         setCards(newCards ?? [])
       }
-    } catch {
-    } finally {
-      setCardsLoading(false)
-    }
+    } catch {} finally { setCardsLoading(false) }
   }, [sessionId])
 
-  // Welcome message + initial content cards
+  // Set up welcome + initial node selection
   useEffect(() => {
     if (!profile || welcomeSetRef.current) return
     welcomeSetRef.current = true
@@ -329,24 +237,27 @@ function StudyInner() {
     const topic = initialTopic || profile.blindSpotsIdentified?.[0]?.name || profile.objective
     setCurrentTopic(topic)
 
-    if (initialTopic) {
-      // User came from dashboard with a specific topic
-      const welcome = profile.language === 'pt-BR'
-        ? `Vamos explorar **${initialTopic}**. O que você já sabe sobre isso?`
-        : `Let's explore **${initialTopic}**. What do you already know about this?`
-      setMessages([{ role: 'tutor', content: welcome }])
-    } else {
-      const bs = profile.blindSpotsIdentified?.[0]
-      if (bs) {
-        const welcome = profile.language === 'pt-BR'
-          ? `Vamos trabalhar em **${bs.name}**. ${bs.description} Pronto para começar?`
-          : `Let's work on **${bs.name}**. ${bs.description} Ready to start?`
-        setMessages([{ role: 'tutor', content: welcome }])
-      }
+    // Auto-select first blind spot node
+    const firstNode = profile.blindSpotsIdentified?.[0]
+    if (firstNode) {
+      setSelectedNodeId(firstNode.id)
+      setContentPanelOpen(true)
+      loadContentCards(firstNode.name)
     }
 
-    loadContentCards(topic)
-  }, [profile, initialTopic, loadContentCards])
+    if (initialTopic) {
+      const welcome = isEn
+        ? `Let's explore **${initialTopic}**. What do you already know about this?`
+        : `Vamos explorar **${initialTopic}**. O que você já sabe sobre isso?`
+      setMessages([{ role: 'tutor', content: welcome }])
+    } else if (firstNode) {
+      const welcome = isEn
+        ? `Let's work on **${firstNode.name}**. ${firstNode.description} Ready to start?`
+        : `Vamos trabalhar em **${firstNode.name}**. ${firstNode.description} Pronto para começar?`
+      setMessages([{ role: 'tutor', content: welcome }])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile])
 
   // Auto-checkpoint every 8 messages
   useEffect(() => {
@@ -358,69 +269,62 @@ function StudyInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length])
 
-  // Debounced card refresh after user messages
+  // Refresh cards every 3 user messages
   useEffect(() => {
     const userMessages = messages.filter(m => m.role === 'user')
-    if (userMessages.length === 0) return
-    if (userMessages.length % 3 !== 0) return
-
-    // Refresh cards with conversation context every 3 user messages
+    if (userMessages.length === 0 || userMessages.length % 3 !== 0) return
     if (cardRefreshTimerRef.current) clearTimeout(cardRefreshTimerRef.current)
     cardRefreshTimerRef.current = setTimeout(() => {
       const context = messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n')
-      const lastUserMsg = userMessages[userMessages.length - 1].content
-      const topic = currentTopic || lastUserMsg
-      loadContentCards(topic, context)
+      loadContentCards(currentTopic, context)
     }, 500)
-
     return () => { if (cardRefreshTimerRef.current) clearTimeout(cardRefreshTimerRef.current) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length])
 
+  const handleNodeSelect = (id: string, label: string) => {
+    setSelectedNodeId(id)
+    setCurrentTopic(label)
+    setContentPanelOpen(true)
+    loadContentCards(label, messages.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n'))
+    // Add a tutor nudge in chat
+    const nudge = isEn
+      ? `Switching focus to **${label}**. ${profile?.blindSpotsIdentified?.find(b => b.id === id)?.description ?? ''}`
+      : `Mudando foco para **${label}**. ${profile?.blindSpotsIdentified?.find(b => b.id === id)?.description ?? ''}`
+    setMessages(prev => [...prev, { role: 'tutor', content: nudge }])
+  }
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
-
     const apiMessages = messages.map(m => ({
       role: (m.role === 'tutor' ? 'assistant' : 'user') as 'assistant' | 'user',
       content: m.content,
     }))
-
     setMessages(prev => [...prev, { role: 'user', content: text }])
     setInput('')
     setIsLoading(true)
     setStreamingContent('')
-
+    if (!chatOpen) setChatOpen(true)
     try {
       const res = await fetch('/api/study/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          messages: [...apiMessages, { role: 'user', content: text }],
-        }),
+        body: JSON.stringify({ sessionId, messages: [...apiMessages, { role: 'user', content: text }] }),
       })
-
       if (!res.body) return
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let full = ''
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         const chunk = decoder.decode(value)
-        // Strip CEFIS source header if present
         full += chunk.startsWith('\x00cefis\x00') ? chunk.slice(8) : chunk
         setStreamingContent(full)
       }
-
       setMessages(prev => [...prev, { role: 'tutor', content: full }])
       setStreamingContent('')
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setIsLoading(false)
-    }
+    } catch (e) { console.error(e) } finally { setIsLoading(false) }
   }
 
   const playTTS = async (text: string) => {
@@ -431,13 +335,13 @@ function StudyInner() {
         body: JSON.stringify({ text, persona: profile?.persona ?? 'encorajador' }),
       })
       if (!res.ok) return
-      const blob = await res.blob()
-      new Audio(URL.createObjectURL(blob)).play()
+      new Audio(URL.createObjectURL(await res.blob())).play()
     } catch {}
   }
 
   const triggerCheckpoint = async () => {
-    const bs = profile?.blindSpotsIdentified?.[0]
+    const bs = profile?.blindSpotsIdentified?.find(b => b.id === selectedNodeId)
+      ?? profile?.blindSpotsIdentified?.[0]
     try {
       const res = await fetch('/api/study/checkpoint', {
         method: 'POST',
@@ -459,18 +363,31 @@ function StudyInner() {
 
   const handleReflectionSubmit = () => {
     if (!reflectionText.trim()) return
-    setMessages(prev => [
-      ...prev,
+    setMessages(prev => [...prev,
       { role: 'user', content: reflectionText },
-      { role: 'tutor', content: profile?.language === 'pt-BR'
-        ? 'Ótimo! Registrei sua reflexão. Continue assim — reconhecer o que você aprendeu é parte do processo.'
-        : "Great! I recorded your reflection. Keep it up — acknowledging what you've learned is part of the process." },
+      { role: 'tutor', content: isEn
+        ? "Great! I recorded your reflection. Keep it up — acknowledging what you've learned is part of the process."
+        : 'Ótimo! Registrei sua reflexão. Continue assim — reconhecer o que você aprendeu é parte do processo.' },
     ])
     setReflectionText('')
     setShowReflection(false)
   }
 
-  const isEn = profile?.language !== 'pt-BR'
+  const toggleLanguage = (lang: 'en' | 'pt-BR') => {
+    if (!sessionId) return
+    fetch('/api/profile/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, language: lang }),
+    }).catch(console.error)
+    fetch(`/api/study/profile?sessionId=${sessionId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setProfile(d) })
+      .catch(console.error)
+  }
+
+  const blindSpots = profile?.blindSpotsIdentified ?? []
+  const HEADER_H = 52 // px — keep in sync with header className
 
   return (
     <main className="h-screen bg-[#08090F] flex flex-col overflow-hidden">
@@ -478,119 +395,194 @@ function StudyInner() {
       {showCheckpoint && (
         <CheckpointModal
           questions={checkpointQuestions}
-          courseName={profile?.blindSpotsIdentified?.[0]?.name ?? currentTopic}
+          courseName={profile?.blindSpotsIdentified?.find(b => b.id === selectedNodeId)?.name ?? currentTopic}
           language={profile?.language ?? 'en'}
           onComplete={(score) => {
             setShowCheckpoint(false)
             setLastCheckpointScore(score)
-            setCompletedNodes(prev => [...prev, 'current'])
+            if (score >= 70 && selectedNodeId) {
+              setCompletedNodeIds(prev => [...prev, selectedNodeId])
+            }
             fetch('/api/study/progress', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sessionId, courseId: 'current', checkpointScore: score }),
+              body: JSON.stringify({ sessionId, courseId: selectedNodeId ?? 'current', checkpointScore: score }),
             }).catch(console.error)
             if (score >= 80) setShowReflection(true)
           }}
         />
       )}
 
-      {/* ── Header ── */}
-      <div className="flex-shrink-0 flex items-center gap-4 px-5 py-3 border-b border-[#8A8FA8]/8 bg-[#08090F]/90 backdrop-blur-sm">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-sm"
-        >
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b border-[#8A8FA8]/8 bg-[#08090F]/90 backdrop-blur-sm"
+        style={{ height: HEADER_H }}>
+        <button onClick={() => router.push('/dashboard')} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-sm flex-shrink-0">
           ←
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest">Blind Spot</p>
-          <p className="text-[#F0F0F5] text-sm truncate">
+          <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest leading-none mb-0.5">Blind Spot</p>
+          <p className="text-[#F0F0F5] text-sm truncate leading-none">
             {currentTopic || profile?.objective || (isEn ? 'Study session' : 'Sessão de estudo')}
           </p>
         </div>
         {profile?.dnaType && (
-          <span className="flex-shrink-0 text-[#7C3AED]/70 text-xs border border-[#7C3AED]/20 rounded-full px-3 py-1">
+          <span className="flex-shrink-0 text-[#7C3AED]/70 text-[10px] border border-[#7C3AED]/20 rounded-full px-2.5 py-0.5">
             {profile.dnaType}
           </span>
+        )}
+        {lastCheckpointScore !== null && (
+          <span className="text-[#34C785] text-xs flex-shrink-0">{lastCheckpointScore}%</span>
         )}
         {/* Language toggle */}
         <div className="flex-shrink-0 flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-[10px]">
           {(['en', 'pt-BR'] as const).map(lang => (
-            <button
-              key={lang}
-              onClick={() => {
-                if (sessionId) {
-                  fetch('/api/profile/settings', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, language: lang }),
-                  }).catch(console.error)
-                  // Reload profile so AI picks up the new language
-                  fetch(`/api/study/profile?sessionId=${sessionId}`)
-                    .then(r => r.ok ? r.json() : null)
-                    .then(d => { if (d) setProfile(d) })
-                    .catch(console.error)
-                }
-              }}
-              className={`px-2.5 py-1 transition-colors ${
-                profile?.language === lang
-                  ? 'bg-[#7C3AED] text-white'
-                  : 'bg-[#0E0F1A] text-[#8A8FA8] hover:text-[#F0F0F5]'
-              }`}
-            >
+            <button key={lang} onClick={() => toggleLanguage(lang)}
+              className={`px-2.5 py-1 transition-colors ${profile?.language === lang ? 'bg-[#7C3AED] text-white' : 'bg-[#0E0F1A] text-[#8A8FA8] hover:text-[#F0F0F5]'}`}>
               {lang === 'en' ? 'EN' : 'PT'}
             </button>
           ))}
         </div>
-        {lastCheckpointScore !== null && (
-          <span className="text-[#34C785] text-xs flex-shrink-0">
-            {lastCheckpointScore}%
-          </span>
-        )}
       </div>
 
-      {/* ── Two-panel body ── */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* ── Main area: map + panels ─────────────────────────────────────────── */}
+      <div className="flex-1 relative overflow-hidden">
 
-        {/* Content cards panel — hidden on small screens, shown as left column on lg */}
-        <div className="hidden lg:flex lg:w-[340px] xl:w-[380px] flex-shrink-0 flex-col border-r border-[#8A8FA8]/8 overflow-hidden">
-          <ContentPanel
-            cards={cards}
-            loading={cardsLoading}
-            persona={profile?.persona ?? 'encorajador'}
-            onAskTutor={sendMessage}
-            onRefresh={() => loadContentCards(currentTopic, messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n'))}
-          />
-        </div>
-
-        {/* Mobile: horizontal cards strip */}
-        <div className="lg:hidden absolute bottom-20 left-0 right-0 z-10 pointer-events-none">
-          {cards.length > 0 && (
-            <div className="flex gap-3 px-4 overflow-x-auto pb-2 pointer-events-auto">
-              {cards.map(card => (
-                <div key={card.id} className="flex-shrink-0 w-56">
-                  {card.type === 'text'     && <TextCard     card={card} onAskTutor={sendMessage} />}
-                  {card.type === 'video'    && <VideoCard    card={card} />}
-                  {card.type === 'audio'    && <AudioCard    card={card} persona={profile?.persona ?? 'encorajador'} />}
-                  {card.type === 'exercise' && <ExerciseCard card={card} onSend={sendMessage} />}
-                </div>
-              ))}
+        {/* ── Knowledge Map (primary, always behind panels) ── */}
+        <div className="absolute inset-0 flex flex-col">
+          {/* Map title */}
+          <div className="px-5 pt-4 pb-2 flex items-center justify-between flex-shrink-0">
+            <div>
+              <p className="text-[#7C3AED] text-[10px] uppercase tracking-widest">
+                {isEn ? 'Knowledge map' : 'Mapa de conhecimento'}
+              </p>
+              <p className="text-[#8A8FA8] text-xs mt-0.5">
+                {isEn ? 'Tap a node to explore' : 'Toque em um nó para explorar'}
+              </p>
             </div>
-          )}
+            {selectedNodeId && (
+              <button
+                onClick={() => { setContentPanelOpen(v => !v) }}
+                className="text-[10px] uppercase tracking-widest text-[#7C3AED] border border-[#7C3AED]/30 px-3 py-1.5 rounded-full hover:bg-[#7C3AED]/10 transition-colors"
+              >
+                {contentPanelOpen
+                  ? (isEn ? 'Hide materials' : 'Ocultar')
+                  : (isEn ? 'View materials' : 'Ver materiais')}
+              </button>
+            )}
+          </div>
+
+          {/* The SVG map */}
+          <div className="flex-1 px-3 pb-3 min-h-0">
+            {blindSpots.length > 0 ? (
+              <KnowledgeMap
+                blindSpots={blindSpots}
+                completedIds={completedNodeIds}
+                activeId={selectedNodeId}
+                selectedId={selectedNodeId}
+                onSelect={handleNodeSelect}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
+                  {isEn
+                    ? 'Complete the onboarding diagnostic to unlock your knowledge map.'
+                    : 'Complete o diagnóstico de integração para desbloquear seu mapa de conhecimento.'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Chat panel */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* ── Content panel — right sidebar (slides in) ── */}
+        <div
+          className={`absolute inset-y-0 right-0 w-full sm:w-[340px] bg-[#0E0F1A] border-l border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
+            contentPanelOpen && selectedNodeId ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Panel header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#8A8FA8]/8 flex-shrink-0">
+            <div className="min-w-0">
+              <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest">
+                {isEn ? 'Learning materials' : 'Materiais de estudo'}
+              </p>
+              <p className="text-[#F0F0F5] text-sm truncate font-medium mt-0.5">
+                {blindSpots.find(b => b.id === selectedNodeId)?.name ?? currentTopic}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => loadContentCards(currentTopic, messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n'))}
+                disabled={cardsLoading}
+                className="text-[#8A8FA8]/40 text-xs hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+              >
+                {cardsLoading ? '…' : '↻'}
+              </button>
+              <button onClick={() => setContentPanelOpen(false)} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-lg leading-none">
+                ×
+              </button>
+            </div>
+          </div>
+
+          {/* Cards */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {cardsLoading && cards.length === 0 && (
+              <>
+                {[0,1,2,3].map(i => (
+                  <div key={i} className="bg-[#08090F] border border-[#8A8FA8]/8 rounded-2xl p-5 animate-pulse">
+                    <div className="h-3 bg-[#8A8FA8]/10 rounded w-1/4 mb-3" />
+                    <div className="h-4 bg-[#8A8FA8]/10 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-[#8A8FA8]/8 rounded w-full mb-1" />
+                    <div className="h-3 bg-[#8A8FA8]/8 rounded w-2/3" />
+                  </div>
+                ))}
+              </>
+            )}
+            {cards.map(card => {
+              if (card.type === 'text')     return <TextCard     key={card.id} card={card} onAskTutor={(t) => { sendMessage(t); setChatOpen(true) }} />
+              if (card.type === 'video')    return <VideoCard    key={card.id} card={card} />
+              if (card.type === 'audio')    return <AudioCard    key={card.id} card={card} persona={profile?.persona ?? 'encorajador'} />
+              if (card.type === 'exercise') return <ExerciseCard key={card.id} card={card} onSend={(t) => { sendMessage(t); setChatOpen(true) }} />
+              return null
+            })}
+            {!cardsLoading && cards.length === 0 && (
+              <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
+                {isEn ? 'Tap a node to load materials.' : 'Toque em um nó para carregar os materiais.'}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Chat drawer (slides up from bottom) ── */}
+        <div
+          className={`absolute inset-x-0 bottom-0 bg-[#0E0F1A] border-t border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-30 ${
+            chatOpen ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          style={{ height: '55%' }}
+        >
+          {/* Drawer handle */}
+          <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#8A8FA8]/8 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-1 rounded-full bg-[#8A8FA8]/20 mx-auto" />
+            </div>
+            <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest">
+              {isEn ? 'Ask your tutor' : 'Pergunte ao tutor'}
+            </p>
+            <button onClick={() => setChatOpen(false)} className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-lg leading-none">
+              ×
+            </button>
+          </div>
+
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+          <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+            {messages.length === 0 && (
+              <p className="text-[#8A8FA8]/30 text-xs text-center py-4">
+                {isEn ? 'Ask anything about the selected topic.' : 'Pergunte qualquer coisa sobre o tópico selecionado.'}
+              </p>
+            )}
             {messages.map((msg, i) => (
               <ChatBubble key={i} role={msg.role} content={msg.content} />
             ))}
-
-            {streamingContent && (
-              <ChatBubble role="tutor" content={streamingContent} isStreaming />
-            )}
-
+            {streamingContent && <ChatBubble role="tutor" content={streamingContent} isStreaming />}
             {isLoading && !streamingContent && (
               <div className="flex gap-1 px-4 py-3">
                 {[0,1,2].map(i => (
@@ -598,9 +590,8 @@ function StudyInner() {
                 ))}
               </div>
             )}
-
             {showReflection && (
-              <div className="bg-[#0E0F1A] border border-[#34C785]/30 rounded-2xl p-4 mt-4">
+              <div className="bg-[#08090F] border border-[#34C785]/30 rounded-2xl p-4 mt-2">
                 <p className="text-[#34C785] text-xs uppercase tracking-widest mb-2">
                   {isEn ? 'Post-session reflection' : 'Reflexão pós-sessão'}
                 </p>
@@ -611,33 +602,32 @@ function StudyInner() {
                   value={reflectionText}
                   onChange={e => setReflectionText(e.target.value)}
                   placeholder={isEn ? 'Write your reflection…' : 'Escreva sua reflexão…'}
-                  className="w-full bg-[#08090F] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[80px]"
+                  className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[60px]"
                 />
-                <button
-                  onClick={handleReflectionSubmit}
-                  className="mt-2 bg-[#34C785] text-[#08090F] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity"
-                >
+                <button onClick={handleReflectionSubmit}
+                  className="mt-2 bg-[#34C785] text-[#08090F] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity">
                   {isEn ? 'Save reflection →' : 'Salvar reflexão →'}
                 </button>
               </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
           <form
             onSubmit={e => { e.preventDefault(); sendMessage(input) }}
-            className="flex-shrink-0 border-t border-[#8A8FA8]/10 px-5 py-4"
+            className="flex-shrink-0 border-t border-[#8A8FA8]/10 px-5 py-3"
           >
             <div className="flex gap-3 items-center">
               <input
+                ref={chatInputRef}
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 placeholder={isEn ? 'Ask anything…' : 'Pergunte algo…'}
                 className="flex-1 bg-transparent text-[#F0F0F5] placeholder-[#8A8FA8]/50 outline-none text-sm"
                 disabled={isLoading}
+                autoFocus={chatOpen}
               />
               {input && (
                 <button type="submit" className="text-[#7C3AED] text-xs uppercase tracking-widest opacity-70 hover:opacity-100">
@@ -647,11 +637,26 @@ function StudyInner() {
             </div>
           </form>
         </div>
+
+        {/* ── Chat FAB ── */}
+        <button
+          onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
+          className={`absolute bottom-6 right-6 z-40 w-13 h-13 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
+            chatOpen
+              ? 'bg-[#0E0F1A] border border-[#8A8FA8]/20 text-[#8A8FA8]'
+              : 'bg-gradient-to-br from-[#7C3AED] to-[#C026D3] text-white'
+          }`}
+          style={{ width: 52, height: 52 }}
+          aria-label={isEn ? 'Open chat' : 'Abrir chat'}
+        >
+          <span className="text-lg">{chatOpen ? '×' : '💬'}</span>
+        </button>
+
       </div>
 
       <VoiceToggle
         persona={profile?.persona ?? 'encorajador'}
-        onTranscript={sendMessage}
+        onTranscript={(t) => { sendMessage(t); setChatOpen(true) }}
         onPlayTTS={playTTS}
       />
     </main>
