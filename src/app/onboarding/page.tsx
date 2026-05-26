@@ -1,11 +1,11 @@
 'use client'
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import ConstellationBackground from '@/components/onboarding/ConstellationBackground'
 import ChatBubble from '@/components/onboarding/ChatBubble'
 import QuizCard from '@/components/onboarding/QuizCard'
 import PersonaCard from '@/components/onboarding/PersonaCard'
-import type { OnboardingStage, QuizAnswer, QuizQuestion, PersonaType, Language } from '@/types/learner'
+import type { OnboardingStage, QuizAnswer, QuizQuestion, PersonaType, Language, BlindSpot } from '@/types/learner'
 
 interface Message {
   role: 'tutor' | 'user'
@@ -19,6 +19,7 @@ const STAGE_QUESTIONS: Record<string, string> = {
 
 function OnboardingInner() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const initialMessage = searchParams.get('q') ?? ''
 
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -33,6 +34,7 @@ function OnboardingInner() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([])
   const [showPersona, setShowPersona] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
+  const [topBlindSpot, setTopBlindSpot] = useState<BlindSpot | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll
@@ -180,6 +182,7 @@ function OnboardingInner() {
       // Pulse nodes for blind spots
       if (data.blindSpots?.length) {
         setPulsingNodes([0, 1, 2].slice(0, data.blindSpots.length))
+        setTopBlindSpot((data.blindSpots as BlindSpot[])[0] ?? null)
         setStage('blind_spot_reveal')
 
         setTimeout(() => {
@@ -190,14 +193,14 @@ function OnboardingInner() {
         }, 1500)
       }
 
-      // Show study plan
+      // Show study plan then transition to plan stage
       if (data.studyPlan?.items?.length) {
-        setStage('plan')
         setTimeout(() => {
           const planMsg = language === 'pt-BR'
             ? `Seu plano de estudos:\n\n${(data.studyPlan.items as Array<{ courseName: string; reason: string }>).map((item, i) => `${i + 1}. ${item.courseName}\n   ${item.reason}`).join('\n\n')}`
             : `Your study plan:\n\n${(data.studyPlan.items as Array<{ courseName: string; reason: string }>).map((item, i) => `${i + 1}. ${item.courseName}\n   ${item.reason}`).join('\n\n')}`
           setMessages(prev => [...prev, { role: 'tutor', content: planMsg }])
+          setStage('plan')
         }, 3000)
       }
     } catch (e) {
@@ -291,8 +294,37 @@ function OnboardingInner() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        {stage !== 'analyzing' && stage !== 'quiz' && stage !== 'persona_selection' && (
+        {/* Post-plan CTAs */}
+        {stage === 'plan' && sessionId && (
+          <div className="border-t border-[#8A8FA8]/10 pt-6 space-y-3">
+            <button
+              onClick={() => router.push(`/study/${sessionId}`)}
+              className="w-full bg-[#F5A623] text-[#0A0C14] font-semibold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity text-sm"
+            >
+              {topBlindSpot
+                ? (language === 'pt-BR' ? `Corrigir: ${topBlindSpot.name} →` : `Fix: ${topBlindSpot.name} →`)
+                : (language === 'pt-BR' ? 'Começar agora →' : 'Start now →')
+              }
+            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push(`/dashboard?sessionId=${sessionId}`)}
+                className="flex-1 border border-[#8A8FA8]/30 text-[#8A8FA8] py-2.5 px-4 rounded-xl hover:border-[#F5A623]/50 hover:text-[#F0F0F5] transition-colors text-xs uppercase tracking-widest"
+              >
+                {language === 'pt-BR' ? 'Ver plano completo' : 'View full plan'}
+              </button>
+              <button
+                onClick={() => router.push(`/dashboard?sessionId=${sessionId}`)}
+                className="flex-1 border border-[#8A8FA8]/10 text-[#8A8FA8]/60 py-2.5 px-4 rounded-xl hover:border-[#8A8FA8]/30 transition-colors text-xs uppercase tracking-widest"
+              >
+                {language === 'pt-BR' ? 'Continuar como visitante' : 'Continue as guest'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Input — hidden on plan stage */}
+        {stage !== 'analyzing' && stage !== 'quiz' && stage !== 'persona_selection' && stage !== 'plan' && (
           <form onSubmit={handleSend} className="border-t border-[#8A8FA8]/10 pt-4">
             <div className="flex gap-3 items-center">
               <input

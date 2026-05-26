@@ -7,7 +7,7 @@ import { getAllCourses } from '@/lib/cefis'
 import { getProfile, updateProfile } from '@/lib/engine/progress'
 
 export async function POST(req: NextRequest) {
-  const { sessionId, quizResults } = await req.json()
+  const { sessionId, quizResults, persona } = await req.json()
 
   const profile = await getProfile(sessionId)
   if (!profile) return NextResponse.json({ error: 'Session not found' }, { status: 404 })
@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
   await updateProfile(sessionId, {
     blindSpotsIdentified: blindSpots,
     recommendedCourseIds: studyPlan.items.map(i => i.courseId),
-    stage: 'dna_reveal',
+    persona: persona ?? undefined,
+    stage: 'plan',
   })
 
   return NextResponse.json({ blindSpots, dnaReveal, studyPlan })
