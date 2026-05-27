@@ -1,9 +1,11 @@
-import sharp from 'sharp'
+import { execFileSync } from 'node:child_process'
+import { writeFileSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 export interface SceneData {
   label: string  // 'HOOK' | 'CORE CONCEPT' | 'EXAMPLE' | 'TAKEAWAY'
-  title: string  // short headline extracted/derived from script section (max 8 words)
-  body: string   // 1–2 sentence summary of the section
+  title: string  // short headline (max 8 words)
+  body: string   // 1–2 sentence summary
 }
 
 function escapeXml(text: string): string {
@@ -40,7 +42,9 @@ function textBlock(
   color: string,
   lineHeight: number,
 ): string {
-  return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size}" font-weight="${weight}" fill="${color}">${lines.map((line, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`).join('')}</text>`
+  return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size}" font-weight="${weight}" fill="${color}">${
+    lines.map((line, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`).join('')
+  }</text>`
 }
 
 function progressDots(current: number, total: number): string {
@@ -73,22 +77,17 @@ export function buildSceneSvg(
   const totalStr = String(total).padStart(2, '0')
   const logoData = `data:image/png;base64,${logoBase64}`
 
-  // Vertical centering: label pill at y=310, title starts at y=470, body below
   const titleY = 460
   const titleLineCount = titleLines.length
   const titleBottom = titleY + (titleLineCount - 1) * 94
   const bodyY = titleBottom + 80
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080">
   <defs>
     <radialGradient id="bg1" cx="50%" cy="50%" r="70%">
       <stop offset="0%" stop-color="#111111"/>
       <stop offset="100%" stop-color="#0d0d0d"/>
     </radialGradient>
-    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="22" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
     <filter id="glowSoft" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur stdDeviation="40" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -127,19 +126,34 @@ export function buildSceneSvg(
   ${progressDots(index, total)}
 
   <!-- Scene counter bottom-right -->
-  <text x="1868" y="1010" text-anchor="end" font-family="Arial, monospace" font-size="20" font-weight="400" fill="#888888" opacity="0.6" letter-spacing="2">${number} / ${totalStr}</text>
+  <text x="1868" y="1010" text-anchor="end" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#888888" opacity="0.6" letter-spacing="2">${number} / ${totalStr}</text>
 </svg>`
 }
 
-export async function renderScenePng(
+/**
+ * Renders a scene SVG to PNG using rsvg-convert (librsvg).
+ * Writes temp SVG to workDir, runs rsvg-convert, returns PNG as Buffer.
+ */
+export function renderScenePng(
   scene: SceneData,
   index: number,
   total: number,
   logoBase64: string,
-): Promise<Buffer> {
-  const svgString = buildSceneSvg(scene, index, total, logoBase64)
-  const pngBuffer = await sharp(Buffer.from(svgString))
-    .png()
-    .toBuffer()
-  return pngBuffer
+  workDir: string,
+): Buffer {
+  const svgPath = join(workDir, `scene${index}.svg`)
+  const pngPath = join(workDir, `scene${index}.png`)
+
+  const svgContent = buildSceneSvg(scene, index, total, logoBase64)
+  writeFileSync(svgPath, svgContent)
+
+  execFileSync('rsvg-convert', [
+    '-w', '1920',
+    '-h', '1080',
+    '-f', 'png',
+    '-o', pngPath,
+    svgPath,
+  ])
+
+  return readFileSync(pngPath)
 }

@@ -95,13 +95,11 @@ export async function generateLessonVideo(params: VideoJobParams): Promise<void>
     const logoPath = resolve(process.cwd(), 'public/blindspot-mark-gradient.png')
     const logoBase64 = readFileSync(logoPath).toString('base64')
 
-    // 4. Render scene PNGs
+    // 4. Render scene PNGs via rsvg-convert (writes SVG + PNG into workDir)
     const pngPaths: string[] = []
     for (let i = 0; i < scenes.length; i++) {
-      const pngBuffer = await renderScenePng(scenes[i], i, scenes.length, logoBase64)
-      const pngPath = join(workDir, `scene${i}.png`)
-      writeFileSync(pngPath, pngBuffer)
-      pngPaths.push(pngPath)
+      renderScenePng(scenes[i], i, scenes.length, logoBase64, workDir)
+      pngPaths.push(join(workDir, `scene${i}.png`))
     }
 
     // 5. Generate voiceover via OpenAI TTS
