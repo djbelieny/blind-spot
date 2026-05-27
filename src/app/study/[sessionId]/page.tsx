@@ -1575,6 +1575,7 @@ function StudyInner() {
                     <video
                       controls
                       playsInline
+                      preload="metadata"
                       poster={videoPoster ?? undefined}
                       src={videoUrl}
                       className="w-full rounded-xl border border-[#F94716]/20"
