@@ -9,8 +9,8 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# librsvg provides rsvg-convert (SVG→PNG), ffmpeg for video encoding
-RUN apk add --no-cache librsvg ffmpeg
+# imagemagick (magick CLI, SVG→PNG via rsvg delegate) + librsvg (SVG support) + ffmpeg
+RUN apk add --no-cache imagemagick librsvg ffmpeg
 
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static

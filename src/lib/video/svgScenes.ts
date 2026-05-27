@@ -147,12 +147,11 @@ export function renderScenePng(
   const svgContent = buildSceneSvg(scene, index, total, logoBase64)
   writeFileSync(svgPath, svgContent)
 
-  execFileSync('rsvg-convert', [
-    '-w', '1920',
-    '-h', '1080',
-    '-f', 'png',
-    '-o', pngPath,
+  // Use ImageMagick (magick) which leverages librsvg for SVG rendering
+  execFileSync('magick', [
+    '-size', '1920x1080',
     svgPath,
+    pngPath,
   ])
 
   return readFileSync(pngPath)
