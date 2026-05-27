@@ -3,7 +3,9 @@ export const maxDuration = 10
 
 import { NextRequest, NextResponse } from 'next/server'
 import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { join } from 'node:path'
+
+const VIDEO_DIR = '/data/lesson-videos'
 import redis from '@/lib/redis'
 import { getUnitContent, getRoadmap } from '@/lib/engine/roadmap'
 import { getProfile } from '@/lib/engine/progress'
@@ -39,15 +41,15 @@ export async function GET(req: NextRequest) {
   }
 
   // Check if the file physically exists
-  const videoFilePath = resolve(process.cwd(), 'public/generated/lesson-videos', `${cacheKey}.mp4`)
+  const videoFilePath = join(VIDEO_DIR, `${cacheKey}.mp4`)
   const fileExists = existsSync(videoFilePath)
 
   // Reconcile: correct Redis ↔ filesystem mismatches
   if (fileExists && statusData?.status === 'generating') {
     const corrected: VideoStatus = {
       status: 'ready',
-      videoUrl: `/generated/lesson-videos/${cacheKey}.mp4`,
-      posterUrl: `/generated/lesson-videos/${cacheKey}-poster.png`,
+      videoUrl: `/api/lesson-video/stream/${cacheKey}.mp4`,
+      posterUrl: `/api/lesson-video/stream/${cacheKey}-poster.png`,
     }
     await redis.set(key, JSON.stringify(corrected), 'EX', 60 * 60 * 24 * 7)
     statusData = corrected
@@ -142,8 +144,8 @@ export async function POST(req: NextRequest) {
         key,
         JSON.stringify({
           status: 'ready',
-          videoUrl: `/generated/lesson-videos/${cacheKey}.mp4`,
-          posterUrl: `/generated/lesson-videos/${cacheKey}-poster.png`,
+          videoUrl: `/api/lesson-video/stream/${cacheKey}.mp4`,
+          posterUrl: `/api/lesson-video/stream/${cacheKey}-poster.png`,
         }),
         'EX',
         60 * 60 * 24 * 7,

@@ -230,10 +230,10 @@ export async function generateLessonVideo(params: VideoJobParams): Promise<void>
     ])
 
     // 11. Ensure output directory exists
-    const outDir = resolve(process.cwd(), 'public/generated/lesson-videos')
+    const outDir = '/data/lesson-videos'
     mkdirSync(outDir, { recursive: true })
 
-    // 12. Copy files to public directory (copyFileSync works across devices/volumes)
+    // 12. Copy files (copyFileSync works across device boundaries)
     const finalVideoPath = join(outDir, `${cacheKey}.mp4`)
     const finalPosterPath = join(outDir, `${cacheKey}-poster.png`)
     copyFileSync(outputPath, finalVideoPath)
