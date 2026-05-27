@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile, updateProfile } from '@/lib/engine/progress'
 import type { LearnerProfile } from '@/types/learner'

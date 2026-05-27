@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile, updateProfile } from '@/lib/engine/progress'
 import { getUserFromToken, updateUser, COOKIE_NAME } from '@/lib/auth'

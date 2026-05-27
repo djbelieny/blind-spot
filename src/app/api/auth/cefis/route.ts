@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { loginCEFISUser, getMeWithToken, getTracksWithToken } from '@/lib/cefis'
 import { getProfile, updateProfile, getProgress, saveTrackProgress } from '@/lib/engine/progress'

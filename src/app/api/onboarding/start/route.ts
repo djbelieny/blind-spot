@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { detectLanguage, analyzeComplexity, inferUrgency, inferMotivation } from '@/lib/engine/language'

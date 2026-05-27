@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 
 const HYPERFRAMES_URL = process.env.HYPERFRAMES_URL ?? 'http://hyperframes:3001'

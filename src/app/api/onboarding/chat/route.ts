@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest } from 'next/server'
 import { streamTutorResponse } from '@/lib/ai/tutorchat'
 import { getProfile, updateProfile } from '@/lib/engine/progress'

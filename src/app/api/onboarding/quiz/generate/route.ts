@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { generateDomainQuestions } from '@/lib/ai/quiz'
 import { getProfile, updateProfile } from '@/lib/engine/progress'

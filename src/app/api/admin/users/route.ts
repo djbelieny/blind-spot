@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import redis from '@/lib/redis'
 import type { User } from '@/lib/auth'

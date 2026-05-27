@@ -2,17 +2,17 @@ import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 
 export const deepseekV3 = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+  apiKey: process.env.DEEPSEEK_API_KEY || 'build-placeholder',
   baseURL: 'https://api.deepseek.com/v1',
 })
 
 export const deepseekR1 = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+  apiKey: process.env.DEEPSEEK_API_KEY || 'build-placeholder',
   baseURL: 'https://api.deepseek.com/v1',
 })
 
 export const claude = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY ?? '',
+  apiKey: process.env.ANTHROPIC_API_KEY || 'build-placeholder',
 })
 
 export const MODELS = {

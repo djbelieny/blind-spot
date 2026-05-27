@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { analyzeGaps } from '@/lib/ai/gapanalysis'
 import { generateStudyPlan } from '@/lib/ai/plangeneration'

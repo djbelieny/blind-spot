@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { scoreQuizAnswers, classifyBaselineLevel, determineDNAType } from '@/lib/engine/scoring'
 import { getProfile, updateProfile } from '@/lib/engine/progress'

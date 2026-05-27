@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/lib/engine/progress'
 import { getAllCourses } from '@/lib/cefis'
