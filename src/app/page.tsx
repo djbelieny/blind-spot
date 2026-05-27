@@ -1,438 +1,418 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
-import Image from 'next/image'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Lang = 'en' | 'pt-BR'
-
-const T = {
-  en: {
-    nav: {
-      howItWorks: 'How it works', features: 'Features', faq: 'FAQ',
-      login: 'Log in', getStarted: 'Get started',
-    },
-    hero: {
-      h1a: 'Stop guessing',
-      h1b: "what you don't know",
-      sub: 'Blindspot maps your knowledge gaps in real time and gives you an AI tutor that knows exactly where to focus — so you stop wasting time on what you already know.',
-      placeholder: 'What are you trying to learn?',
-      cta: 'Start for free →',
-      hasAccount: 'Already have an account?',
-      signIn: 'Sign in',
-    },
-    hiw: {
-      label: 'Process',
-      title: 'Three steps to zero blind spots',
-      steps: [
-        { step: '01', title: 'Tell us your goal', desc: "Tell us what you want to learn or which exam you're preparing for. No setup required — just describe your goal in plain words.", icon: '◎' },
-        { step: '02', title: 'We map your gaps', desc: "Our diagnostic identifies exactly what you know and what you don't — even the gaps you didn't know you had. Precise, not generic.", icon: '◈' },
-        { step: '03', title: 'You study what matters', desc: 'Your AI tutor focuses every session on closing the gaps that matter most for your goal. No busywork, no guessing.', icon: '▦' },
-      ],
-    },
-    features: {
-      label: 'Features',
-      title: 'Every tool you need to stop guessing',
-      items: [
-        { icon: '◉', title: 'See your knowledge gap in real time', desc: 'Your personal knowledge radar updates as you study. Watch your blind spots close and your weak areas strengthen — session by session, concept by concept. No more guessing where you stand.', accent: 'violet' as const },
-        { icon: '⬡', title: "AI tutoring that knows what you don't know", desc: "Your AI tutor has a complete picture of your knowledge — what you know, what you almost know, and what you've never seen. Every explanation is calibrated to fill the exact gap you have, not a generic lesson.", accent: 'teal' as const },
-        { icon: '⚡', title: 'Adaptive diagnostic, not a test', desc: 'The diagnostic feels like a conversation, not an exam. It learns from how you answer — speed, confidence, patterns — to build a precise map of your knowledge in minutes.', accent: 'magenta' as const },
-        { icon: '◷', title: 'Built for your schedule', desc: 'Ten minutes or an hour, Blindspot adapts. Sessions are designed to maximize progress in whatever time you have — no fluff, no filler, no wasted minutes.', accent: 'green' as const },
-      ],
-    },
-    stats: [
-      { number: '2,400+', label: 'Students' },
-      { number: '89%', label: 'Report closing knowledge gaps' },
-      { number: '4.2×', label: 'Faster than traditional study' },
-      { number: '28 min', label: 'Average daily session' },
-    ],
-    faq: {
-      label: 'FAQ',
-      title: 'Questions, answered',
-      items: [
-        { q: 'What is a blind spot in learning?', a: "A blind spot is a gap in your knowledge that you don't know you have. It's the thing you skipped over, misunderstood, or never encountered — and it quietly blocks your progress. Blindspot identifies these gaps before they cost you." },
-        { q: 'How is this different from regular tutoring?', a: "Traditional tutoring assumes you know what you need help with. Blindspot diagnoses what you actually don't know — even the things you're not aware of — and builds your study plan around closing those specific gaps. No wasted time on what you already know." },
-        { q: 'Do I need a CEFIS account?', a: "No. Blindspot works for any subject or learning goal, with or without a CEFIS account. If you do have one, connecting it gives you deeper integration with your existing course tracks and progress data." },
-        { q: 'What subjects are supported?', a: 'Blindspot works across all subjects — from math and sciences to language learning, professional certifications, and exam prep. The AI adapts to whatever topic you bring to it.' },
-        { q: 'Is it free to start?', a: 'Yes. You can start for free, go through the diagnostic, and start closing your blind spots with no credit card required. Premium features are available for users who want deeper analysis and extended session history.' },
-      ],
-    },
-    footer: {
-      cta: 'Find your blind spots today.',
-      sub: 'Start for free. No credit card. Your first diagnostic takes under five minutes.',
-      btn: 'Get started for free →',
-      rights: 'All rights reserved.',
-    },
-  },
-  'pt-BR': {
-    nav: {
-      howItWorks: 'Como funciona', features: 'Recursos', faq: 'FAQ',
-      login: 'Entrar', getStarted: 'Começar',
-    },
-    hero: {
-      h1a: 'Pare de adivinhar',
-      h1b: 'o que você não sabe',
-      sub: 'O Blindspot mapeia suas lacunas de conhecimento em tempo real e oferece um tutor de IA que sabe exatamente onde focar — para você parar de desperdiçar tempo com o que já domina.',
-      placeholder: 'O que você quer aprender?',
-      cta: 'Começar de graça →',
-      hasAccount: 'Já tem uma conta?',
-      signIn: 'Entrar',
-    },
-    hiw: {
-      label: 'Processo',
-      title: 'Três passos para zero pontos cegos',
-      steps: [
-        { step: '01', title: 'Diga seu objetivo', desc: 'Conte o que quer aprender ou qual exame está preparando. Sem configuração — apenas descreva seu objetivo em palavras simples.', icon: '◎' },
-        { step: '02', title: 'Mapeamos suas lacunas', desc: 'Nosso diagnóstico identifica exatamente o que você sabe e o que não sabe — até as lacunas que você não sabia que tinha. Preciso, não genérico.', icon: '◈' },
-        { step: '03', title: 'Você estuda o que importa', desc: 'Seu tutor de IA foca cada sessão em fechar as lacunas mais importantes para seu objetivo. Sem desperdício, sem suposições.', icon: '▦' },
-      ],
-    },
-    features: {
-      label: 'Recursos',
-      title: 'Tudo que você precisa para parar de adivinhar',
-      items: [
-        { icon: '◉', title: 'Veja sua lacuna de conhecimento em tempo real', desc: 'Seu radar pessoal de conhecimento se atualiza conforme você estuda. Veja seus pontos cegos fechando e suas áreas fracas se fortalecendo — sessão por sessão, conceito por conceito.', accent: 'violet' as const },
-        { icon: '⬡', title: 'Tutoria de IA que sabe o que você não sabe', desc: 'Seu tutor de IA tem uma visão completa do seu conhecimento — o que você sabe, o que quase sabe e o que nunca viu. Cada explicação é calibrada para preencher exatamente sua lacuna.', accent: 'teal' as const },
-        { icon: '⚡', title: 'Diagnóstico adaptativo, não uma prova', desc: 'O diagnóstico parece uma conversa, não um exame. Ele aprende com a forma como você responde — velocidade, confiança, padrões — para construir um mapa preciso do seu conhecimento em minutos.', accent: 'magenta' as const },
-        { icon: '◷', title: 'Feito para sua rotina', desc: 'Dez minutos ou uma hora, o Blindspot se adapta. As sessões são projetadas para maximizar o progresso com o tempo que você tem — sem enrolação, sem desperdício.', accent: 'green' as const },
-      ],
-    },
-    stats: [
-      { number: '2.400+', label: 'Alunos' },
-      { number: '89%', label: 'Relatam fechar lacunas de conhecimento' },
-      { number: '4,2×', label: 'Mais rápido que o estudo tradicional' },
-      { number: '28 min', label: 'Sessão diária média' },
-    ],
-    faq: {
-      label: 'FAQ',
-      title: 'Perguntas respondidas',
-      items: [
-        { q: 'O que é um ponto cego no aprendizado?', a: 'Um ponto cego é uma lacuna no seu conhecimento que você não sabe que tem. É aquilo que você pulou, entendeu errado ou nunca encontrou — e que silenciosamente bloqueia seu progresso. O Blindspot identifica essas lacunas antes que elas te custem caro.' },
-        { q: 'Como isso é diferente de tutoria tradicional?', a: 'A tutoria tradicional assume que você sabe o que precisa de ajuda. O Blindspot diagnostica o que você realmente não sabe — inclusive as coisas que você não percebe — e constrói seu plano de estudo focando em fechar essas lacunas específicas.' },
-        { q: 'Preciso de uma conta CEFIS?', a: 'Não. O Blindspot funciona para qualquer matéria ou objetivo de aprendizado, com ou sem conta CEFIS. Se você tiver uma, conectá-la oferece integração mais profunda com suas trilhas de cursos e dados de progresso existentes.' },
-        { q: 'Quais matérias são suportadas?', a: 'O Blindspot funciona em todas as áreas — de matemática e ciências até aprendizado de idiomas, certificações profissionais e preparação para exames. A IA se adapta a qualquer tema que você trouxer.' },
-        { q: 'É gratuito para começar?', a: 'Sim. Você pode começar de graça, fazer o diagnóstico e começar a fechar seus pontos cegos sem precisar de cartão de crédito. Recursos premium estão disponíveis para usuários que queiram análises mais profundas e histórico estendido de sessões.' },
-      ],
-    },
-    footer: {
-      cta: 'Encontre seus pontos cegos hoje.',
-      sub: 'Comece de graça. Sem cartão de crédito. Seu primeiro diagnóstico leva menos de cinco minutos.',
-      btn: 'Começar de graça →',
-      rights: 'Todos os direitos reservados.',
-    },
-  },
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal')
+    const obs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in') }),
+      { threshold: 0.1 }
+    )
+    els.forEach(el => obs.observe(el))
+    return () => obs.disconnect()
+  }, [])
 }
 
-const ACCENT_STYLES = {
-  violet:  { border: 'border-[#7C3AED]/20', icon: 'bg-[#7C3AED]/10 text-[#7C3AED]',  glow: 'from-[#7C3AED]/5' },
-  teal:    { border: 'border-[#22D3EE]/20', icon: 'bg-[#22D3EE]/10 text-[#22D3EE]',  glow: 'from-[#22D3EE]/5' },
-  magenta: { border: 'border-[#C026D3]/20', icon: 'bg-[#C026D3]/10 text-[#C026D3]',  glow: 'from-[#C026D3]/5' },
-  green:   { border: 'border-[#34C785]/20', icon: 'bg-[#34C785]/10 text-[#34C785]',  glow: 'from-[#34C785]/5' },
+function drawRadar(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const w = canvas.width, h = canvas.height
+  const cx = w / 2, cy = h / 2
+  const maxR = 80, n = 6
+  const start = -Math.PI / 2
+  const pt = (i: number, r: number): [number, number] => {
+    const a = start + (i / n) * 2 * Math.PI
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)]
+  }
+  const labels = ['Tons', 'Escrita', 'Fala', 'Compreensão', 'Gramática', 'Cultura']
+  const scores = [75, 52, 48, 85, 68, 40]
+
+  ctx.fillStyle = '#0d0d0d'
+  ctx.fillRect(0, 0, w, h)
+
+  for (let l = 1; l <= 5; l++) {
+    const r = (l / 5) * maxR
+    ctx.beginPath()
+    for (let i = 0; i < n; i++) { const [x, y] = pt(i, r); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) }
+    ctx.closePath(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.stroke()
+  }
+  for (let i = 0; i < n; i++) {
+    const [x, y] = pt(i, maxR)
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y)
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1; ctx.stroke()
+  }
+
+  const dataPts = scores.map((s, i) => pt(i, (s / 100) * maxR))
+  ctx.beginPath()
+  dataPts.forEach(([x, y], i) => { i === 0 ? ctx.moveTo(x + 7, y + 7) : ctx.lineTo(x + 7, y + 7) })
+  ctx.closePath(); ctx.fillStyle = 'rgba(249,71,22,0.10)'; ctx.fill()
+
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR)
+  grad.addColorStop(0, 'rgba(249,71,22,0.65)')
+  grad.addColorStop(0.6, 'rgba(249,71,22,0.35)')
+  grad.addColorStop(1, 'rgba(249,71,22,0.10)')
+  ctx.beginPath()
+  dataPts.forEach(([x, y], i) => { i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) })
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill()
+  ctx.beginPath()
+  dataPts.forEach(([x, y], i) => { i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) })
+  ctx.closePath(); ctx.strokeStyle = '#F94716'; ctx.lineWidth = 2; ctx.stroke()
+
+  dataPts.forEach(([x, y]) => {
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, 2 * Math.PI); ctx.fillStyle = 'rgba(249,71,22,0.20)'; ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI); ctx.fillStyle = '#F94716'; ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 2 * Math.PI); ctx.fillStyle = '#fff'; ctx.fill()
+  })
+
+  ctx.font = 'bold 11px Inter, sans-serif'
+  const lR = maxR + 24
+  labels.forEach((label, i) => {
+    const [x, y] = pt(i, lR)
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillStyle = 'rgba(255,255,255,0.90)'; ctx.fillText(label, x, y)
+  })
+  ctx.font = '600 10px Inter, sans-serif'
+  dataPts.forEach(([x, y], i) => {
+    const a = start + (i / n) * 2 * Math.PI
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#FF8C5A'; ctx.fillText(String(scores[i]), x + 18 * Math.cos(a), y + 18 * Math.sin(a))
+  })
+  ctx.font = 'bold 12px Inter, sans-serif'; ctx.fillStyle = 'rgba(249,71,22,0.85)'
+  ctx.textAlign = 'center'; ctx.fillText('Mandarim', cx, cy - maxR - 14)
 }
 
-const STAT_COLORS = [
-  'bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent',
-  'text-[#22D3EE]',
-  'text-[#C026D3]',
-  'text-[#34C785]',
-]
-
-function BrandLockup({ size = 'nav', muted = false }: { size?: 'nav' | 'hero' | 'footer'; muted?: boolean }) {
-  const isHero = size === 'hero'
-  const markClass = isHero ? 'h-14 w-16 sm:h-16 sm:w-[74px]' : size === 'footer' ? 'h-7 w-8' : 'h-7 w-8 sm:h-8 sm:w-9'
-  const textClass = isHero
-    ? 'text-2xl sm:text-3xl md:text-4xl text-white'
-    : size === 'footer'
-      ? 'text-sm text-[#8A8FA8]/50'
-      : 'text-base sm:text-lg text-white'
-
+function Stars() {
   return (
-    <span className={`inline-flex items-center ${isHero ? 'gap-3' : 'gap-2'}`}>
-      <span className={`${markClass} relative inline-flex flex-shrink-0 items-center justify-center`}>
-        <Image
-          src="/blindspot-mark-gradient.png"
-          alt=""
-          width={540}
-          height={465}
-          priority={isHero}
-          aria-hidden="true"
-          className="h-full w-full object-contain drop-shadow-[0_0_18px_rgba(192,38,211,0.28)]"
-        />
-      </span>
-      <span className={`${textClass} font-heading font-semibold tracking-tight ${muted ? '' : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.16)]'}`}>
-        blindspot
-      </span>
-    </span>
-  )
-}
-
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="border-b border-[#8A8FA8]/10">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between py-5 text-left text-[#F0F0F5] text-sm font-medium hover:text-white transition-colors"
-      >
-        <span>{question}</span>
-        <span className={`ml-4 flex-shrink-0 text-[#7C3AED] transition-transform duration-200 ${open ? 'rotate-45' : ''}`}>+</span>
-      </button>
-      {open && <p className="pb-5 text-[#8A8FA8] text-sm leading-relaxed">{answer}</p>}
+    <div className="flex gap-1 mb-3.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill="#F94716">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
     </div>
   )
 }
 
-export default function Home() {
-  const [message, setMessage] = useState('')
-  const [scrolled, setScrolled] = useState(false)
-  const [lang, setLang] = useState<Lang>('en')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`mb-2 overflow-hidden transition-colors duration-300 rounded-xl ${open ? 'border-[#F94716]/35' : 'border-white/[0.08]'} border bg-[#141414]`}>
+      <button className="w-full flex items-center justify-between px-6 py-5 text-left gap-4" onClick={() => setOpen(v => !v)}>
+        <span className={`text-[15px] font-bold transition-colors ${open ? 'text-[#F94716]' : 'text-white'}`}>{q}</span>
+        <div className={`flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${open ? 'rotate-45 bg-[#F94716] border-[#F94716]' : 'border-[#555]'}`}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /></svg>
+        </div>
+      </button>
+      <div className={`transition-all duration-300 overflow-hidden ${open ? 'max-h-[300px] opacity-100 pb-[22px]' : 'max-h-0 opacity-0'}`}>
+        <p className="px-6 text-[14px] text-[#888] leading-[1.8]">{a}</p>
+      </div>
+    </div>
+  )
+}
 
-  const t = T[lang]
+const OR_BTN = 'inline-flex items-center gap-2 rounded-lg bg-[#F94716] text-white font-bold cursor-pointer transition-all duration-200 hover:bg-[#FF6B3D] hover:-translate-y-px [box-shadow:0_0_20px_rgba(249,71,22,.35)]'
+const DARK_BTN = 'inline-flex items-center gap-2 rounded-lg text-white font-semibold cursor-pointer transition-all duration-200 hover:border-white/20 hover:bg-[#1f1f1f] bg-[#1a1a1a] border border-white/[0.08]'
+
+export default function Home() {
+  const router = useRouter()
+  const [scrolled, setScrolled] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useScrollReveal()
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => { if (r.ok) router.replace('/dashboard') }).catch(() => {})
   }, [router])
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    if (canvasRef.current) drawRadar(canvasRef.current)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!message.trim()) return
-    router.push(`/auth/signup?q=${encodeURIComponent(message.trim())}`)
-  }
-
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#08090F] text-[#F0F0F5]">
+    <div className="min-h-screen overflow-x-hidden" style={{ background: '#0d0d0d', color: '#fff', fontFamily: 'Inter, DM Sans, sans-serif', lineHeight: 1.5, WebkitFontSmoothing: 'antialiased' }}>
 
-      {/* ── Nav ────────────────────────────────────────────────────────────── */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'border-b border-[#8A8FA8]/10 backdrop-blur-md bg-[#08090F]/80' : ''
-      }`}>
-        <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <a href="/" aria-label="Blindspot home" className="flex items-center flex-shrink-0">
-            <BrandLockup />
-          </a>
+      {/* HEADER */}
+      <header className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-12 py-[18px] transition-all duration-300 border-b ${scrolled ? 'bg-[#0d0d0d]/92 backdrop-blur-xl border-white/[0.08]' : 'border-transparent'}`}>
+        <a className="flex items-center gap-2.5 no-underline" href="/">
+          <span className="text-[16px] font-bold tracking-[-0.01em] text-white">BlindSpot</span>
+        </a>
+        <nav className="hidden md:flex gap-8">
+          {[['#problem', 'Problema'], ['#features', 'Ferramentas'], ['#students', 'Resultados'], ['#faq', 'FAQ']].map(([href, label]) => (
+            <a key={href} href={href} className="text-[14px] text-[#888] no-underline hover:text-white transition-colors duration-200 font-medium">{label}</a>
+          ))}
+        </nav>
+        <button onClick={() => router.push('/auth/login')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>Entrar</button>
+      </header>
 
-          {/* Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm text-[#8A8FA8]">
-            <a href="#how-it-works" className="hover:text-[#F0F0F5] transition-colors">{t.nav.howItWorks}</a>
-            <a href="#features" className="hover:text-[#F0F0F5] transition-colors">{t.nav.features}</a>
-            <a href="#faq" className="hover:text-[#F0F0F5] transition-colors">{t.nav.faq}</a>
-          </div>
+      {/* HERO */}
+      <section id="hero" className="relative min-h-screen flex items-center overflow-hidden" style={{ padding: '130px 48px 80px' }}>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 600, top: '-20%', left: '-5%', background: 'rgba(249,71,22,.08)', filter: 'blur(100px)' }} />
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 400, height: 400, bottom: '-10%', right: '-8%', background: 'rgba(249,71,22,.05)', filter: 'blur(100px)' }} />
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto grid gap-[80px] items-center" style={{ gridTemplateColumns: '1fr 1fr' }}>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {/* Language toggle */}
-            <div className="flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-[11px]">
-              {(['en', 'pt-BR'] as Lang[]).map(l => (
-                <button key={l} onClick={() => setLang(l)}
-                  className={`px-3 py-1.5 transition-colors ${lang === l ? 'bg-[#7C3AED] text-white' : 'bg-transparent text-[#8A8FA8] hover:text-[#F0F0F5]'}`}>
-                  {l === 'en' ? 'EN' : 'PT'}
-                </button>
-              ))}
-            </div>
-
-            {/* Login */}
-            <button
-              onClick={() => router.push('/auth/login')}
-            className="hidden sm:block text-[#8A8FA8] hover:text-[#F0F0F5] text-sm transition-colors"
-            >
-              {t.nav.login}
-            </button>
-
-            {/* Get started */}
-            <button
-              onClick={() => router.push('/auth/signup')}
-              className="hidden sm:block bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white text-sm font-heading font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
-            >
-              {t.nav.getStarted}
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Hero ───────────────────────────────────────────────────────────── */}
-      <section className="pt-32 pb-24 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#7C3AED]/8 rounded-full blur-[100px]" />
-          <div className="absolute top-40 left-1/3 w-[300px] h-[200px] bg-[#C026D3]/6 rounded-full blur-[80px]" />
-        </div>
-
-        <div className="relative -mx-4 w-screen px-4 text-center sm:mx-auto sm:w-auto sm:max-w-3xl sm:px-0">
-          <div className="mb-7 flex justify-center">
-            <BrandLockup size="hero" />
-          </div>
-
-          <div className="inline-flex items-center gap-2 bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#34C785] animate-pulse" />
-            <span className="text-[#7C3AED] text-xs tracking-wide">
-              {lang === 'en' ? 'AI-powered knowledge mapping' : 'Mapeamento de conhecimento com IA'}
-            </span>
-          </div>
-
-          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
-            {t.hero.h1a}
-            <span className="block mx-auto max-w-[20rem] bg-gradient-to-r from-[#7C3AED] to-[#C026D3] bg-clip-text text-transparent sm:max-w-none">
-              {t.hero.h1b}
-            </span>
-          </h1>
-          <p className="text-[#8A8FA8] text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-            {t.hero.sub}
-          </p>
-
-          <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder={t.hero.placeholder}
-                className="flex-1 min-w-0 bg-[#0E0F1A] border border-[#7C3AED]/20 text-[#F0F0F5] placeholder-[#8A8FA8]/50 rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#7C3AED]/50 transition-colors"
-              />
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-heading font-semibold px-6 py-4 rounded-2xl hover:opacity-90 transition-opacity text-sm whitespace-nowrap"
-              >
-                {t.hero.cta}
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-5 text-[#8A8FA8]/50 text-xs">
-            {t.hero.hasAccount}{' '}
-            <button
-              type="button"
-              onClick={() => router.push('/auth/login')}
-              className="text-[#8A8FA8] hover:text-[#F0F0F5] transition-colors underline underline-offset-2"
-            >
-              {t.hero.signIn}
-            </button>
-          </p>
-        </div>
-      </section>
-
-      {/* ── How it works ───────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.hiw.label}</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.hiw.title}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {t.hiw.steps.map((item, idx) => (
-              <div key={item.step} className="bg-[#0E0F1A] border border-[#7C3AED]/10 rounded-2xl p-7 flex flex-col gap-4 relative overflow-hidden group hover:border-[#7C3AED]/30 transition-colors">
-                <div className={`absolute inset-0 bg-gradient-to-br ${idx === 0 ? 'from-[#7C3AED]/5' : idx === 1 ? 'from-[#C026D3]/5' : 'from-[#22D3EE]/5'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
-                <div className="flex items-center justify-between relative">
-                  <span className={`text-2xl ${idx === 0 ? 'text-[#7C3AED]' : idx === 1 ? 'text-[#C026D3]' : 'text-[#22D3EE]'}`}>{item.icon}</span>
-                  <span className={`text-xs font-mono font-bold tracking-widest ${idx === 0 ? 'text-[#7C3AED]/40' : idx === 1 ? 'text-[#C026D3]/40' : 'text-[#22D3EE]/40'}`}>{item.step}</span>
-                </div>
-                <h3 className="font-heading text-[#F0F0F5] text-lg font-semibold leading-snug relative">{item.title}</h3>
-                <p className="text-[#8A8FA8] text-sm leading-relaxed relative">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ───────────────────────────────────────────────────────── */}
-      <section id="features" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.features.label}</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.features.title}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {t.features.items.map(item => {
-              const a = ACCENT_STYLES[item.accent]
-              return (
-                <div key={item.title} className={`bg-[#0E0F1A] border ${a.border} rounded-2xl p-8 flex flex-col gap-4 relative overflow-hidden group hover:bg-[#111225] transition-colors`}>
-                  <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${a.glow} to-transparent`} />
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${a.icon}`}>
-                    <span className="text-lg">{item.icon}</span>
-                  </div>
-                  <h3 className="font-heading text-[#F0F0F5] text-xl font-semibold leading-snug">{item.title}</h3>
-                  <p className="text-[#8A8FA8] text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Stats bar ──────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6 border-y border-[#8A8FA8]/10 bg-[#0A0B15]">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#8A8FA8]/10">
-            {t.stats.map((s, i) => (
-              <div key={i} className="px-8 py-6 text-center first:pl-0 last:pr-0">
-                <p className={`font-heading text-3xl md:text-4xl font-bold mb-1 ${STAT_COLORS[i]}`}>{s.number}</p>
-                <p className="text-[#8A8FA8] text-xs leading-relaxed">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-24 px-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">{t.faq.label}</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold">{t.faq.title}</h2>
-          </div>
+          {/* LEFT */}
           <div>
-            {t.faq.items.map((item, i) => (
-              <FAQItem key={i} question={item.q} answer={item.a} />
+            <p className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold mb-7" style={{ background: 'rgba(249,71,22,.12)', border: '1px solid rgba(249,71,22,.3)', color: '#F94716' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] animate-pulse" />
+              Em Fase Beta
+            </p>
+            <h1 className="font-black leading-[1.05] tracking-[-0.03em] mb-6 text-white" style={{ fontSize: 'clamp(40px,5.5vw,72px)' }}>
+              Deixe de <em className="not-italic text-[#F94716]">adivinhar</em> e comece a <em className="not-italic text-[#F94716]">dominar</em>
+            </h1>
+            <p className="mb-10 font-medium" style={{ fontSize: 20, color: '#888', lineHeight: 1.5, maxWidth: 480 }}>
+              O BlindSpot é um tutor de AI que revela o que você ainda não sabe que não sabe. Monta um método personalizado para o seu jeito de aprender. Você aprende de verdade.
+            </p>
+            <div className="flex gap-3 flex-wrap mb-14">
+              <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>Comece agora (grátis)</button>
+              <a href="#faq" className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>Saiba mais</a>
+            </div>
+            <div className="reveal flex gap-10 flex-wrap">
+              {[['2.4', 'K+', 'Alunos ativos'], ['4.2', '×', 'Mais absorção'], ['28', 'min', 'Sessão diária']].map(([n, s, l]) => (
+                <div key={l}>
+                  <div className="text-[26px] font-extrabold text-white"><span className="text-[#F94716]">{n}</span>{s}</div>
+                  <p className="text-[13px] mt-0.5" style={{ color: '#888' }}>{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <div className="reveal hidden lg:flex flex-col items-start gap-6 relative">
+            <h2 className="font-black leading-[1] tracking-[-0.03em] text-white" style={{ fontSize: 'clamp(36px,4.5vw,60px)' }}>
+              Seu <em className="not-italic text-[#F94716]">Radar</em> de Mandarim
+            </h2>
+            <div className="relative w-full flex items-center justify-center" style={{ animation: 'landing-float 5s ease-in-out infinite' }}>
+              <div className="relative w-full max-w-[380px] rounded-3xl p-7 overflow-hidden" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 32px 80px rgba(0,0,0,.6),0 0 60px rgba(249,71,22,.08)' }}>
+                <div className="absolute left-0 right-0 h-[2px] opacity-50 z-10" style={{ background: 'linear-gradient(90deg,transparent,#F94716,transparent)', animation: 'landing-scan 3s linear infinite' }} />
+                <p className="text-[11px] font-bold tracking-[0.18em] uppercase mb-5 text-[#F94716]">AI Analysis</p>
+                <h3 className="text-[22px] font-extrabold text-white mb-1.5 leading-[1.2]">Lacunas Detectadas</h3>
+                <p className="text-[13px] mb-6" style={{ color: '#888' }}>Seu perfil de conhecimento atualizado</p>
+                <div className="flex flex-col gap-2.5">
+                  {[
+                    { dot: '#FF6B3D', subj: 'Tons & Pronúncia', meta: 'Conexão faltando', badge: 'CRÍTICO', bg: 'rgba(249,71,22,.15)', tc: '#F94716', bc: 'rgba(249,71,22,.3)' },
+                    { dot: '#FBBF24', subj: 'Caracteres Compostos', meta: 'Entender estrutura', badge: 'ALTA', bg: 'rgba(251,191,36,.12)', tc: '#FBBF24', bc: 'rgba(251,191,36,.25)' },
+                    { dot: '#A855F7', subj: 'Contexto Coloquial', meta: 'Uso em conversas', badge: 'MÉDIA', bg: 'rgba(168,85,247,.12)', tc: '#A855F7', bc: 'rgba(168,85,247,.25)' },
+                  ].map(item => (
+                    <div key={item.subj} className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,.08)' }}>
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: item.dot }} />
+                        <div>
+                          <p className="text-[14px] font-semibold text-white">{item.subj}</p>
+                          <p className="text-[12px]" style={{ color: '#888' }}>{item.meta}</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-[6px]" style={{ background: item.bg, color: item.tc, border: `1px solid ${item.bc}` }}>{item.badge}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute bottom-[-16px] right-[-20px] flex items-center gap-2.5 px-4 py-3 rounded-2xl whitespace-nowrap" style={{ background: 'rgba(20,20,20,.96)', border: '1px solid rgba(249,71,22,.35)', backdropFilter: 'blur(16px)', animation: 'landing-slide-r .8s cubic-bezier(.16,1,.3,1) .6s both' }}>
+                <span className="text-lg">🎯</span>
+                <div>
+                  <p className="text-[11px] font-bold tracking-[0.05em] text-[#F94716]">PRÓXIMA LIÇÃO</p>
+                  <p className="text-[12px]" style={{ color: '#888' }}>Tones &amp; Tonal Pairs</p>
+                </div>
+              </div>
+              <div className="absolute top-[-16px] left-[-20px] px-[18px] py-3.5 rounded-2xl" style={{ background: 'rgba(20,20,20,.96)', border: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(16px)', animation: 'landing-fade-up .8s cubic-bezier(.16,1,.3,1) .3s both' }}>
+                <div className="text-[28px] font-black leading-[1] text-[#F94716]">+28%</div>
+                <div className="text-[11px] mt-0.5" style={{ color: '#888' }}>Semana passada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PROBLEM */}
+      <section id="problem" className="relative" style={{ padding: '100px 48px' }}>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 500, height: 500, top: 0, right: '-10%', background: 'rgba(249,71,22,.06)', filter: 'blur(100px)' }} />
+        <div className="max-w-[1200px] mx-auto">
+          <div className="reveal text-center max-w-[760px] mx-auto mb-14">
+            <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">O Problema</p>
+            <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>Você quer dominar algo, mas não tem o passo a passo?</h2>
+          </div>
+          <div className="reveal grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
+            {[
+              { n: '01', title: 'Método estruturado', text: 'Montamos um passo a passo completo para qualquer coisa que você queira aprender. Sem improvisação, sem etapas perdidas. Você sabe exatamente por onde começa e onde vai chegar.', r: '16px 0 0 16px' },
+              { n: '02', title: 'Aprendizado Camaleão', text: 'A interface se adapta ao seu método de aprendizado específico e à sua linguagem. O BlindSpot fala como você pensa, respeita seu ritmo e entrega o conteúdo do jeito que você absorve melhor.', r: undefined },
+              { n: '03', title: 'Rápido. Prático. Simplesmente eficiente.', text: 'Trabalha o seu alvo de estudo em sessões curtas, sem passar o dia todo em uma mentoria ou sala de aula. Você aprende de verdade em menos tempo do que imagina.', r: '0 16px 16px 0' },
+            ].map(card => (
+              <div key={card.n} className="group relative overflow-hidden transition-all duration-300" style={{ padding: '36px 32px', background: '#141414', border: '1px solid rgba(255,255,255,.08)', borderRadius: card.r }}>
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#F94716] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left" />
+                <div className="text-[42px] font-black leading-[1] mb-4 text-[#F94716]" style={{ opacity: 0.2 }}>{card.n}</div>
+                <h3 className="text-[18px] font-extrabold text-white mb-2.5">{card.title}</h3>
+                <p className="text-[14px] leading-[1.75]" style={{ color: '#888' }}>{card.text}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Footer CTA ─────────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 relative overflow-hidden bg-[#0E0F1A] border-t border-[#8A8FA8]/10">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#22D3EE]/5 rounded-full blur-[80px]" />
-          <div className="absolute bottom-0 right-1/4 w-[300px] h-[200px] bg-[#7C3AED]/6 rounded-full blur-[60px]" />
+      {/* STATS STRIP */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', borderBottom: '1px solid rgba(255,255,255,.08)', padding: '40px 0', background: '#141414' }}>
+        <div className="grid max-w-[1200px] mx-auto px-12" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+          {[['2.400+', 'Alunos ativos'], ['100%', 'Personalizável'], ['4.2×', 'Mais absorção de conteúdo'], ['28min', 'Sessão diária média']].map(([val, lbl], i) => (
+            <div key={val} className={`reveal text-center px-6 ${i < 3 ? 'border-r border-white/[0.08]' : ''}`}>
+              <span className="block font-black leading-[1] mb-2 text-[#F94716]" style={{ fontSize: 'clamp(36px,4vw,52px)' }}>{val}</span>
+              <p className="text-[13px]" style={{ color: '#888' }}>{lbl}</p>
+            </div>
+          ))}
         </div>
-        <div className="max-w-2xl mx-auto text-center relative">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#22D3EE] mb-5 leading-tight">
-            {t.footer.cta}
-          </h2>
-          <p className="text-[#8A8FA8] text-lg mb-10 leading-relaxed">{t.footer.sub}</p>
-          <button
-            onClick={() => router.push('/auth/signup')}
-            className="bg-gradient-to-r from-[#7C3AED] to-[#C026D3] text-white font-heading font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-opacity text-base"
-          >
-            {t.footer.btn}
-          </button>
+      </div>
+
+      {/* FEATURES */}
+      <section id="features" className="relative" style={{ padding: '100px 48px' }}>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 600, bottom: 0, left: '-15%', background: 'rgba(249,71,22,.07)', filter: 'blur(100px)' }} />
+        <div className="max-w-[1200px] mx-auto">
+          <div className="reveal text-center mb-14">
+            <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">Ferramentas</p>
+            <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>Tudo que você precisa para parar de adivinhar</h2>
+          </div>
+          <div className="grid gap-6 mb-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="reveal relative overflow-hidden rounded-[20px] transition-colors duration-300 hover:border-[#F94716]/25 p-9" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)' }}>
+              <div className="absolute bottom-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle,rgba(249,71,22,.12),transparent 70%)' }} />
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-10 h-10 rounded-[10px] flex items-center justify-center" style={{ background: 'rgba(249,71,22,.15)', border: '1px solid rgba(249,71,22,.3)' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#F94716" strokeWidth="1.5"/><circle cx="12" cy="12" r="4" stroke="#F94716" strokeWidth="1.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="#F94716" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </div>
+                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#F94716]">Radar de Conhecimento</span>
+              </div>
+              <h3 className="text-[20px] font-extrabold text-white mb-2.5 leading-[1.3]">Visualize exatamente o que você domina em cada área</h3>
+              <p className="text-[14px] leading-[1.75] mb-6" style={{ color: '#888' }}>Um mapa dinâmico de todos os seus domínios de conhecimento, atualizado após cada sessão. Você sabe o que está forte, o que precisa de atenção e o que vem a seguir.</p>
+              <div className="flex justify-center"><canvas ref={canvasRef} width={320} height={280} style={{ maxWidth: '100%', display: 'block' }} /></div>
+            </div>
+            <div className="reveal relative overflow-hidden rounded-[20px] transition-colors duration-300 hover:border-[#F94716]/25 p-9" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)' }}>
+              <div className="absolute bottom-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle,rgba(249,71,22,.12),transparent 70%)' }} />
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-10 h-10 rounded-[10px] flex items-center justify-center" style={{ background: 'rgba(249,71,22,.15)', border: '1px solid rgba(249,71,22,.3)' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#F94716" strokeWidth="1.5"/><circle cx="12" cy="12" r="3" stroke="#F94716" strokeWidth="1.5"/></svg>
+                </div>
+                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#F94716]">Detecção de Lacunas por AI</span>
+              </div>
+              <h3 className="text-[20px] font-extrabold text-white mb-2.5 leading-[1.3]">94% de precisão em encontrar o que você não sabe que não sabe</h3>
+              <p className="text-[14px] leading-[1.75] mb-6" style={{ color: '#888' }}>Nosso modelo não olha apenas para respostas erradas. Analisa tempo de resposta, padrões de hesitação e caminhos de raciocínio para encontrar lacunas que o estudo comum nunca detecta.</p>
+              <div className="px-4 py-3 rounded-xl" style={{ background: '#1a1a1a', borderLeft: '3px solid #F94716' }}>
+                <p className="text-[11px] font-bold tracking-[0.12em] uppercase mb-1.5 text-[#F94716]">Lacuna detectada</p>
+                <p className="text-[13px] leading-[1.65]" style={{ color: '#94A3B8' }}>"Você entende conceitos básicos de Mandarim mas ainda não conectou os tons à pronúncia em contexto. Isso afeta toda sua fluência oral."</p>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            {[
+              { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="#F94716" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: 'Plano Adaptativo', desc: 'Cada sessão recalibra seu plano. O BlindSpot aprende o que funciona pra você e ajusta dificuldade, sequência e tempo automaticamente.' },
+              { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#F94716" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: 'Feedback Inteligente', desc: 'Você sabe exatamente o que precisa melhorar, quais pontos aprender e em que ordem. Nada de achismo. Cada sugestão tem um porquê claro por trás.' },
+            ].map(card => (
+              <div key={card.title} className="reveal group rounded-2xl transition-all duration-300 hover:bg-[#181818] hover:border-[#F94716]/20 p-6" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)' }}>
+                <div className="w-9 h-9 rounded-[10px] flex items-center justify-center mb-3.5" style={{ background: 'rgba(249,71,22,.12)', border: '1px solid rgba(249,71,22,.25)' }}>{card.icon}</div>
+                <h3 className="text-[15px] font-bold text-white mb-2">{card.title}</h3>
+                <p className="text-[13px] leading-[1.7]" style={{ color: '#888' }}>{card.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="py-8 px-6 border-t border-[#8A8FA8]/10">
-        <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <span className="text-[#8A8FA8]/50 text-xs">
-            &copy; {new Date().getFullYear()} Blindspot. {t.footer.rights}
-          </span>
-          <div className="flex items-center gap-4">
-            <div className="flex rounded-full border border-[#8A8FA8]/15 overflow-hidden text-[11px]">
-              {(['en', 'pt-BR'] as Lang[]).map(l => (
-                <button key={l} onClick={() => setLang(l)}
-                  className={`px-3 py-1 transition-colors ${lang === l ? 'bg-[#7C3AED] text-white' : 'bg-transparent text-[#8A8FA8] hover:text-[#F0F0F5]'}`}>
-                  {l === 'en' ? 'EN' : 'PT'}
-                </button>
+      {/* TESTIMONIALS */}
+      <section id="students" style={{ padding: '100px 48px', background: '#141414' }}>
+        <div className="max-w-[1200px] mx-auto">
+          <div className="reveal text-center mb-14">
+            <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">Resultados reais</p>
+            <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>Pessoas reais. Aprendizado de verdade.</h2>
+          </div>
+          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            {[
+              { q: '"Passei meses tentando aprender programação do jeito errado. Em duas semanas com o BlindSpot aprendi mais do que em seis meses sozinho. Ele entende exatamente como eu penso."', i: 'AC', n: 'Ana Costa', r: 'Dev em formação' },
+              { q: '"Queria aprender Mandarim faz anos. Nunca conseguia porque não tinha por onde começar. O BlindSpot montou um caminho claro e agora estou tendo conversas básicas em 40 dias."', i: 'BM', n: 'Bruno Melo', r: 'Empreendedor' },
+              { q: '"Achei que aprender fotografia precisava de curso caro. O BlindSpot montou minha trilha personalizada, identificou minha maior fraqueza e em três semanas o resultado mudou completamente."', i: 'CF', n: 'Carla Freitas', r: 'Fotógrafa' },
+              { q: '"A melhor ferramenta que já usei. Não é só aprender. É saber o que aprender, em que ordem, e por quê. Essa clareza muda tudo."', i: 'DS', n: 'Diego Santos', r: 'Designer' },
+            ].map(t => (
+              <div key={t.n} className="reveal rounded-[18px] transition-all duration-300 hover:bg-[#181818] hover:border-[#F94716]/20 p-7" style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,.08)' }}>
+                <Stars />
+                <blockquote className="text-[15px] leading-[1.75] mb-6" style={{ color: '#CBD5E1', fontStyle: 'normal' }}>{t.q}</blockquote>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-extrabold flex-shrink-0" style={{ background: 'rgba(249,71,22,.15)', border: '1.5px solid rgba(249,71,22,.4)', color: '#F94716' }}>{t.i}</div>
+                  <div><p className="text-[14px] font-bold text-white">{t.n}</p><p className="text-[12px]" style={{ color: '#888' }}>{t.r}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" style={{ padding: '100px 48px' }}>
+        <div className="max-w-[1200px] mx-auto">
+          <div className="reveal text-center mb-14">
+            <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">FAQ</p>
+            <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>Perguntas, respondidas</h2>
+          </div>
+          <div className="max-w-[760px] mx-auto reveal">
+            {[
+              { q: 'Posso usar o BlindSpot para aprender qualquer coisa?', a: 'Sim. O BlindSpot funciona para qualquer tema que você queira dominar. Mandarim, programação, filosofia, fotografia, finanças, música, marketing. Se existe um conjunto de conhecimentos a dominar, o BlindSpot monta o caminho e te guia até lá.' },
+              { q: 'Como o BlindSpot é diferente de outros apps de aprendizado?', a: 'Outros apps te entregam conteúdo genérico. O BlindSpot identifica o que você especificamente não sabe, monta um método personalizado para o seu jeito de aprender e te guia pelos pontos certos. A diferença é que você para de estudar no escuro e começa a aprender com direção.' },
+              { q: 'Quanto tempo até ver resultados reais?', a: 'A maioria das pessoas nota mudanças em 2 a 3 semanas de sessões diárias consistentes de 20 a 30 minutos. As maiores evoluções vêm logo após o primeiro diagnóstico revelar exatamente onde estão as lacunas.' },
+              { q: 'Meus dados de aprendizado são privados?', a: 'Sim. Seu perfil de conhecimento, resultados e dados de sessão são criptografados e nunca vendidos. Você é dono dos seus dados e pode exportar ou excluir tudo a qualquer momento.' },
+              { q: 'Preciso ter algum conhecimento prévio para começar?', a: 'Não. O BlindSpot funciona do zero absoluto até níveis avançados. O diagnóstico inicial identifica exatamente onde você está hoje e monta o caminho a partir dali. Você começa de onde for.' },
+              { q: 'Como a AI detecta o que eu ainda não sei?', a: 'Analisamos não só respostas erradas, mas tempo de resposta, padrões de hesitação, o caminho do raciocínio e como você interage com o conteúdo. Isso revela lacunas que métodos de detecção tradicionais nunca encontram.' },
+            ].map(item => <FAQItem key={item.q} q={item.q} a={item.a} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section id="cta" className="relative overflow-hidden text-center" style={{ padding: '120px 48px' }}>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 700, height: 700, top: '-15%', right: '-20%', background: 'rgba(249,71,22,.05)', filter: 'blur(100px)' }} />
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 500, height: 500, bottom: 0, left: '-10%', background: 'rgba(249,71,22,.06)', filter: 'blur(100px)' }} />
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <h2 className="font-black leading-[1] tracking-[-0.03em] text-white mb-5" style={{ fontSize: 'clamp(40px,6vw,80px)' }}>
+            Pronto para parar de <span className="text-[#F94716]">adivinhar</span>?
+          </h2>
+          <p className="text-[18px] leading-[1.7] max-w-[520px] mx-auto mb-12" style={{ color: '#888' }}>
+            Mais de 2.400 pessoas já estão usando o BlindSpot para aprender de verdade. Você vem?
+          </p>
+          <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} text-[16px] px-7 py-3.5`}>
+            Comece agora gratuitamente
+          </button>
+          <p className="text-[12px] mt-4" style={{ color: '#555' }}>Sem cartão. Sem compromisso. 7 dias de acesso total à plataforma.</p>
+          <div className="flex items-center justify-center gap-2.5 mt-7">
+            <div className="flex">
+              {['AC', 'BM', 'CF'].map((init, i) => (
+                <div key={init} className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: '#1a1a1a', color: '#F94716', border: '2px solid #0d0d0d', marginLeft: i === 0 ? 0 : -8 }}>{init}</div>
               ))}
             </div>
-            <BrandLockup size="footer" muted />
+            <p className="text-[13px]" style={{ color: '#888' }}>Junte-se a pessoas reais que estão dominando o que querem</p>
           </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,.08)', padding: '56px 48px 36px' }}>
+        <div className="grid max-w-[1200px] mx-auto mb-12" style={{ gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 48 }}>
+          <div>
+            <p className="text-white font-bold text-base mb-4">BlindSpot</p>
+            <p className="text-[13px] leading-[1.6]" style={{ color: '#888' }}>O tutor de AI que revela o que você ainda não sabe que não sabe. Aprenda mais rápido, de verdade.</p>
+          </div>
+          {[
+            { h: 'Produto', links: [{ l: 'Entrar', href: '/auth/login' }, { l: 'Cadastro', href: '/auth/signup' }, { l: 'Recursos', href: '#features' }] },
+            { h: 'Saiba mais', links: [{ l: 'Problema', href: '#problem' }, { l: 'FAQ', href: '#faq' }] },
+            { h: 'Redes', links: [{ l: 'Twitter', href: '#' }, { l: 'LinkedIn', href: '#' }, { l: 'Discord', href: '#' }] },
+          ].map(col => (
+            <div key={col.h}>
+              <h4 className="text-[12px] font-bold tracking-[0.15em] uppercase mb-4 text-[#F94716]">{col.h}</h4>
+              {col.links.map(ln => (
+                <a key={ln.l} href={ln.href} className="block text-[13px] mb-2.5 no-underline hover:text-white transition-colors" style={{ color: '#888' }}>{ln.l}</a>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="border-t pt-8 text-center text-[12px] max-w-[1200px] mx-auto" style={{ borderColor: 'rgba(255,255,255,.08)', color: '#555' }}>
+          Copyright 2024 BlindSpot. Todos os direitos reservados.
         </div>
       </footer>
 

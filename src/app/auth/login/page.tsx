@@ -36,12 +36,12 @@ function LoginInner() {
   }
 
   return (
-    <main className="min-h-screen bg-[#08090F] flex items-center justify-center px-6">
+    <main className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-10">
           <div className="flex items-center gap-1.5 mb-6">
             <span className="text-[#F0F0F5] font-semibold text-lg tracking-tight">blindspot</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mb-2.5 flex-shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] mb-2.5 flex-shrink-0" />
           </div>
           <h1 className="text-[#F0F0F5] text-2xl font-light">Welcome back.</h1>
           <p className="text-[#8A8FA8] text-sm mt-1.5">Sign in to continue learning.</p>
@@ -58,7 +58,7 @@ function LoginInner() {
               onChange={e => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
               style={{ '--tw-ring-color': 'transparent' } as React.CSSProperties}
             />
           </div>
@@ -71,7 +71,7 @@ function LoginInner() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
             />
             <button
               type="button"
@@ -92,7 +92,7 @@ function LoginInner() {
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white font-medium py-4 rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 text-sm mt-1"
+            className="w-full bg-gradient-to-r from-[#F94716] to-[#E03A0E] text-white font-medium py-4 rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 text-sm mt-1"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

@@ -17,14 +17,14 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: 'Blindspot — The tutor that reveals what you have not seen yet',
-  description: 'Você ainda não sabe o que não sabe.',
+  title: 'BlindSpot — O tutor que revela o que você ainda não viu',
+  description: 'Deixe de adivinhar e comece a dominar. O tutor de AI que revela o que você ainda não sabe que não sabe.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${dmSans.variable} ${spaceGrotesk.variable} font-sans bg-[#08090F] text-[#F0F0F5] min-h-screen`}>
+    <html lang="pt-BR" className="dark">
+      <body className={`${dmSans.variable} ${spaceGrotesk.variable} font-sans bg-[#0d0d0d] text-[#F0F0F5] min-h-screen`}>
         {children}
       </body>
     </html>

@@ -42,12 +42,12 @@ function SignupInner() {
   }
 
   return (
-    <main className="min-h-screen bg-[#08090F] flex items-center justify-center px-6">
+    <main className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-10">
           <div className="flex items-center gap-1.5 mb-6">
             <span className="text-[#F0F0F5] font-semibold text-lg tracking-tight">blindspot</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] mb-2.5 flex-shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] mb-2.5 flex-shrink-0" />
           </div>
           <h1 className="text-[#F0F0F5] text-2xl font-light">
             {q ? 'Create your account to continue.' : 'Create your account.'}
@@ -70,7 +70,7 @@ function SignupInner() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Your name (optional)"
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
             />
           </div>
           <div>
@@ -82,7 +82,7 @@ function SignupInner() {
               onChange={e => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
             />
           </div>
           <div className="relative">
@@ -95,7 +95,7 @@ function SignupInner() {
               placeholder="Password (min 6 characters)"
               required
               minLength={6}
-              className="w-full bg-[#0E0F1A] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
             />
             <button
               type="button"
@@ -116,7 +116,7 @@ function SignupInner() {
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white font-medium py-4 rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 text-sm mt-1"
+            className="w-full bg-gradient-to-r from-[#F94716] to-[#E03A0E] text-white font-medium py-4 rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 text-sm mt-1"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

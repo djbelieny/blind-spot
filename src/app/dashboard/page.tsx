@@ -28,7 +28,7 @@ const DNA_META: Record<string, {
   pt: { name: string; tagline: string; description: string; strengths: string[]; watchOut: string }
 }> = {
   explorador: {
-    symbol: '◎', color: '#7C3AED',
+    symbol: '◎', color: '#F94716',
     en: {
       name: 'Practical Explorer', tagline: 'You learn by doing, not by reading.',
       description: 'You process information best through hands-on experience. Passive reading doesn\'t stick — you need to try things, make mistakes, and iterate. Your understanding solidifies through doing, not observing.',
@@ -88,7 +88,7 @@ const DNA_META: Record<string, {
     },
   },
   sprint: {
-    symbol: '⚡', color: '#C026D3',
+    symbol: '⚡', color: '#FF6B3D',
     en: {
       name: 'Intense Sprinter', tagline: 'Short focus, high intensity — you peak fast.',
       description: 'You operate in intense bursts. Long sessions drain you, but 15-25 minute focused sprints are where you peak. You absorb dense material fast and need to move before boredom sets in.',
@@ -141,7 +141,7 @@ function Dots() {
   return (
     <div className="flex gap-1.5 justify-center py-12">
       {[0,1,2].map(i => (
-        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
+        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F94716]/40 animate-bounce" style={{ animationDelay: `${i*150}ms` }} />
       ))}
     </div>
   )
@@ -173,7 +173,7 @@ function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolea
       {/* Strip button */}
       <button
         onClick={() => setDrawerOpen(o => !o)}
-        className="group relative w-full overflow-hidden rounded-2xl border border-[#7C3AED]/12 hover:border-[#7C3AED]/30 bg-gradient-to-r from-[#7C3AED]/5 to-transparent px-7 py-5 flex items-center gap-5 mb-1 cursor-pointer transition-all duration-200 text-left"
+        className="group relative w-full overflow-hidden rounded-2xl border border-[#F94716]/12 hover:border-[#F94716]/30 bg-gradient-to-r from-[#F94716]/5 to-transparent px-7 py-5 flex items-center gap-5 mb-1 cursor-pointer transition-all duration-200 text-left"
         aria-label={isEn ? 'View learning DNA' : 'Ver DNA de aprendizado'}
       >
         <span className="text-3xl leading-none flex-shrink-0" style={{ color: dna.color }}>{dna.symbol}</span>
@@ -200,7 +200,7 @@ function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolea
           )}
           <span className={`text-[#8A8FA8]/40 text-sm group-hover:text-[#8A8FA8]/70 transition-all duration-300 ml-1 ${drawerOpen ? 'rotate-90' : ''}`}>›</span>
         </div>
-        <span className="absolute right-5 top-2 text-[72px] leading-none text-[#7C3AED]/4 select-none pointer-events-none">
+        <span className="absolute right-5 top-2 text-[72px] leading-none text-[#F94716]/4 select-none pointer-events-none">
           {dna.symbol}
         </span>
       </button>
@@ -230,7 +230,7 @@ function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolea
               </div>
 
               <div className="flex flex-col gap-4">
-                <div className="bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-2xl px-5 py-4">
+                <div className="bg-[#141414] border border-[#8A8FA8]/8 rounded-2xl px-5 py-4">
                   <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1.5">
                     {isEn ? 'Watch out for' : 'Atenção'}
                   </p>
@@ -255,7 +255,7 @@ function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolea
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {traits.map((t, i) => t.value && (
-                  <div key={i} className="bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-xl px-4 py-3">
+                  <div key={i} className="bg-[#141414] border border-[#8A8FA8]/8 rounded-xl px-4 py-3">
                     <p className="text-[#8A8FA8] text-[10px] mb-1">{t.label}</p>
                     <p className="text-[#F0F0F5] text-sm flex items-center gap-1.5">
                       <span className="text-[#8A8FA8]">{t.icon}</span>
@@ -269,13 +269,13 @@ function ProfileStrip({ profile, isEn }: { profile: LearnerProfile; isEn: boolea
             {/* Stats row */}
             <div className="flex gap-3">
               {profile.minutesPerDay > 0 && (
-                <div className="flex-1 bg-[#0E0F1A] border border-[#8A8FA8]/8 rounded-xl px-4 py-3 text-center">
+                <div className="flex-1 bg-[#141414] border border-[#8A8FA8]/8 rounded-xl px-4 py-3 text-center">
                   <p className="text-[#F0F0F5] text-xl font-medium tabular-nums">{profile.minutesPerDay}</p>
                   <p className="text-[#8A8FA8] text-[10px] mt-0.5">{isEn ? 'min / day' : 'min / dia'}</p>
                 </div>
               )}
               {profile.blindSpotsIdentified.length > 0 && (
-                <div className="flex-1 bg-[#0E0F1A] border border-[#22D3EE]/12 rounded-xl px-4 py-3 text-center">
+                <div className="flex-1 bg-[#141414] border border-[#22D3EE]/12 rounded-xl px-4 py-3 text-center">
                   <p className="text-[#22D3EE] text-xl font-medium tabular-nums">{profile.blindSpotsIdentified.length}</p>
                   <p className="text-[#8A8FA8] text-[10px] mt-0.5">{isEn ? 'blind spots' : 'pontos cegos'}</p>
                 </div>
@@ -304,7 +304,7 @@ function TopicQuizCard({
   const allAnswered = quiz.questions.length > 0 && quiz.questions.every(q => answers[q.id])
 
   return (
-    <div className="bg-[#0E0F1A] border border-[#7C3AED]/15 rounded-3xl p-7 flex flex-col gap-6">
+    <div className="bg-[#141414] border border-[#F94716]/15 rounded-3xl p-7 flex flex-col gap-6">
       <div>
         <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-2">
           {isEn ? 'Quick knowledge check' : 'Verificação rápida'}
@@ -330,7 +330,7 @@ function TopicQuizCard({
                   onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt }))}
                   className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all border ${
                     answers[q.id] === opt
-                      ? 'border-[#7C3AED]/50 bg-[#7C3AED]/8 text-[#F0F0F5]'
+                      ? 'border-[#F94716]/50 bg-[#F94716]/8 text-[#F0F0F5]'
                       : 'border-[#8A8FA8]/12 text-[#8A8FA8] hover:border-[#8A8FA8]/30 hover:text-[#F0F0F5]'
                   }`}
                 >
@@ -349,7 +349,7 @@ function TopicQuizCard({
         <button
           onClick={() => onSubmit(answers)}
           disabled={!allAnswered || submitting}
-          className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity disabled:opacity-30"
+          className="text-[#F94716] text-sm hover:opacity-80 transition-opacity disabled:opacity-30"
         >
           {submitting
             ? (isEn ? 'Analyzing…' : 'Analisando…')
@@ -376,7 +376,7 @@ function TopicCard({
 
   return (
     <button
-      className="group w-full text-left bg-[#0E0F1A] border border-[#8A8FA8]/10 hover:border-[#7C3AED]/40 hover:bg-[#0F1025] rounded-3xl p-7 flex flex-col gap-5 transition-all duration-200"
+      className="group w-full text-left bg-[#141414] border border-[#8A8FA8]/10 hover:border-[#F94716]/40 hover:bg-[#0F1025] rounded-3xl p-7 flex flex-col gap-5 transition-all duration-200"
       onClick={() => onStudy(topic)}
       aria-label={`Study ${topic.name}`}
     >
@@ -387,7 +387,7 @@ function TopicCard({
         </p>
         {hasProgress ? (
           <div className="text-right flex-shrink-0">
-            <p className="text-[22px] font-bold text-[#7C3AED] leading-none tabular-nums">{proficiency}%</p>
+            <p className="text-[22px] font-bold text-[#F94716] leading-none tabular-nums">{proficiency}%</p>
             <p className="text-[#8A8FA8] text-[10px] mt-0.5">
               {isEn ? 'proficiency' : 'proficiência'}
             </p>
@@ -408,7 +408,7 @@ function TopicCard({
       {hasProgress && (
         <div className="h-px bg-[#8A8FA8]/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#7C3AED] to-[#C026D3] rounded-full transition-all duration-700"
+            className="h-full bg-gradient-to-r from-[#F94716] to-[#FF6B3D] rounded-full transition-all duration-700"
             style={{ width: `${proficiency}%` }}
           />
         </div>
@@ -416,7 +416,7 @@ function TopicCard({
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-1">
-        <span className="text-[#7C3AED] text-sm group-hover:text-[#9D5CF7] transition-colors">
+        <span className="text-[#F94716] text-sm group-hover:text-[#9D5CF7] transition-colors">
           {isEn ? 'Open learning map →' : 'Abrir mapa de aprendizado →'}
         </span>
         {topic.blindSpots.length > 0 && (
@@ -431,14 +431,14 @@ function TopicCard({
 
 function TopicCardSkeleton() {
   return (
-    <div className="bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-5 animate-pulse">
+    <div className="bg-[#141414] border border-[#8A8FA8]/10 rounded-3xl p-7 flex flex-col gap-5 animate-pulse">
       <div className="flex items-start justify-between">
         <div className="h-2.5 bg-[#8A8FA8]/10 rounded w-24" />
-        <div className="h-6 bg-[#7C3AED]/15 rounded w-14" />
+        <div className="h-6 bg-[#F94716]/15 rounded w-14" />
       </div>
       <div className="h-6 bg-[#8A8FA8]/10 rounded-lg w-4/5" />
       <div className="h-px bg-[#8A8FA8]/8 rounded-full" />
-      <div className="h-4 bg-[#7C3AED]/15 rounded w-1/3" />
+      <div className="h-4 bg-[#F94716]/15 rounded w-1/3" />
     </div>
   )
 }
@@ -608,7 +608,7 @@ function DashboardInner() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#08090F] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
         <Dots />
       </main>
     )
@@ -617,14 +617,14 @@ function DashboardInner() {
   const busy = quizLoading || quizSubmitting
 
   return (
-    <main className="min-h-screen bg-[#08090F]">
+    <main className="min-h-screen bg-[#0d0d0d]">
       <ConstellationBackground nodeCount={28} />
       <div className="relative z-10 max-w-5xl mx-auto px-8 py-12">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-10">
           <div>
-            <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-2">Blind Spot</p>
+            <p className="text-[#F94716] text-xs uppercase tracking-widest mb-2">Blind Spot</p>
             <h1 className="text-[#F0F0F5] text-3xl font-light">
               {user?.name
                 ? (isEn ? `Welcome back, ${user.name}.` : `Bem-vindo, ${user.name}.`)
@@ -649,8 +649,8 @@ function DashboardInner() {
                   }}
                   className={`px-3 py-1.5 transition-colors ${
                     language === lang
-                      ? 'bg-[#7C3AED] text-white'
-                      : 'bg-[#0E0F1A] text-[#8A8FA8] hover:text-[#F0F0F5]'
+                      ? 'bg-[#F94716] text-white'
+                      : 'bg-[#141414] text-[#8A8FA8] hover:text-[#F0F0F5]'
                   }`}
                 >
                   {lang === 'en' ? 'EN' : 'PT'}
@@ -673,10 +673,10 @@ function DashboardInner() {
               onChange={e => setLearnInput(e.target.value)}
               disabled={busy || !!pendingQuiz}
               placeholder={isEn ? 'What would you like to learn today?' : 'O que você quer aprender hoje?'}
-              className="w-full bg-transparent text-[#F0F0F5] text-2xl placeholder-[#8A8FA8]/35 border-b border-[#8A8FA8]/20 focus:border-[#7C3AED]/50 outline-none pb-4 transition-colors pr-24 disabled:opacity-40"
+              className="w-full bg-transparent text-[#F0F0F5] text-2xl placeholder-[#8A8FA8]/35 border-b border-[#8A8FA8]/20 focus:border-[#F94716]/50 outline-none pb-4 transition-colors pr-24 disabled:opacity-40"
             />
             {learnInput && !busy && !pendingQuiz && (
-              <button type="submit" className="absolute right-0 bottom-4 text-[#7C3AED]/80 text-base hover:text-[#7C3AED] transition-colors">
+              <button type="submit" className="absolute right-0 bottom-4 text-[#F94716]/80 text-base hover:text-[#F94716] transition-colors">
                 {isEn ? 'Go →' : 'Ir →'}
               </button>
             )}
@@ -692,7 +692,7 @@ function DashboardInner() {
                 <button
                   key={i}
                   onClick={() => handleSuggestionClick(s)}
-                  className="text-[#8A8FA8] text-sm border border-[#8A8FA8]/15 rounded-full px-4 py-2 hover:border-[#7C3AED]/40 hover:text-[#F0F0F5] transition-all"
+                  className="text-[#8A8FA8] text-sm border border-[#8A8FA8]/15 rounded-full px-4 py-2 hover:border-[#F94716]/40 hover:text-[#F0F0F5] transition-all"
                 >
                   {s}
                 </button>
@@ -736,7 +736,7 @@ function DashboardInner() {
             {tracks.map(track => (
               <div
                 key={track.trackId}
-                className="bg-[#0E0F1A] border border-[#22D3EE]/12 hover:border-[#22D3EE]/30 hover:bg-[#0F1225] rounded-3xl p-7 flex flex-col gap-6 transition-all duration-200 cursor-pointer group"
+                className="bg-[#141414] border border-[#22D3EE]/12 hover:border-[#22D3EE]/30 hover:bg-[#0F1225] rounded-3xl p-7 flex flex-col gap-6 transition-all duration-200 cursor-pointer group"
                 onClick={() => sessionId && router.push(`/study/${sessionId}?q=${encodeURIComponent(track.trackName)}`)}
                 role="button"
                 tabIndex={0}
@@ -769,7 +769,7 @@ function DashboardInner() {
 
         {/* CEFIS connect */}
         {!user?.cefisEmail && tracks.length === 0 && (
-          <div className="border border-dashed border-[#7C3AED]/20 rounded-3xl p-6 mt-5">
+          <div className="border border-dashed border-[#F94716]/20 rounded-3xl p-6 mt-5">
             {!showCefisForm ? (
               <>
                 <p className="text-[#F0F0F5] text-sm font-medium mb-2">
@@ -780,7 +780,7 @@ function DashboardInner() {
                     ? 'Connect to study from your existing courses and track real progress.'
                     : 'Conecte para estudar com seus cursos e acompanhar progresso real.'}
                 </p>
-                <button onClick={() => setShowCefisForm(true)} className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity">
+                <button onClick={() => setShowCefisForm(true)} className="text-[#F94716] text-sm hover:opacity-80 transition-opacity">
                   {isEn ? 'Connect CEFIS →' : 'Conectar CEFIS →'}
                 </button>
               </>
@@ -791,12 +791,12 @@ function DashboardInner() {
                 </p>
                 <input autoFocus type="email" value={cefisEmail} onChange={e => setCefisEmail(e.target.value)}
                   placeholder={isEn ? 'CEFIS email' : 'Email do CEFIS'}
-                  className="w-full bg-[#08090F] border border-[#8A8FA8]/12 rounded-2xl px-4 py-3 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+                  className="w-full bg-[#0d0d0d] border border-[#8A8FA8]/12 rounded-2xl px-4 py-3 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
                 />
                 <input type="password" value={cefisPassword} onChange={e => setCefisPassword(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleCefisConnect() }}
                   placeholder={isEn ? 'Password' : 'Senha'}
-                  className="w-full bg-[#08090F] border border-[#8A8FA8]/12 rounded-2xl px-4 py-3 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
+                  className="w-full bg-[#0d0d0d] border border-[#8A8FA8]/12 rounded-2xl px-4 py-3 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30"
                 />
                 {cefisError && <p className="text-red-400/80 text-xs">{cefisError}</p>}
                 <div className="flex justify-between items-center pt-1">
@@ -804,7 +804,7 @@ function DashboardInner() {
                     {isEn ? 'Cancel' : 'Cancelar'}
                   </button>
                   <button onClick={handleCefisConnect} disabled={cefisLoading || !cefisEmail || !cefisPassword}
-                    className="text-[#7C3AED] text-sm hover:opacity-80 transition-opacity disabled:opacity-30">
+                    className="text-[#F94716] text-sm hover:opacity-80 transition-opacity disabled:opacity-30">
                     {cefisLoading ? (isEn ? 'Connecting…' : 'Conectando…') : (isEn ? 'Connect →' : 'Conectar →')}
                   </button>
                 </div>

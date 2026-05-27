@@ -42,12 +42,12 @@ export default function CheckpointModal({ questions, courseName, language, mode 
 
   if (showResult) {
     const passed = score >= 70
-    const borderColor = passed ? 'border-[#34C785]/30' : 'border-[#C026D3]/30'
-    const scoreColor = passed ? 'text-[#34C785]' : 'text-[#C026D3]'
+    const borderColor = passed ? 'border-[#34C785]/30' : 'border-[#FF6B3D]/30'
+    const scoreColor = passed ? 'text-[#34C785]' : 'text-[#FF6B3D]'
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#08090F]/90 backdrop-blur-sm px-4">
-        <div className={`bg-[#0E0F1A] border ${borderColor} rounded-2xl p-8 max-w-md w-full text-center`}>
+      <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#0d0d0d]/90 backdrop-blur-sm px-4">
+        <div className={`bg-[#141414] border ${borderColor} rounded-2xl p-8 max-w-md w-full text-center`}>
           <div className={`text-5xl font-bold ${scoreColor} mb-2`}>{score}%</div>
 
           {isUnlock ? (
@@ -73,7 +73,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
           <button
             onClick={() => onComplete(score)}
             className={`font-medium px-6 py-3 rounded-xl hover:opacity-90 transition-opacity text-sm ${
-              passed ? 'bg-[#34C785] text-[#08090F]' : 'bg-[#7C3AED] text-white'
+              passed ? 'bg-[#34C785] text-[#0d0d0d]' : 'bg-[#F94716] text-white'
             }`}
           >
             {isUnlock
@@ -88,13 +88,13 @@ export default function CheckpointModal({ questions, courseName, language, mode 
   if (!current) return null
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#08090F]/80 backdrop-blur-sm px-4">
-      <div className="bg-[#0E0F1A] border border-[#8A8FA8]/20 rounded-2xl p-6 max-w-lg w-full">
+    <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#0d0d0d]/80 backdrop-blur-sm px-4">
+      <div className="bg-[#141414] border border-[#8A8FA8]/20 rounded-2xl p-6 max-w-lg w-full">
         {/* Progress bar + cancel row */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex gap-1 flex-1">
             {questions.map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#7C3AED]' : 'bg-[#8A8FA8]/20'}`} />
+              <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#F94716]' : 'bg-[#8A8FA8]/20'}`} />
             ))}
           </div>
           {onCancel && (
@@ -129,7 +129,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
             <button
               key={opt}
               onClick={() => handleAnswer(opt)}
-              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 transition-all"
+              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#F94716]/50 hover:bg-[#F94716]/5 transition-all"
             >
               {opt}
             </button>

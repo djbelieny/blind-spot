@@ -17,8 +17,8 @@ const NODE_R: Record<number, number> = { 0: 0.85, 1: 0.60, 2: 0.50, 3: 0.40, 4: 
 
 // Status → emissive color (on-brand palette)
 const STATUS_COLOR: Record<NodeStatus, string> = {
-  available:   '#7C3AED',   // violet
-  'in-progress': '#C026D3', // magenta
+  available:   '#F94716',   // violet
+  'in-progress': '#FF6B3D', // magenta
   completed:   '#34C785',   // teal-green
   locked:      '#555870',   // visible gray-blue
 }
@@ -101,7 +101,7 @@ function SunNode({ label }: { label: string }) {
         <mesh key={i}>
           <sphereGeometry args={[0.85 * scale, 32, 32]} />
           <meshBasicMaterial
-            color="#7C3AED"
+            color="#F94716"
             transparent
             opacity={[0.18, 0.08, 0.03][i]}
             depthWrite={false}
@@ -228,7 +228,7 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
           </mesh>
           <mesh>
             <sphereGeometry args={[r * 1.7, 32, 32]} />
-            <meshBasicMaterial color="#C026D3" transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
+            <meshBasicMaterial color="#FF6B3D" transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
           </mesh>
         </>
       )}
