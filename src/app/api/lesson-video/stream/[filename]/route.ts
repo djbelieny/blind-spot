@@ -5,7 +5,7 @@ import { existsSync, statSync, createReadStream } from 'node:fs'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 
-export const VIDEO_DIR = '/data/lesson-videos'
+const VIDEO_DIR = '/data/lesson-videos'
 
 export async function GET(
   req: NextRequest,
