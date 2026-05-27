@@ -202,6 +202,14 @@ function StudyInner() {
   const podcastUnitRef = useRef<string | null>(null)
   const podcastTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Video state
+  const [videoStatus, setVideoStatus] = useState<'idle' | 'missing' | 'generating' | 'ready' | 'failed'>('idle')
+  const [videoCacheKey, setVideoCacheKey] = useState<string | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [videoPoster, setVideoPoster] = useState<string | null>(null)
+  const [videoError, setVideoError] = useState<string | null>(null)
+  const videoPollerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   // Map state
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [completedNodeIds, setCompletedNodeIds] = useState<string[]>([])
@@ -397,8 +405,72 @@ function StudyInner() {
       setPodcastError(null)
       setPodcastCached(false)
     }
+    // Reset video state when unit changes
+    setVideoStatus('idle')
+    setVideoUrl(null)
+    setVideoPoster(null)
+    setVideoError(null)
+    setVideoCacheKey(null)
+    if (videoPollerRef.current) {
+      clearInterval(videoPollerRef.current)
+      videoPollerRef.current = null
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNodeId, sessionId])
+
+  const checkOrStartVideo = useCallback(() => {
+    if (!selectedNodeId || !sessionId) return
+    const topicParam = encodeURIComponent(initialTopic || '')
+    fetch(`/api/lesson-video/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { status: string; cacheKey: string; videoCached: boolean; videoUrl?: string; posterUrl?: string; error?: string } | null) => {
+        if (!data) return
+        setVideoCacheKey(data.cacheKey)
+        if (data.videoUrl) setVideoUrl(data.videoUrl)
+        if (data.posterUrl) setVideoPoster(data.posterUrl)
+
+        const startPolling = () => {
+          if (videoPollerRef.current) return
+          videoPollerRef.current = setInterval(() => {
+            fetch(`/api/lesson-video/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+              .then(r => r.ok ? r.json() : null)
+              .then((d: { status: string; videoUrl?: string; posterUrl?: string; error?: string } | null) => {
+                if (!d) return
+                if (d.status === 'ready') {
+                  setVideoStatus('ready')
+                  if (d.videoUrl) setVideoUrl(d.videoUrl)
+                  if (d.posterUrl) setVideoPoster(d.posterUrl)
+                  clearInterval(videoPollerRef.current!)
+                  videoPollerRef.current = null
+                } else if (d.status === 'failed') {
+                  setVideoStatus('failed')
+                  setVideoError(d.error ?? null)
+                  clearInterval(videoPollerRef.current!)
+                  videoPollerRef.current = null
+                }
+              }).catch(() => {})
+          }, 4000)
+        }
+
+        if (data.status === 'ready') {
+          setVideoStatus('ready')
+        } else if (data.status === 'generating') {
+          setVideoStatus('generating')
+          startPolling()
+        } else {
+          // missing or failed — auto-start generation
+          setVideoStatus('generating')
+          fetch('/api/lesson-video/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, unitId: selectedNodeId, topic: initialTopic || '' }),
+          }).catch(() => setVideoStatus('failed'))
+          startPolling()
+        }
+      })
+      .catch(() => setVideoStatus('failed'))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, selectedNodeId, initialTopic])
 
 
   const isUnitLocked = useCallback((unitId: string): boolean => {
@@ -979,6 +1051,9 @@ function StudyInner() {
                     })
                     .catch(() => {})
                 }
+                if (tab === 'watch' && selectedNodeId && videoStatus === 'idle') {
+                  checkOrStartVideo()
+                }
               }}
                 className={`flex-1 py-2.5 text-[10px] uppercase tracking-widest transition-colors ${
                   contentTab === tab
@@ -1484,32 +1559,77 @@ function StudyInner() {
               </div>
             )}
 
-            {/* WATCH TAB (Video Script) */}
+            {/* WATCH TAB */}
             {!contentLoading && unitContent && contentTab === 'watch' && (
               <div className="p-4 flex flex-col gap-4">
-                {/* Badge */}
-                <div className="flex items-center gap-2">
-                  <span className="text-[#F94716] text-[10px] uppercase tracking-widest font-medium border border-[#F94716]/30 px-2.5 py-0.5 rounded-full">
-                    HYPERFRAME READY
-                  </span>
-                </div>
-
-                {/* Script sections */}
-                {parseVideoSections(unitContent.videoScript).map(section => (
-                  <div key={section.label} className="bg-[#0d0d0d] border border-[#888888]/10 rounded-xl p-4">
-                    <p className="text-[#F94716]/70 text-[10px] uppercase tracking-widest mb-2">
-                      {section.label}
+                {videoStatus === 'ready' && videoUrl && (
+                  <>
+                    <video
+                      controls
+                      playsInline
+                      poster={videoPoster ?? undefined}
+                      src={videoUrl}
+                      className="w-full rounded-xl border border-[#F94716]/20"
+                      style={{ background: '#0d0d0d' }}
+                    />
+                    <p className="text-[#888888]/40 text-[10px] text-center">
+                      {isEn ? 'Cached · opens instantly next time' : 'Salvo · abre instantaneamente na próxima vez'}
                     </p>
-                    <p className="text-[#C4C6DA] text-xs leading-relaxed">{section.text}</p>
-                  </div>
-                ))}
+                  </>
+                )}
 
-                {/* Note */}
-                <p className="text-[#888888]/40 text-[10px] leading-relaxed text-center">
-                  {isEn
-                    ? 'Video generation powered by Hyperframe — connect your API key to auto-generate.'
-                    : 'Geração de vídeo via Hyperframe — conecte sua chave de API para gerar automaticamente.'}
-                </p>
+                {(videoStatus === 'idle' || videoStatus === 'generating') && (
+                  <div className="flex flex-col items-center gap-5 py-10">
+                    <div className="relative w-16 h-16">
+                      <div className="absolute inset-0 rounded-full border-2 border-[#F94716]/20" />
+                      <div className="absolute inset-0 rounded-full border-2 border-t-[#F94716] animate-spin" />
+                      <div className="absolute inset-2 rounded-full bg-[#F94716]/10 animate-pulse" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[#F0F0F5] text-sm font-medium mb-1">
+                        {isEn ? 'Generating your explainer…' : 'Gerando seu vídeo explicativo…'}
+                      </p>
+                      <p className="text-[#888888]/50 text-xs">
+                        {isEn ? '~60–90s · audio + animated visuals' : '~60–90s · áudio + visuais animados'}
+                      </p>
+                    </div>
+                    <div className="w-full space-y-2 mt-2">
+                      {parseVideoSections(unitContent.videoScript).map(section => (
+                        <div key={section.label} className="bg-[#0d0d0d] border border-[#888888]/10 rounded-xl p-3 opacity-50">
+                          <p className="text-[#F94716]/60 text-[9px] uppercase tracking-widest mb-1">{section.label}</p>
+                          <p className="text-[#C4C6DA] text-[11px] leading-relaxed line-clamp-2">{section.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {videoStatus === 'failed' && (
+                  <div className="flex flex-col items-center gap-4 py-10">
+                    <p className="text-[#F94716] text-sm">{isEn ? 'Generation failed' : 'Falha na geração'}</p>
+                    {videoError && <p className="text-[#888888]/60 text-xs text-center">{videoError}</p>}
+                    <button
+                      onClick={() => { setVideoStatus('idle'); checkOrStartVideo() }}
+                      className="px-4 py-2 bg-[#F94716]/10 border border-[#F94716]/30 rounded-full text-[#F94716] text-xs hover:bg-[#F94716]/20 transition-colors"
+                    >
+                      {isEn ? 'Retry' : 'Tentar novamente'}
+                    </button>
+                    <div className="w-full space-y-2 mt-2">
+                      {parseVideoSections(unitContent.videoScript).map(section => (
+                        <div key={section.label} className="bg-[#0d0d0d] border border-[#888888]/10 rounded-xl p-3">
+                          <p className="text-[#F94716]/60 text-[9px] uppercase tracking-widest mb-1">{section.label}</p>
+                          <p className="text-[#C4C6DA] text-[11px] leading-relaxed">{section.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {videoStatus === 'missing' && (
+                  <div className="flex flex-col items-center gap-4 py-10">
+                    <p className="text-[#888888]/60 text-xs">{isEn ? 'No video yet — starting generation…' : 'Iniciando geração…'}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
