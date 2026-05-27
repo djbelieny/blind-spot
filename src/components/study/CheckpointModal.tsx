@@ -57,7 +57,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
                   ? (isEn ? '🔓 Topic unlocked!' : '🔓 Tópico desbloqueado!')
                   : (isEn ? 'Not quite yet' : 'Ainda não desta vez')}
               </p>
-              <p className="text-[#8A8FA8] text-sm mb-6">
+              <p className="text-[#888888] text-sm mb-6">
                 {passed
                   ? (isEn ? `You know enough to dive into ${courseName}.` : `Você sabe o suficiente para mergulhar em ${courseName}.`)
                   : (isEn ? `Let's build the foundation first.` : `Vamos construir a base primeiro.`)}
@@ -66,7 +66,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
           ) : (
             <>
               <p className="text-[#F0F0F5] mb-1">{isEn ? 'Session complete' : 'Sessão completa'}</p>
-              <p className="text-[#8A8FA8] text-sm mb-6">{courseName}</p>
+              <p className="text-[#888888] text-sm mb-6">{courseName}</p>
             </>
           )}
 
@@ -89,18 +89,18 @@ export default function CheckpointModal({ questions, courseName, language, mode 
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#0d0d0d]/80 backdrop-blur-sm px-4">
-      <div className="bg-[#141414] border border-[#8A8FA8]/20 rounded-2xl p-6 max-w-lg w-full">
+      <div className="bg-[#141414] border border-[#888888]/20 rounded-2xl p-6 max-w-lg w-full">
         {/* Progress bar + cancel row */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex gap-1 flex-1">
             {questions.map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#F94716]' : 'bg-[#8A8FA8]/20'}`} />
+              <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentIdx ? 'bg-[#F94716]' : 'bg-[#888888]/20'}`} />
             ))}
           </div>
           {onCancel && (
             <button
               onClick={onCancel}
-              className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors text-lg leading-none flex-shrink-0 -mt-0.5"
+              className="text-[#888888]/40 hover:text-[#888888] transition-colors text-lg leading-none flex-shrink-0 -mt-0.5"
               aria-label="Cancel"
             >
               ×
@@ -118,7 +118,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
         )}
 
         {!isUnlock && (
-          <p className="text-[#8A8FA8] text-xs mb-3 uppercase tracking-widest">
+          <p className="text-[#888888] text-xs mb-3 uppercase tracking-widest">
             {isEn ? 'Quick check' : 'Verificação rápida'}
           </p>
         )}
@@ -129,7 +129,7 @@ export default function CheckpointModal({ questions, courseName, language, mode 
             <button
               key={opt}
               onClick={() => handleAnswer(opt)}
-              className="w-full text-left px-4 py-3 rounded-xl border border-[#8A8FA8]/20 text-[#F0F0F5] text-sm hover:border-[#F94716]/50 hover:bg-[#F94716]/5 transition-all"
+              className="w-full text-left px-4 py-3 rounded-xl border border-[#888888]/20 text-[#F0F0F5] text-sm hover:border-[#F94716]/50 hover:bg-[#F94716]/5 transition-all"
             >
               {opt}
             </button>

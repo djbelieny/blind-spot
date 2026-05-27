@@ -144,11 +144,11 @@ export default function Home() {
           <span className="text-[16px] font-bold tracking-[-0.01em] text-white">BlindSpot</span>
         </a>
         <nav className="hidden md:flex gap-8">
-          {[['#problem', 'Problema'], ['#features', 'Ferramentas'], ['#students', 'Resultados'], ['#faq', 'FAQ']].map(([href, label]) => (
+          {[['#features', 'Ferramentas'], ['#students', 'Alunos'], ['#faq', 'FAQ']].map(([href, label]) => (
             <a key={href} href={href} className="text-[14px] text-[#888] no-underline hover:text-white transition-colors duration-200 font-medium">{label}</a>
           ))}
         </nav>
-        <button onClick={() => router.push('/auth/login')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>Entrar</button>
+        <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>Começar grátis</button>
       </header>
 
       {/* HERO */}
@@ -161,20 +161,26 @@ export default function Home() {
           <div>
             <p className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold mb-7" style={{ background: 'rgba(249,71,22,.12)', border: '1px solid rgba(249,71,22,.3)', color: '#F94716' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] animate-pulse" />
-              Em Fase Beta
+              CEFIS Hackathon 2026 Winner
             </p>
             <h1 className="font-black leading-[1.05] tracking-[-0.03em] mb-6 text-white" style={{ fontSize: 'clamp(40px,5.5vw,72px)' }}>
-              Deixe de <em className="not-italic text-[#F94716]">adivinhar</em> e comece a <em className="not-italic text-[#F94716]">dominar</em>
+              VOCÊ NÃO SABE<br />O QUE VOCÊ<br /><em className="not-italic text-[#F94716]">NÃO SABE...</em>
             </h1>
             <p className="mb-10 font-medium" style={{ fontSize: 20, color: '#888', lineHeight: 1.5, maxWidth: 480 }}>
-              O BlindSpot é um tutor de AI que revela o que você ainda não sabe que não sabe. Monta um método personalizado para o seu jeito de aprender. Você aprende de verdade.
+              E nem por onde começar
             </p>
             <div className="flex gap-3 flex-wrap mb-14">
-              <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>Comece agora (grátis)</button>
-              <a href="#faq" className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>Saiba mais</a>
+              <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>
+                Quero aprender qualquer coisa
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <a href="#features" className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>
+                Ver em ação
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/><path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="currentColor"/></svg>
+              </a>
             </div>
             <div className="reveal flex gap-10 flex-wrap">
-              {[['2.4', 'K+', 'Alunos ativos'], ['4.2', '×', 'Mais absorção'], ['28', 'min', 'Sessão diária']].map(([n, s, l]) => (
+              {[['2.400', '+', 'alunos ativos'], ['100', '%', 'personalizável'], ['4.2', '×', 'mais absorção de conteúdo']].map(([n, s, l]) => (
                 <div key={l}>
                   <div className="text-[26px] font-extrabold text-white"><span className="text-[#F94716]">{n}</span>{s}</div>
                   <p className="text-[13px] mt-0.5" style={{ color: '#888' }}>{l}</p>
@@ -186,19 +192,23 @@ export default function Home() {
           {/* RIGHT */}
           <div className="reveal hidden lg:flex flex-col items-start gap-6 relative">
             <h2 className="font-black leading-[1] tracking-[-0.03em] text-white" style={{ fontSize: 'clamp(36px,4.5vw,60px)' }}>
-              Seu <em className="not-italic text-[#F94716]">Radar</em> de Mandarim
+              Domine <em className="not-italic text-[#F94716]">TUDO</em><br />Mais <em className="not-italic text-[#F94716]">RÁPIDO</em>
             </h2>
             <div className="relative w-full flex items-center justify-center" style={{ animation: 'landing-float 5s ease-in-out infinite' }}>
+              <div className="absolute top-[-16px] left-[-20px] px-[18px] py-3.5 rounded-2xl z-10" style={{ background: 'rgba(20,20,20,.96)', border: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(16px)', animation: 'landing-fade-up .8s cubic-bezier(.16,1,.3,1) .3s both' }}>
+                <div className="text-[28px] font-black leading-[1] text-[#F94716]">85%</div>
+                <div className="text-[11px] mt-0.5" style={{ color: '#888' }}>absorção em 7 dias</div>
+              </div>
               <div className="relative w-full max-w-[380px] rounded-3xl p-7 overflow-hidden" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 32px 80px rgba(0,0,0,.6),0 0 60px rgba(249,71,22,.08)' }}>
                 <div className="absolute left-0 right-0 h-[2px] opacity-50 z-10" style={{ background: 'linear-gradient(90deg,transparent,#F94716,transparent)', animation: 'landing-scan 3s linear infinite' }} />
-                <p className="text-[11px] font-bold tracking-[0.18em] uppercase mb-5 text-[#F94716]">AI Analysis</p>
-                <h3 className="text-[22px] font-extrabold text-white mb-1.5 leading-[1.2]">Lacunas Detectadas</h3>
-                <p className="text-[13px] mb-6" style={{ color: '#888' }}>Seu perfil de conhecimento atualizado</p>
+                <p className="text-[11px] font-bold tracking-[0.18em] uppercase mb-5 text-[#F94716]">Aprendizado ativo</p>
+                <h3 className="text-[22px] font-extrabold text-white mb-1.5 leading-[1.2]">3 habilidades<br />desbloqueadas</h3>
+                <p className="text-[13px] mb-6" style={{ color: '#888' }}>Seu progresso personalizado</p>
                 <div className="flex flex-col gap-2.5">
                   {[
-                    { dot: '#FF6B3D', subj: 'Tons & Pronúncia', meta: 'Conexão faltando', badge: 'CRÍTICO', bg: 'rgba(249,71,22,.15)', tc: '#F94716', bc: 'rgba(249,71,22,.3)' },
-                    { dot: '#FBBF24', subj: 'Caracteres Compostos', meta: 'Entender estrutura', badge: 'ALTA', bg: 'rgba(251,191,36,.12)', tc: '#FBBF24', bc: 'rgba(251,191,36,.25)' },
-                    { dot: '#A855F7', subj: 'Contexto Coloquial', meta: 'Uso em conversas', badge: 'MÉDIA', bg: 'rgba(168,85,247,.12)', tc: '#A855F7', bc: 'rgba(168,85,247,.25)' },
+                    { dot: '#FF6B3D', subj: 'Mandarim', meta: 'Fonética e tons', badge: 'Ativo', bg: 'rgba(249,71,22,.15)', tc: '#F94716', bc: 'rgba(249,71,22,.3)' },
+                    { dot: '#FBBF24', subj: 'Programação', meta: 'Algoritmos e lógica', badge: 'Em progresso', bg: 'rgba(251,191,36,.12)', tc: '#FBBF24', bc: 'rgba(251,191,36,.25)' },
+                    { dot: '#A855F7', subj: 'Filosofia', meta: 'Epistemologia básica', badge: 'Iniciando', bg: 'rgba(168,85,247,.12)', tc: '#A855F7', bc: 'rgba(168,85,247,.25)' },
                   ].map(item => (
                     <div key={item.subj} className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,.08)' }}>
                       <div className="flex items-center gap-2.5">
@@ -214,15 +224,11 @@ export default function Home() {
                 </div>
               </div>
               <div className="absolute bottom-[-16px] right-[-20px] flex items-center gap-2.5 px-4 py-3 rounded-2xl whitespace-nowrap" style={{ background: 'rgba(20,20,20,.96)', border: '1px solid rgba(249,71,22,.35)', backdropFilter: 'blur(16px)', animation: 'landing-slide-r .8s cubic-bezier(.16,1,.3,1) .6s both' }}>
-                <span className="text-lg">🎯</span>
+                <span className="text-lg">🚀</span>
                 <div>
-                  <p className="text-[11px] font-bold tracking-[0.05em] text-[#F94716]">PRÓXIMA LIÇÃO</p>
-                  <p className="text-[12px]" style={{ color: '#888' }}>Tones &amp; Tonal Pairs</p>
+                  <p className="text-[11px] font-bold tracking-[0.05em] text-[#F94716]">NOVO NÍVEL DESBLOQUEADO</p>
+                  <p className="text-[12px]" style={{ color: '#888' }}>Mandarim · Nível intermediário</p>
                 </div>
-              </div>
-              <div className="absolute top-[-16px] left-[-20px] px-[18px] py-3.5 rounded-2xl" style={{ background: 'rgba(20,20,20,.96)', border: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(16px)', animation: 'landing-fade-up .8s cubic-bezier(.16,1,.3,1) .3s both' }}>
-                <div className="text-[28px] font-black leading-[1] text-[#F94716]">+28%</div>
-                <div className="text-[11px] mt-0.5" style={{ color: '#888' }}>Semana passada</div>
               </div>
             </div>
           </div>
@@ -370,23 +376,30 @@ export default function Home() {
         <div className="absolute rounded-full pointer-events-none" style={{ width: 700, height: 700, top: '-15%', right: '-20%', background: 'rgba(249,71,22,.05)', filter: 'blur(100px)' }} />
         <div className="absolute rounded-full pointer-events-none" style={{ width: 500, height: 500, bottom: 0, left: '-10%', background: 'rgba(249,71,22,.06)', filter: 'blur(100px)' }} />
         <div className="max-w-[1200px] mx-auto relative z-10">
-          <h2 className="font-black leading-[1] tracking-[-0.03em] text-white mb-5" style={{ fontSize: 'clamp(40px,6vw,80px)' }}>
-            Pronto para parar de <span className="text-[#F94716]">adivinhar</span>?
-          </h2>
-          <p className="text-[18px] leading-[1.7] max-w-[520px] mx-auto mb-12" style={{ color: '#888' }}>
-            Mais de 2.400 pessoas já estão usando o BlindSpot para aprender de verdade. Você vem?
+          <p className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold mb-7 reveal" style={{ background: 'rgba(249,71,22,.12)', border: '1px solid rgba(249,71,22,.3)', color: '#F94716' }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] animate-pulse" />
+            Comece grátis hoje. Sem cartão de crédito.
           </p>
-          <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} text-[16px] px-7 py-3.5`}>
-            Comece agora gratuitamente
-          </button>
-          <p className="text-[12px] mt-4" style={{ color: '#555' }}>Sem cartão. Sem compromisso. 7 dias de acesso total à plataforma.</p>
-          <div className="flex items-center justify-center gap-2.5 mt-7">
+          <h2 className="font-black leading-[1] tracking-[-0.03em] text-white mb-5 reveal" style={{ fontSize: 'clamp(40px,6vw,80px)' }}>
+            Aprenda qualquer coisa.<br /><span className="text-[#F94716]">Do jeito certo.<br />Agora.</span>
+          </h2>
+          <p className="text-[18px] leading-[1.7] max-w-[560px] mx-auto mb-12 reveal" style={{ color: '#888' }}>
+            Diagnóstico em 15 minutos. Trilha personalizada. Resultado de verdade.<br />Você não precisa de mais conteúdo. Você precisa do caminho certo.
+          </p>
+          <div className="reveal">
+            <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} text-[16px] px-7 py-3.5`}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="white"/><circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.5" opacity=".5"/></svg>
+              Quero aprender qualquer coisa
+            </button>
+          </div>
+          <p className="text-[12px] mt-4 reveal" style={{ color: '#555' }}>Grátis para começar. Sem cartão. Resultado em 15 minutos.</p>
+          <div className="flex items-center justify-center gap-2.5 mt-7 reveal">
             <div className="flex">
-              {['AC', 'BM', 'CF'].map((init, i) => (
+              {['AC', 'BM', 'CF', 'DS'].map((init, i) => (
                 <div key={init} className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: '#1a1a1a', color: '#F94716', border: '2px solid #0d0d0d', marginLeft: i === 0 ? 0 : -8 }}>{init}</div>
               ))}
             </div>
-            <p className="text-[13px]" style={{ color: '#888' }}>Junte-se a pessoas reais que estão dominando o que querem</p>
+            <p className="text-[13px]" style={{ color: '#888' }}>Mais de 2.400 pessoas já aprendendo este mês</p>
           </div>
         </div>
       </section>

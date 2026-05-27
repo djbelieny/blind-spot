@@ -45,7 +45,7 @@ export default function ConstellationBackground({
         opacity: 0,
         targetOpacity: 0.3 + Math.random() * 0.3,
         size: 2 + Math.random() * 2,
-        color: '#7C3AED',
+        color: '#F94716',
         pulsing: false,
         pulsePhase: Math.random() * Math.PI * 2,
       })
@@ -62,7 +62,7 @@ export default function ConstellationBackground({
       if (nodesRef.current[id]) {
         nodesRef.current[id].pulsing = true
         nodesRef.current[id].targetOpacity = 1
-        nodesRef.current[id].color = '#7C3AED'
+        nodesRef.current[id].color = '#F94716'
       }
     })
   }, [pulsingNodeIds])

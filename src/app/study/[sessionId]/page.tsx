@@ -122,7 +122,7 @@ function MapLegend({ isEn }: { isEn: boolean }) {
       </div>
 
       {/* Legend pill */}
-      <div className="flex items-center gap-4 bg-[#0A0B14]/85 backdrop-blur-md border border-[#8A8FA8]/10 rounded-full px-5 py-2">
+      <div className="flex items-center gap-4 bg-[#0A0B14]/85 backdrop-blur-md border border-[#888888]/10 rounded-full px-5 py-2">
         {items.map(({ color, label }, i) => (
           <div
             key={label}
@@ -705,20 +705,20 @@ function StudyInner() {
       {/* Unlock challenge loading overlay */}
       {unlockLoading && (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-[#0d0d0d]/80 backdrop-blur-sm px-4">
-          <div className="bg-[#141414] border border-[#22D3EE]/20 rounded-2xl p-8 flex flex-col items-center gap-5 max-w-sm w-full text-center">
+          <div className="bg-[#141414] border border-[#F94716]/20 rounded-2xl p-8 flex flex-col items-center gap-5 max-w-sm w-full text-center">
             <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-2 border-[#22D3EE]/15" />
-              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#22D3EE] animate-spin" />
-              <div className="absolute inset-[6px] rounded-full border border-[#F94716]/20 border-t-[#F94716] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }} />
+              <div className="absolute inset-0 rounded-full border-2 border-[#F94716]/15" />
+              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#F94716] animate-spin" />
+              <div className="absolute inset-[6px] rounded-full border border-[#FF6B3D]/20 border-t-[#FF6B3D] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }} />
             </div>
             <div>
-              <p className="text-[#22D3EE] text-[10px] uppercase tracking-widest mb-1.5">
+              <p className="text-[#F94716] text-[10px] uppercase tracking-widest mb-1.5">
                 {isEn ? 'Unlock challenge' : 'Desafio de desbloqueio'}
               </p>
               <p className="text-[#F0F0F5] text-base font-light">
                 {isEn ? 'Preparing your challenge…' : 'Preparando seu desafio…'}
               </p>
-              <p className="text-[#8A8FA8]/60 text-xs mt-2">
+              <p className="text-[#888888]/60 text-xs mt-2">
                 {isEn ? 'Generating questions based on prerequisites' : 'Gerando perguntas com base nos pré-requisitos'}
               </p>
             </div>
@@ -790,14 +790,14 @@ function StudyInner() {
       )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b border-[#8A8FA8]/8 bg-[#0d0d0d]/90 backdrop-blur-sm"
+      <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b border-[#888888]/8 bg-[#0d0d0d]/90 backdrop-blur-sm"
         style={{ height: HEADER_H }}>
         <button onClick={() => router.push('/dashboard')} aria-label="Back to dashboard"
-          className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors flex-shrink-0 p-1 rounded-lg">
+          className="text-[#888888]/40 hover:text-[#888888] transition-colors flex-shrink-0 p-1 rounded-lg">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest leading-none mb-0.5">
+          <p className="text-[#888888] text-[9px] uppercase tracking-widest leading-none mb-0.5">
             {isEn ? 'Learning Path' : 'Roteiro de Aprendizagem'}
           </p>
           <p className="text-[#F0F0F5] text-sm truncate leading-none">
@@ -813,10 +813,10 @@ function StudyInner() {
           <span className="text-[#34C785] text-xs flex-shrink-0">{lastCheckpointScore}%</span>
         )}
         {/* Language toggle */}
-        <div className="flex-shrink-0 flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-[10px]">
+        <div className="flex-shrink-0 flex rounded-full border border-[#888888]/20 overflow-hidden text-[10px]">
           {(['en', 'pt-BR'] as const).map(lang => (
             <button key={lang} onClick={() => toggleLanguage(lang)}
-              className={`px-2.5 py-1 transition-colors ${profile?.language === lang ? 'bg-[#F94716] text-white' : 'bg-[#141414] text-[#8A8FA8] hover:text-[#F0F0F5]'}`}>
+              className={`px-2.5 py-1 transition-colors ${profile?.language === lang ? 'bg-[#F94716] text-white' : 'bg-[#141414] text-[#888888] hover:text-[#F0F0F5]'}`}>
               {lang === 'en' ? 'EN' : 'PT'}
             </button>
           ))}
@@ -842,12 +842,12 @@ function StudyInner() {
               {roadmapLoading ? (
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-8 h-8 rounded-full border-2 border-[#F94716]/30 border-t-[#F94716] animate-spin" />
-                  <p className="text-[#8A8FA8]/60 text-sm">
+                  <p className="text-[#888888]/60 text-sm">
                     {isEn ? 'Building your learning path…' : 'Criando seu caminho de aprendizagem…'}
                   </p>
                 </div>
               ) : (
-                <p className="text-[#8A8FA8]/40 text-sm text-center px-8">
+                <p className="text-[#888888]/40 text-sm text-center px-8">
                   {isEn
                     ? 'Complete the onboarding diagnostic to unlock your learning roadmap.'
                     : 'Complete o diagnóstico de integração para desbloquear seu roteiro.'}
@@ -860,7 +860,7 @@ function StudyInner() {
           {roadmapLoading && mapUnits.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
               <div className="w-8 h-8 rounded-full border-2 border-[#F94716]/30 border-t-[#F94716] animate-spin" />
-              <p className="text-[#8A8FA8]/60 text-sm">
+              <p className="text-[#888888]/60 text-sm">
                 {isEn ? 'Building your learning path…' : 'Criando seu caminho de aprendizagem…'}
               </p>
             </div>
@@ -872,7 +872,7 @@ function StudyInner() {
               <p className="text-[#F94716]/70 text-[10px] uppercase tracking-widest">
                 {isEn ? 'Knowledge map' : 'Mapa de conhecimento'}
               </p>
-              <p className="text-[#8A8FA8]/50 text-xs mt-0.5">
+              <p className="text-[#888888]/50 text-xs mt-0.5">
                 {isEn ? 'Tap a node to begin' : 'Toque em um nó para explorar'}
               </p>
             </div>
@@ -899,12 +899,12 @@ function StudyInner() {
               {radarOpen ? (
                 <div className="bg-[#141414]/95 backdrop-blur-md border border-[#F94716]/20 rounded-2xl p-3 shadow-xl shadow-black/40">
                   <div className="flex items-center justify-between mb-1 px-1">
-                    <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest">
+                    <p className="text-[#888888] text-[9px] uppercase tracking-widest">
                       {isEn ? 'Your proficiency' : 'Sua proficiência'}
                     </p>
                     <button
                       onClick={() => setRadarOpen(false)}
-                      className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors ml-4"
+                      className="text-[#888888]/40 hover:text-[#888888] transition-colors ml-4"
                       aria-label="Close radar"
                     >
                       <X className="w-3 h-3" />
@@ -927,7 +927,7 @@ function StudyInner() {
                     <polygon points="6,1 11,4.5 9,10 3,10 1,4.5" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
                     <polygon points="6,3.5 8.5,5.5 7.5,8.5 4.5,8.5 3.5,5.5" fill="currentColor" opacity="0.4"/>
                   </svg>
-                  <span className="text-[#8A8FA8] text-[10px] group-hover:text-[#F0F0F5] transition-colors">
+                  <span className="text-[#888888] text-[10px] group-hover:text-[#F0F0F5] transition-colors">
                     {isEn ? 'Proficiency' : 'Proficiência'}
                   </span>
                 </button>
@@ -938,14 +938,14 @@ function StudyInner() {
 
         {/* ── Content panel — left sidebar ── */}
         <div
-          className={`absolute inset-y-0 left-0 w-full sm:w-[340px] bg-[#141414] border-r border-[#8A8FA8]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
+          className={`absolute inset-y-0 left-0 w-full sm:w-[340px] bg-[#141414] border-r border-[#888888]/8 flex flex-col transition-transform duration-300 ease-out z-20 ${
             contentPanelOpen && selectedNodeId ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           {/* Panel header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#8A8FA8]/8 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#888888]/8 flex-shrink-0">
             <div className="min-w-0">
-              <p className="text-[#8A8FA8] text-[9px] uppercase tracking-widest">
+              <p className="text-[#888888] text-[9px] uppercase tracking-widest">
                 {isEn ? 'Learning materials' : 'Materiais de estudo'}
               </p>
               <p className="text-[#F0F0F5] text-sm truncate font-medium mt-0.5">
@@ -953,13 +953,13 @@ function StudyInner() {
               </p>
             </div>
             <button onClick={() => setContentPanelOpen(false)} aria-label="Close panel"
-              className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5 flex-shrink-0">
+              className="text-[#888888]/40 hover:text-[#888888] transition-colors p-1.5 rounded-lg hover:bg-[#888888]/5 flex-shrink-0">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Tab bar */}
-          <div className="flex border-b border-[#8A8FA8]/8 flex-shrink-0">
+          <div className="flex border-b border-[#888888]/8 flex-shrink-0">
             {(Object.keys(tabLabels) as ContentTab[]).map(tab => (
               <button key={tab} onClick={() => {
                 setContentTab(tab)
@@ -972,7 +972,7 @@ function StudyInner() {
                 className={`flex-1 py-2.5 text-[10px] uppercase tracking-widest transition-colors ${
                   contentTab === tab
                     ? 'text-[#F94716] border-b border-[#F94716]'
-                    : 'text-[#8A8FA8]/50 hover:text-[#8A8FA8]'
+                    : 'text-[#888888]/50 hover:text-[#888888]'
                 }`}>
                 {tabLabels[tab].icon}{' '}{isEn ? tabLabels[tab].en : tabLabels[tab].pt}
               </button>
@@ -988,31 +988,31 @@ function StudyInner() {
                 {/* Tag pills */}
                 <div className="flex gap-2">
                   <div className="h-5 w-14 rounded-full bg-[#F94716]/15" />
-                  <div className="h-5 w-10 rounded-full bg-[#8A8FA8]/10" />
+                  <div className="h-5 w-10 rounded-full bg-[#888888]/10" />
                   <div className="h-5 w-16 rounded-full bg-[#22D3EE]/10" />
                 </div>
 
                 {/* Key points block */}
                 <div className="space-y-2.5">
-                  <div className="h-2.5 w-20 rounded bg-[#8A8FA8]/15" />
+                  <div className="h-2.5 w-20 rounded bg-[#888888]/15" />
                   {[100, 88, 95, 76].map((w, i) => (
                     <div key={i} className="flex items-start gap-2.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#F94716]/30 mt-1.5 flex-shrink-0" />
-                      <div className={`h-2.5 rounded bg-[#8A8FA8]/10`} style={{ width: `${w}%` }} />
+                      <div className={`h-2.5 rounded bg-[#888888]/10`} style={{ width: `${w}%` }} />
                     </div>
                   ))}
                 </div>
 
                 {/* Explanation block */}
                 <div className="space-y-2">
-                  <div className="h-2.5 w-24 rounded bg-[#8A8FA8]/15" />
+                  <div className="h-2.5 w-24 rounded bg-[#888888]/15" />
                   {[100, 94, 100, 88, 72, 60].map((w, i) => (
-                    <div key={i} className="h-2 rounded bg-[#8A8FA8]/8" style={{ width: `${w}%` }} />
+                    <div key={i} className="h-2 rounded bg-[#888888]/8" style={{ width: `${w}%` }} />
                   ))}
                 </div>
 
                 {/* Bottom card shimmer */}
-                <div className="rounded-2xl border border-[#8A8FA8]/8 bg-[#8A8FA8]/4 h-20" />
+                <div className="rounded-2xl border border-[#888888]/8 bg-[#888888]/4 h-20" />
               </div>
             )}
 
@@ -1028,7 +1028,7 @@ function StudyInner() {
                   <p className="text-[#F0F0F5] text-sm font-light mb-1">
                     {isEn ? 'Preparing your materials…' : 'Preparando seus materiais…'}
                   </p>
-                  <p className="text-[#8A8FA8]/60 text-[11px]">
+                  <p className="text-[#888888]/60 text-[11px]">
                     {isEn ? 'Generating content for this topic' : 'Gerando conteúdo para este tópico'}
                   </p>
                 </div>
@@ -1045,7 +1045,7 @@ function StudyInner() {
                   <p className="text-[#F0F0F5] text-sm mb-1">
                     {isEn ? 'Content failed to load' : 'Erro ao carregar conteúdo'}
                   </p>
-                  <p className="text-[#8A8FA8]/50 text-[11px] leading-relaxed mb-4">
+                  <p className="text-[#888888]/50 text-[11px] leading-relaxed mb-4">
                     {contentError}
                   </p>
                   <button
@@ -1061,7 +1061,7 @@ function StudyInner() {
             {/* No unit selected */}
             {!contentLoading && !contentGenerating && !unitContent && !contentError && (
               <div className="p-6 text-center">
-                <p className="text-[#8A8FA8]/40 text-xs">
+                <p className="text-[#888888]/40 text-xs">
                   {isEn ? 'Select a node to load content.' : 'Selecione um nó para carregar o conteúdo.'}
                 </p>
               </div>
@@ -1078,7 +1078,7 @@ function StudyInner() {
                     </span>
                   )}
                   {selectedUnit && (
-                    <span className="text-[#8A8FA8]/60 text-[10px] border border-[#8A8FA8]/15 rounded-full px-2.5 py-0.5">
+                    <span className="text-[#888888]/60 text-[10px] border border-[#888888]/15 rounded-full px-2.5 py-0.5">
                       ~{selectedUnit.estimatedMinutes} min
                     </span>
                   )}
@@ -1092,7 +1092,7 @@ function StudyInner() {
                 {/* Key points */}
                 {unitContent.keyPoints.length > 0 && (
                   <div>
-                    <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-2.5">
+                    <p className="text-[#888888] text-[10px] uppercase tracking-widest mb-2.5">
                       {isEn ? 'Key Points' : 'Pontos-Chave'}
                     </p>
                     <ul className="space-y-2">
@@ -1108,7 +1108,7 @@ function StudyInner() {
 
                 {/* Explanation */}
                 <div>
-                  <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-2.5">
+                  <p className="text-[#888888] text-[10px] uppercase tracking-widest mb-2.5">
                     {isEn ? 'Explanation' : 'Explicação'}
                   </p>
                   <p className="text-[#C4C6DA] text-xs leading-[1.7]">{unitContent.explanation}</p>
@@ -1118,7 +1118,7 @@ function StudyInner() {
                 {selectedUnit?.conceptTags && selectedUnit.conceptTags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {selectedUnit.conceptTags.map(tag => (
-                      <span key={tag} className="text-[#8A8FA8]/50 text-[10px] bg-[#8A8FA8]/5 rounded px-2 py-0.5">
+                      <span key={tag} className="text-[#888888]/50 text-[10px] bg-[#888888]/5 rounded px-2 py-0.5">
                         {tag}
                       </span>
                     ))}
@@ -1131,18 +1131,18 @@ function StudyInner() {
             {!contentLoading && unitContent && contentTab === 'cards' && (
               <div className="p-4 flex flex-col gap-4">
                 {unitContent.flashcards.length === 0 ? (
-                  <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
+                  <p className="text-[#888888]/40 text-xs text-center py-8">
                     {isEn ? 'No flashcards available.' : 'Nenhum flashcard disponível.'}
                   </p>
                 ) : (
                   <>
                     {/* Counter */}
                     <div className="flex items-center justify-between">
-                      <p className="text-[#8A8FA8]/50 text-[11px]">
+                      <p className="text-[#888888]/50 text-[11px]">
                         {flashcardIdx + 1} / {unitContent.flashcards.length}
                       </p>
                       <button onClick={shuffleFlashcards}
-                        className="text-[#8A8FA8]/50 text-[11px] hover:text-[#8A8FA8] transition-colors">
+                        className="text-[#888888]/50 text-[11px] hover:text-[#888888] transition-colors">
                         {isEn ? 'Reset' : 'Reiniciar'}
                       </button>
                     </div>
@@ -1150,13 +1150,13 @@ function StudyInner() {
                     {/* Card */}
                     <button
                       onClick={() => setFlashcardFlipped(v => !v)}
-                      className="min-h-[180px] w-full rounded-2xl border border-[#8A8FA8]/15 flex flex-col items-center justify-center gap-3 p-5 text-center transition-all duration-200 active:scale-[0.98]"
+                      className="min-h-[180px] w-full rounded-2xl border border-[#888888]/15 flex flex-col items-center justify-center gap-3 p-5 text-center transition-all duration-200 active:scale-[0.98]"
                       style={{
                         background: flashcardFlipped ? '#141525' : '#0C0D18',
                         borderColor: flashcardFlipped ? 'rgba(124,58,237,0.25)' : 'rgba(138,143,168,0.12)',
                       }}
                     >
-                      <p className="text-[#8A8FA8]/40 text-[10px] uppercase tracking-widest">
+                      <p className="text-[#888888]/40 text-[10px] uppercase tracking-widest">
                         {flashcardFlipped ? (isEn ? 'Answer' : 'Resposta') : (isEn ? 'Question' : 'Pergunta')}
                       </p>
                       <p className={`leading-relaxed transition-all duration-200 ${
@@ -1166,7 +1166,7 @@ function StudyInner() {
                           ? unitContent.flashcards[flashcardIdx].back
                           : unitContent.flashcards[flashcardIdx].front}
                       </p>
-                      <p className="text-[#8A8FA8]/30 text-[10px]">
+                      <p className="text-[#888888]/30 text-[10px]">
                         {isEn ? 'Tap to flip' : 'Toque para virar'}
                       </p>
                     </button>
@@ -1176,14 +1176,14 @@ function StudyInner() {
                       <button
                         onClick={() => { setFlashcardIdx(v => Math.max(0, v - 1)); setFlashcardFlipped(false) }}
                         disabled={flashcardIdx === 0}
-                        className="flex-1 py-2.5 rounded-xl border border-[#8A8FA8]/12 text-[#8A8FA8]/60 text-sm hover:border-[#8A8FA8]/25 hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+                        className="flex-1 py-2.5 rounded-xl border border-[#888888]/12 text-[#888888]/60 text-sm hover:border-[#888888]/25 hover:text-[#888888] transition-colors disabled:opacity-30"
                       >
                         ←
                       </button>
                       <button
                         onClick={() => { setFlashcardIdx(v => Math.min(unitContent.flashcards.length - 1, v + 1)); setFlashcardFlipped(false) }}
                         disabled={flashcardIdx === unitContent.flashcards.length - 1}
-                        className="flex-1 py-2.5 rounded-xl border border-[#8A8FA8]/12 text-[#8A8FA8]/60 text-sm hover:border-[#8A8FA8]/25 hover:text-[#8A8FA8] transition-colors disabled:opacity-30"
+                        className="flex-1 py-2.5 rounded-xl border border-[#888888]/12 text-[#888888]/60 text-sm hover:border-[#888888]/25 hover:text-[#888888] transition-colors disabled:opacity-30"
                       >
                         →
                       </button>
@@ -1197,7 +1197,7 @@ function StudyInner() {
             {!contentLoading && unitContent && contentTab === 'quiz' && (
               <div className="p-4 flex flex-col gap-4">
                 {unitContent.quiz.length === 0 ? (
-                  <p className="text-[#8A8FA8]/40 text-xs text-center py-8">
+                  <p className="text-[#888888]/40 text-xs text-center py-8">
                     {isEn ? 'No quiz available.' : 'Nenhum quiz disponível.'}
                   </p>
                 ) : quizDone ? (
@@ -1209,7 +1209,7 @@ function StudyInner() {
                     <p className="text-[#F0F0F5] text-base font-medium">
                       {isEn ? 'Quiz complete!' : 'Quiz concluído!'}
                     </p>
-                    <p className="text-[#8A8FA8]/60 text-xs text-center">
+                    <p className="text-[#888888]/60 text-xs text-center">
                       {quizScore === unitContent.quiz.length
                         ? (isEn ? 'Perfect score!' : 'Pontuação perfeita!')
                         : quizScore >= Math.ceil(unitContent.quiz.length * 0.75)
@@ -1226,7 +1226,7 @@ function StudyInner() {
                 ) : (
                   <>
                     {/* Progress */}
-                    <p className="text-[#8A8FA8]/50 text-[11px]">
+                    <p className="text-[#888888]/50 text-[11px]">
                       {isEn ? `Question ${quizIdx + 1} of ${unitContent.quiz.length}` : `Pergunta ${quizIdx + 1} de ${unitContent.quiz.length}`}
                     </p>
 
@@ -1240,7 +1240,7 @@ function StudyInner() {
                       {unitContent.quiz[quizIdx].options.map(option => {
                         const isCorrect = option === unitContent.quiz[quizIdx].answer
                         const isChosen = option === quizSelected
-                        let borderColor = 'border-[#8A8FA8]/15'
+                        let borderColor = 'border-[#888888]/15'
                         let textColor = 'text-[#C4C6DA]'
                         let bgColor = ''
                         if (quizAnswered) {
@@ -1257,7 +1257,7 @@ function StudyInner() {
                                 setQuizScore(v => v + 1)
                               }
                             }}
-                            className={`w-full text-left px-4 py-3 rounded-xl border text-xs leading-relaxed transition-colors ${borderColor} ${textColor} ${bgColor} ${!quizAnswered ? 'hover:border-[#8A8FA8]/30 hover:text-[#F0F0F5]' : ''}`}
+                            className={`w-full text-left px-4 py-3 rounded-xl border text-xs leading-relaxed transition-colors ${borderColor} ${textColor} ${bgColor} ${!quizAnswered ? 'hover:border-[#888888]/30 hover:text-[#F0F0F5]' : ''}`}
                           >
                             {option}
                           </button>
@@ -1268,8 +1268,8 @@ function StudyInner() {
                     {/* Explanation + Next */}
                     {quizAnswered && (
                       <div className="space-y-3">
-                        <div className="bg-[#0d0d0d] rounded-xl p-3 border border-[#8A8FA8]/8">
-                          <p className="text-[#8A8FA8]/60 text-[10px] uppercase tracking-widest mb-1">
+                        <div className="bg-[#0d0d0d] rounded-xl p-3 border border-[#888888]/8">
+                          <p className="text-[#888888]/60 text-[10px] uppercase tracking-widest mb-1">
                             {isEn ? 'Explanation' : 'Explicação'}
                           </p>
                           <p className="text-[#C4C6DA] text-xs leading-relaxed">
@@ -1306,15 +1306,15 @@ function StudyInner() {
               <div className="p-4 flex flex-col gap-4">
 
                 {/* Episode card */}
-                <div className="bg-[#0d0d0d] border border-[#8A8FA8]/10 rounded-2xl p-5 flex flex-col gap-4">
+                <div className="bg-[#0d0d0d] border border-[#888888]/10 rounded-2xl p-5 flex flex-col gap-4">
 
                   {/* Two hosts row */}
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F94716] to-[#22D3EE] flex items-center justify-center text-[#F0F0F5] text-xs font-semibold ring-2 ring-[#0d0d0d] z-10">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F94716] to-[#FF6B3D] flex items-center justify-center text-[#F0F0F5] text-xs font-semibold ring-2 ring-[#0d0d0d] z-10">
                         {isEn ? 'A' : 'C'}
                       </div>
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#34C785] to-[#F59E0B] flex items-center justify-center text-[#0d0d0d] text-xs font-semibold ring-2 ring-[#0d0d0d]">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#34C785] to-[#F94716] flex items-center justify-center text-[#0d0d0d] text-xs font-semibold ring-2 ring-[#0d0d0d]">
                         {isEn ? 'S' : 'M'}
                       </div>
                     </div>
@@ -1322,7 +1322,7 @@ function StudyInner() {
                       <p className="text-[#F0F0F5] text-sm font-medium leading-snug truncate">
                         {selectedUnit?.title ?? currentTopic}
                       </p>
-                      <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">
+                      <p className="text-[#888888]/50 text-[10px] mt-0.5">
                         {isEn ? `${isEn ? 'Alex' : 'Carlos'} & ${isEn ? 'Sam' : 'Marina'} · ~10 min` : `Carlos & Marina · ~10 min`}
                       </p>
                     </div>
@@ -1332,7 +1332,7 @@ function StudyInner() {
                   </div>
 
                   {/* Progress bar */}
-                  <div className="h-1 bg-[#8A8FA8]/10 rounded-full overflow-hidden">
+                  <div className="h-1 bg-[#888888]/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-[#F94716] to-[#34C785] rounded-full transition-all duration-300"
                       style={{ width: `${podcastProgress * 100}%` }}
@@ -1353,7 +1353,7 @@ function StudyInner() {
                             ? (isEn ? 'Writing the discussion script…' : 'Escrevendo o roteiro…')
                             : (isEn ? 'Synthesizing voices…' : 'Sintetizando vozes…')}
                         </p>
-                        <p className="text-[#8A8FA8]/50 text-[10px] mt-0.5">
+                        <p className="text-[#888888]/50 text-[10px] mt-0.5">
                           {podcastGeneratePhase === 'voices'
                             ? (isEn ? 'This takes ~20–30 seconds' : 'Isso leva ~20–30 segundos')
                             : (isEn ? 'Crafting the perfect conversation' : 'Criando a conversa perfeita')}
@@ -1377,7 +1377,7 @@ function StudyInner() {
                         <>
                           <button
                             onClick={togglePodcast}
-                            className="w-11 h-11 rounded-full bg-[#F94716] hover:bg-[#6D28D9] transition-colors flex items-center justify-center flex-shrink-0 cursor-pointer"
+                            className="w-11 h-11 rounded-full bg-[#F94716] hover:bg-[#E03A0E] transition-colors flex items-center justify-center flex-shrink-0 cursor-pointer"
                           >
                             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                               {podcastPlaying
@@ -1389,7 +1389,7 @@ function StudyInner() {
                             <p className="text-[#F0F0F5] text-xs font-medium">
                               {podcastPlaying ? (isEn ? 'Playing…' : 'Tocando…') : (isEn ? 'Paused' : 'Pausado')}
                             </p>
-                            <p className="text-[#8A8FA8]/50 text-[10px]">
+                            <p className="text-[#888888]/50 text-[10px]">
                               {isEn ? 'Tap to pause/resume' : 'Toque para pausar/continuar'}
                             </p>
                           </div>
@@ -1427,15 +1427,15 @@ function StudyInner() {
                 {/* Transcript */}
                 {podcastDialogue && podcastDialogue.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <p className="text-[#8A8FA8]/50 text-[10px] uppercase tracking-widest px-1">
+                    <p className="text-[#888888]/50 text-[10px] uppercase tracking-widest px-1">
                       {isEn ? 'Transcript' : 'Transcrição'}
                     </p>
                     {podcastDialogue.map((turn, i) => (
                       <div key={i} className={`flex gap-2.5 ${turn.speaker === 'B' ? 'flex-row-reverse' : ''}`}>
                         <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-semibold ring-1 mt-0.5 ${
                           turn.speaker === 'A'
-                            ? 'bg-gradient-to-br from-[#F94716] to-[#22D3EE] text-[#F0F0F5] ring-[#F94716]/30'
-                            : 'bg-gradient-to-br from-[#34C785] to-[#F59E0B] text-[#0d0d0d] ring-[#34C785]/30'
+                            ? 'bg-gradient-to-br from-[#F94716] to-[#FF6B3D] text-[#F0F0F5] ring-[#F94716]/30'
+                            : 'bg-gradient-to-br from-[#34C785] to-[#F94716] text-[#0d0d0d] ring-[#34C785]/30'
                         }`}>
                           {turn.name[0]}
                         </div>
@@ -1461,15 +1461,15 @@ function StudyInner() {
               <div className="p-4 flex flex-col gap-4">
                 {/* Badge */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[#F59E0B] text-[10px] uppercase tracking-widest font-medium border border-[#F59E0B]/30 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[#F94716] text-[10px] uppercase tracking-widest font-medium border border-[#F94716]/30 px-2.5 py-0.5 rounded-full">
                     HYPERFRAME READY
                   </span>
                 </div>
 
                 {/* Script sections */}
                 {parseVideoSections(unitContent.videoScript).map(section => (
-                  <div key={section.label} className="bg-[#0d0d0d] border border-[#8A8FA8]/10 rounded-xl p-4">
-                    <p className="text-[#F59E0B]/70 text-[10px] uppercase tracking-widest mb-2">
+                  <div key={section.label} className="bg-[#0d0d0d] border border-[#888888]/10 rounded-xl p-4">
+                    <p className="text-[#F94716]/70 text-[10px] uppercase tracking-widest mb-2">
                       {section.label}
                     </p>
                     <p className="text-[#C4C6DA] text-xs leading-relaxed">{section.text}</p>
@@ -1477,7 +1477,7 @@ function StudyInner() {
                 ))}
 
                 {/* Note */}
-                <p className="text-[#8A8FA8]/40 text-[10px] leading-relaxed text-center">
+                <p className="text-[#888888]/40 text-[10px] leading-relaxed text-center">
                   {isEn
                     ? 'Video generation powered by Hyperframe — connect your API key to auto-generate.'
                     : 'Geração de vídeo via Hyperframe — conecte sua chave de API para gerar automaticamente.'}
@@ -1497,17 +1497,17 @@ function StudyInner() {
           style={{ width: 'min(380px, calc(100vw - 48px))' }}
         >
           <div
-            className="bg-[#141414] border border-[#8A8FA8]/12 rounded-3xl flex flex-col overflow-hidden"
+            className="bg-[#141414] border border-[#888888]/12 rounded-3xl flex flex-col overflow-hidden"
             style={{ height: 480, boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(124,58,237,0.1)' }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#8A8FA8]/8 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#888888]/8 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[#F94716]" />
                 <p className="text-[#F0F0F5] text-sm font-medium">Tutor</p>
               </div>
               <button onClick={() => setChatOpen(false)} aria-label="Close chat"
-                className="text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1.5 rounded-lg hover:bg-[#8A8FA8]/5">
+                className="text-[#888888]/40 hover:text-[#888888] transition-colors p-1.5 rounded-lg hover:bg-[#888888]/5">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1515,7 +1515,7 @@ function StudyInner() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
               {messages.length === 0 && (
-                <p className="text-[#8A8FA8]/30 text-xs text-center py-4">
+                <p className="text-[#888888]/30 text-xs text-center py-4">
                   {isEn ? 'Ask anything about the selected topic.' : 'Pergunte qualquer coisa sobre o tópico.'}
                 </p>
               )}
@@ -1543,7 +1543,7 @@ function StudyInner() {
                     value={reflectionText}
                     onChange={e => setReflectionText(e.target.value)}
                     placeholder={isEn ? 'Write your reflection…' : 'Escreva sua reflexão…'}
-                    className="w-full bg-[#141414] border border-[#8A8FA8]/20 rounded-xl text-[#F0F0F5] placeholder-[#8A8FA8]/50 text-sm p-3 outline-none resize-none min-h-[60px]"
+                    className="w-full bg-[#141414] border border-[#888888]/20 rounded-xl text-[#F0F0F5] placeholder-[#888888]/50 text-sm p-3 outline-none resize-none min-h-[60px]"
                   />
                   <button onClick={handleReflectionSubmit}
                     className="mt-2 bg-[#34C785] text-[#0d0d0d] font-medium px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-opacity">
@@ -1557,16 +1557,16 @@ function StudyInner() {
             {/* Input */}
             <form
               onSubmit={e => { e.preventDefault(); sendMessage(input) }}
-              className="flex-shrink-0 px-4 py-3 border-t border-[#8A8FA8]/8"
+              className="flex-shrink-0 px-4 py-3 border-t border-[#888888]/8"
             >
-              <div className="flex gap-3 items-center bg-[#0d0d0d] border border-[#8A8FA8]/10 rounded-2xl px-4 py-2.5">
+              <div className="flex gap-3 items-center bg-[#0d0d0d] border border-[#888888]/10 rounded-2xl px-4 py-2.5">
                 <input
                   ref={chatInputRef}
                   type="text"
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   placeholder={isEn ? 'Ask anything…' : 'Pergunte algo…'}
-                  className="flex-1 bg-transparent text-[#F0F0F5] placeholder-[#8A8FA8]/40 outline-none text-sm"
+                  className="flex-1 bg-transparent text-[#F0F0F5] placeholder-[#888888]/40 outline-none text-sm"
                   disabled={isLoading}
                 />
                 <button
@@ -1586,7 +1586,7 @@ function StudyInner() {
           onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
           className={`absolute bottom-6 right-6 z-50 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
             chatOpen
-              ? 'rounded-full bg-[#141414] border border-[#8A8FA8]/20 text-[#8A8FA8] hover:border-[#8A8FA8]/40 justify-center'
+              ? 'rounded-full bg-[#141414] border border-[#888888]/20 text-[#888888] hover:border-[#888888]/40 justify-center'
               : 'rounded-full bg-gradient-to-br from-[#F94716] to-[#FF6B3D] text-white hover:opacity-90 shadow-lg shadow-[#F94716]/20 pl-5 pr-6'
           }`}
           style={chatOpen ? { width: 52, height: 52 } : { height: 52 }}

@@ -20,7 +20,7 @@ export default function ChatBubble({ role, content, isStreaming }: ChatBubblePro
           style={{ letterSpacing: isTutor ? '0.01em' : undefined }}
         >
           {content}
-          {isStreaming && <span className="inline-block w-1 h-4 bg-[#7C3AED] ml-1 animate-pulse" />}
+          {isStreaming && <span className="inline-block w-1 h-4 bg-[#F94716] ml-1 animate-pulse" />}
         </p>
       </div>
     </div>

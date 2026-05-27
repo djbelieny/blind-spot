@@ -66,20 +66,20 @@ export default function RadarChart({ pillars, label, language = 'en', size = 280
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Grid rings */}
         {rings.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="#8A8FA8" strokeOpacity={0.12} strokeWidth={1} />
+          <path key={i} d={d} fill="none" stroke="#888888" strokeOpacity={0.12} strokeWidth={1} />
         ))}
 
         {/* Axes */}
         {axes.map((a, i) => (
-          <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2} stroke="#8A8FA8" strokeOpacity={0.15} strokeWidth={1} />
+          <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2} stroke="#888888" strokeOpacity={0.15} strokeWidth={1} />
         ))}
 
         {/* Data fill */}
-        <path d={dataPath} fill="#7C3AED" fillOpacity={0.15} stroke="#7C3AED" strokeWidth={1.5} strokeOpacity={0.8} />
+        <path d={dataPath} fill="#F94716" fillOpacity={0.15} stroke="#F94716" strokeWidth={1.5} strokeOpacity={0.8} />
 
         {/* Data dots */}
         {dataPoints.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r={3} fill="#7C3AED" fillOpacity={pillars[KEYS[i]] > 0 ? 0.9 : 0} />
+          <circle key={i} cx={p.x} cy={p.y} r={3} fill="#F94716" fillOpacity={pillars[KEYS[i]] > 0 ? 0.9 : 0} />
         ))}
 
         {/* Labels */}
@@ -95,7 +95,7 @@ export default function RadarChart({ pillars, label, language = 'en', size = 280
               textAnchor="middle"
               dominantBaseline="middle"
               fontSize={9.5}
-              fill="#8A8FA8"
+              fill="#888888"
               fillOpacity={0.7}
             >
               {PILLAR_LABELS[k][lang]}

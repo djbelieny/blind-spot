@@ -239,7 +239,7 @@ function RevealCard({
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl text-[#F94716]">{dna.symbol}</span>
               <div>
-                <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-0.5">
+                <p className="text-[#888888] text-[10px] uppercase tracking-widest mb-0.5">
                   {isEn ? 'Your learning DNA' : 'Seu DNA de aprendizado'}
                 </p>
                 <h2 className="text-[#F0F0F5] text-xl font-medium leading-tight">
@@ -247,7 +247,7 @@ function RevealCard({
                 </h2>
               </div>
             </div>
-            <p className="text-[#8A8FA8] text-sm leading-relaxed">
+            <p className="text-[#888888] text-sm leading-relaxed">
               {isEn ? dna.en.tagline : dna.pt.tagline}
             </p>
           </div>
@@ -258,13 +258,13 @@ function RevealCard({
       {(personaMeta || mins) && (
         <div className="flex flex-wrap gap-2">
           {personaMeta && (
-            <span className="flex items-center gap-1.5 border border-[#8A8FA8]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
+            <span className="flex items-center gap-1.5 border border-[#888888]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
               <span className="text-[#F94716]">{personaMeta.icon}</span>
               {isEn ? personaMeta.en : personaMeta.pt}
             </span>
           )}
           {mins && (
-            <span className="flex items-center gap-1.5 border border-[#8A8FA8]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
+            <span className="flex items-center gap-1.5 border border-[#888888]/15 rounded-full px-3 py-1.5 text-xs text-[#F0F0F5]">
               <span className="text-[#F94716]">◷</span>
               {mins} {isEn ? '/ day' : '/ dia'}
             </span>
@@ -274,7 +274,7 @@ function RevealCard({
 
       {/* Mentor narrative */}
       {dnaReveal && (
-        <p className="text-[#8A8FA8] text-[14px] leading-[1.8] font-light whitespace-pre-line">
+        <p className="text-[#888888] text-[14px] leading-[1.8] font-light whitespace-pre-line">
           {dnaReveal}
         </p>
       )}
@@ -282,7 +282,7 @@ function RevealCard({
       {/* Top blind spot */}
       {topBlindSpot && (
         <div className="border-l-2 border-[#F94716]/40 pl-4">
-          <p className="text-[#8A8FA8] text-[10px] uppercase tracking-widest mb-1.5">
+          <p className="text-[#888888] text-[10px] uppercase tracking-widest mb-1.5">
             {isEn ? 'Where we start' : 'O que vamos trabalhar primeiro'}
           </p>
           <p className="text-[#F0F0F5] text-sm leading-relaxed">{topBlindSpot.impact}</p>
@@ -299,7 +299,7 @@ function RevealCard({
         </button>
         <button
           onClick={onDashboard}
-          className="w-full text-[#8A8FA8] text-sm py-3 hover:text-[#F0F0F5] transition-colors"
+          className="w-full text-[#888888] text-sm py-3 hover:text-[#F0F0F5] transition-colors"
         >
           {isEn ? 'See the full picture' : 'Ver o plano completo'}
         </button>
@@ -471,7 +471,7 @@ function OnboardingInner() {
 
       {/* Subtle progress line — no numbers */}
       {currentStep?.type !== 'reveal' && (
-        <div className="fixed top-0 left-0 right-0 z-20 h-[2px] bg-[#8A8FA8]/10">
+        <div className="fixed top-0 left-0 right-0 z-20 h-[2px] bg-[#888888]/10">
           <div
             className="h-full bg-[#F94716]/60 transition-all duration-500 ease-out"
             style={{ width: `${progressPct}%` }}
@@ -481,7 +481,7 @@ function OnboardingInner() {
 
       {/* Language toggle — fixed top-right */}
       <div className="fixed top-3 right-4 z-30">
-        <div className="flex rounded-full border border-[#8A8FA8]/20 overflow-hidden text-xs">
+        <div className="flex rounded-full border border-[#888888]/20 overflow-hidden text-xs">
           {(['en', 'pt-BR'] as const).map(lang => (
             <button
               key={lang}
@@ -498,7 +498,7 @@ function OnboardingInner() {
               className={`px-3 py-1.5 transition-colors ${
                 language === lang
                   ? 'bg-[#F94716] text-white'
-                  : 'bg-[#141414] text-[#8A8FA8] hover:text-[#F0F0F5]'
+                  : 'bg-[#141414] text-[#888888] hover:text-[#F0F0F5]'
               }`}
             >
               {lang === 'en' ? 'EN' : 'PT'}
@@ -528,7 +528,7 @@ function OnboardingInner() {
                       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm transition-all duration-200 ${
                         selectedChoice === opt.value
                           ? 'border-[#F94716] bg-[#F94716]/10 text-[#F0F0F5]'
-                          : 'border-[#8A8FA8]/12 bg-[#141414] hover:border-[#8A8FA8]/30 hover:bg-[#141414]/80 text-[#F0F0F5]'
+                          : 'border-[#888888]/12 bg-[#141414] hover:border-[#888888]/30 hover:bg-[#141414]/80 text-[#F0F0F5]'
                       }`}
                     >
                       {opt.label}
@@ -546,11 +546,11 @@ function OnboardingInner() {
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleText() } }}
                     placeholder={(currentStep as TextStep).placeholder}
                     rows={3}
-                    className="w-full bg-[#141414] border border-[#8A8FA8]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/30 text-sm outline-none focus:border-[#8A8FA8]/30 resize-none mb-4"
+                    className="w-full bg-[#141414] border border-[#888888]/12 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#888888]/30 text-sm outline-none focus:border-[#888888]/30 resize-none mb-4"
                   />
                   <div className="flex justify-between items-center">
                     {(currentStep as TextStep).optional && (
-                      <button onClick={advance} className="text-[#8A8FA8]/50 text-sm hover:text-[#8A8FA8] transition-colors">
+                      <button onClick={advance} className="text-[#888888]/50 text-sm hover:text-[#888888] transition-colors">
                         {language === 'pt-BR' ? 'Pular' : 'Skip'}
                       </button>
                     )}
@@ -576,14 +576,14 @@ function OnboardingInner() {
                   ))}
                 </div>
                 {!diagLoading && (
-                  <button onClick={advance} className="text-[#8A8FA8] text-sm hover:text-[#F0F0F5] transition-colors">
+                  <button onClick={advance} className="text-[#888888] text-sm hover:text-[#F0F0F5] transition-colors">
                     {language === 'pt-BR' ? 'Continuar →' : 'Continue →'}
                   </button>
                 )}
               </div>
             ) : (
               <>
-                <p className="text-[#8A8FA8] text-xs mb-6 tracking-wide">
+                <p className="text-[#888888] text-xs mb-6 tracking-wide">
                   {language === 'pt-BR'
                     ? `${diagIndex + 1} de ${diagQuestions.length}`
                     : `${diagIndex + 1} of ${diagQuestions.length}`}
@@ -599,7 +599,7 @@ function OnboardingInner() {
                       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm transition-all duration-200 ${
                         selectedChoice === opt
                           ? 'border-[#F94716] bg-[#F94716]/10 text-[#F0F0F5]'
-                          : 'border-[#8A8FA8]/12 bg-[#141414] hover:border-[#8A8FA8]/30 text-[#F0F0F5]'
+                          : 'border-[#888888]/12 bg-[#141414] hover:border-[#888888]/30 text-[#F0F0F5]'
                       }`}
                     >
                       {opt}
@@ -607,7 +607,7 @@ function OnboardingInner() {
                   ))}
                   <button
                     onClick={() => handleDiagAnswer(diagQuestions[diagIndex].id, '__skipped__', true)}
-                    className="w-full text-[#8A8FA8]/40 text-xs py-2 hover:text-[#8A8FA8]/70 transition-colors"
+                    className="w-full text-[#888888]/40 text-xs py-2 hover:text-[#888888]/70 transition-colors"
                   >
                     {language === 'pt-BR' ? 'Não tenho certeza' : "Not sure"}
                   </button>
@@ -625,7 +625,7 @@ function OnboardingInner() {
                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F94716]/50 animate-bounce" style={{ animationDelay: `${i*200}ms` }} />
                   ))}
                 </div>
-                <p className="text-[#8A8FA8] text-sm transition-all duration-700">
+                <p className="text-[#888888] text-sm transition-all duration-700">
                   {(language === 'pt-BR' ? LOADING_LINES_PT : LOADING_LINES_EN)[loadingLineIdx]}
                 </p>
               </div>

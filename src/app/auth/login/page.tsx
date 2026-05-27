@@ -44,7 +44,7 @@ function LoginInner() {
             <span className="w-1.5 h-1.5 rounded-full bg-[#F94716] mb-2.5 flex-shrink-0" />
           </div>
           <h1 className="text-[#F0F0F5] text-2xl font-light">Welcome back.</h1>
-          <p className="text-[#8A8FA8] text-sm mt-1.5">Sign in to continue learning.</p>
+          <p className="text-[#888888] text-sm mt-1.5">Sign in to continue learning.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -58,7 +58,7 @@ function LoginInner() {
               onChange={e => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#888888]/12 hover:border-[#888888]/25 rounded-2xl px-5 py-4 text-[#F0F0F5] placeholder-[#888888]/40 text-sm outline-none transition-colors"
               style={{ '--tw-ring-color': 'transparent' } as React.CSSProperties}
             />
           </div>
@@ -71,13 +71,13 @@ function LoginInner() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full bg-[#141414] border border-[#8A8FA8]/12 hover:border-[#8A8FA8]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#8A8FA8]/40 text-sm outline-none transition-colors"
+              className="w-full bg-[#141414] border border-[#888888]/12 hover:border-[#888888]/25 rounded-2xl px-5 py-4 pr-12 text-[#F0F0F5] placeholder-[#888888]/40 text-sm outline-none transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPw(v => !v)}
               aria-label={showPw ? 'Hide password' : 'Show password'}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8FA8]/40 hover:text-[#8A8FA8] transition-colors p-1 rounded-lg"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#888888]/40 hover:text-[#888888] transition-colors p-1 rounded-lg"
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -103,9 +103,9 @@ function LoginInner() {
           </button>
         </form>
 
-        <p className="text-[#8A8FA8]/50 text-sm text-center mt-8">
+        <p className="text-[#888888]/50 text-sm text-center mt-8">
           New here?{' '}
-          <Link href="/auth/signup" className="text-[#8A8FA8] hover:text-[#F0F0F5] transition-colors underline underline-offset-2">
+          <Link href="/auth/signup" className="text-[#888888] hover:text-[#F0F0F5] transition-colors underline underline-offset-2">
             Create an account
           </Link>
         </p>

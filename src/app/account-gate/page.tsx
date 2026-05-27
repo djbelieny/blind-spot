@@ -12,15 +12,15 @@ function AccountGateInner() {
     <main className="min-h-screen bg-[#08090F] flex items-center justify-center">
       <ConstellationBackground nodeCount={20} />
       <div className="relative z-10 w-full max-w-md px-6 text-center">
-        <p className="text-[#7C3AED] text-xs uppercase tracking-widest mb-3">Blind Spot</p>
+        <p className="text-[#F94716] text-xs uppercase tracking-widest mb-3">Blind Spot</p>
         <h1 className="text-[#F0F0F5] text-2xl font-light mb-3">Save your Blind Spot map</h1>
-        <p className="text-[#8A8FA8] text-sm mb-8 leading-relaxed">
+        <p className="text-[#888888] text-sm mb-8 leading-relaxed">
           Your diagnosis, fixed examples, and next steps are ready.<br />
           Create a profile so Blind Spot can keep adapting to you.
         </p>
 
-        <div className="space-y-3 mb-6 text-left bg-[#0E0F1A] border border-[#8A8FA8]/10 rounded-2xl p-5">
-          <p className="text-[#8A8FA8] text-xs uppercase tracking-widest mb-3">What gets saved</p>
+        <div className="space-y-3 mb-6 text-left bg-[#141414] border border-[#888888]/10 rounded-2xl p-5">
+          <p className="text-[#888888] text-xs uppercase tracking-widest mb-3">What gets saved</p>
           {[
             'Diagnostic history and blind spots',
             'Personalized study plan',
@@ -43,19 +43,19 @@ function AccountGateInner() {
           </button>
           <button
             onClick={() => router.push(`/dashboard?sessionId=${sessionId}`)}
-            className="w-full border border-[#8A8FA8]/20 text-[#F0F0F5] font-medium py-3 px-6 rounded-xl hover:border-[#7C3AED]/40 transition-colors text-sm"
+            className="w-full border border-[#888888]/20 text-[#F0F0F5] font-medium py-3 px-6 rounded-xl hover:border-[#F94716]/40 transition-colors text-sm"
           >
             Continue with email
           </button>
           <button
             onClick={() => router.push(`/dashboard?sessionId=${sessionId}`)}
-            className="w-full text-[#8A8FA8] py-2.5 px-6 text-sm hover:text-[#F0F0F5] transition-colors"
+            className="w-full text-[#888888] py-2.5 px-6 text-sm hover:text-[#F0F0F5] transition-colors"
           >
             Continue as guest →
           </button>
         </div>
 
-        <p className="text-[#8A8FA8]/40 text-xs mt-6">
+        <p className="text-[#888888]/40 text-xs mt-6">
           No dark patterns. Your progress is preserved either way.
         </p>
       </div>

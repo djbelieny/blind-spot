@@ -375,7 +375,7 @@ function MapScene({ units, completedIds, activeId, selectedId, onSelect, rootLab
 export default function KnowledgeMap(props: Props) {
   if (!props.units?.length) return (
     <div className="absolute inset-0 flex items-center justify-center">
-      <span className="text-[#8A8FA8] text-sm">Generating your map…</span>
+      <span className="text-[#888888] text-sm">Generating your map…</span>
     </div>
   )
 
