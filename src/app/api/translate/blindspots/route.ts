@@ -3,6 +3,7 @@ import { getProfile } from '@/lib/engine/progress'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
 import redis from '@/lib/redis'
 import type { BlindSpot } from '@/types/learner'
+import { logCost, calcDeepseekCost } from '@/lib/costs'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
@@ -47,6 +48,8 @@ ${JSON.stringify(payload)}`,
       max_tokens: 1500,
       response_format: { type: 'json_object' },
     })
+
+    if (res.usage) logCost({ type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/translate/blindspots', sessionId: sessionId!, inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens, cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens) })
 
     const raw = res.choices[0].message.content ?? '{}'
     const parsed = JSON.parse(raw)

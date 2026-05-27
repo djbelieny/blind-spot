@@ -4,6 +4,7 @@ import { getRoadmap, getUnitContent, saveUnitContent } from '@/lib/engine/roadma
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
 import redis from '@/lib/redis'
 import type { UnitContent, Roadmap } from '@/types/roadmap'
+import { logCost, calcDeepseekCost } from '@/lib/costs'
 
 // Finds any roadmap for a session that contains a given unitId.
 // Falls back to scanning Redis when the topic-scoped key misses.
@@ -102,6 +103,8 @@ Requirements:
       max_tokens: 4000,
       response_format: { type: 'json_object' },
     })
+
+    if (res.usage) logCost({ type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/roadmap/content', sessionId, inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens, cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens) })
 
     const raw = res.choices[0].message.content ?? '{}'
     const parsed = JSON.parse(raw) as Omit<UnitContent, 'unitId' | 'generatedAt'>

@@ -3,6 +3,7 @@ import { getProfile } from '@/lib/engine/progress'
 import { getRoadmap, saveRoadmap } from '@/lib/engine/roadmap'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
 import type { Roadmap, LearningUnit } from '@/types/roadmap'
+import { logCost, calcDeepseekCost } from '@/lib/costs'
 
 export async function POST(req: NextRequest) {
   const { sessionId, topic } = (await req.json()) as { sessionId: string; topic?: string }
@@ -72,6 +73,8 @@ Return JSON object only — no markdown:
       max_tokens: 3000,
       response_format: { type: 'json_object' },
     })
+
+    if (res.usage) logCost({ type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/roadmap/generate', sessionId, inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens, cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens) })
 
     const raw = res.choices[0].message.content ?? '{}'
     const parsed = JSON.parse(raw) as { units: LearningUnit[] }

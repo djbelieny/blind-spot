@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/lib/engine/progress'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
+import { logCost, calcDeepseekCost } from '@/lib/costs'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
@@ -41,6 +42,7 @@ No explanations. No markdown.`
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     })
+    if (res.usage) logCost({ type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/dashboard/suggestions', sessionId: sessionId ?? undefined, inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens, cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens) })
     const content = res.choices[0]?.message?.content ?? '{}'
     const parsed = JSON.parse(content)
     const suggestions: string[] = Array.isArray(parsed.suggestions) ? parsed.suggestions.slice(0, 3) : []

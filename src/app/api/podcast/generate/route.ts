@@ -3,6 +3,7 @@ import { getProfile } from '@/lib/engine/progress'
 import { getUnitContent, getRoadmap } from '@/lib/engine/roadmap'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
 import redis from '@/lib/redis'
+import { logCost, calcDeepseekCost, calcOpenAITTSCost } from '@/lib/costs'
 
 export const maxDuration = 120
 
@@ -76,9 +77,25 @@ Return JSON only:
     response_format: { type: 'json_object' },
   })
 
+  if (res.usage) {
+    logCost({
+      type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/podcast/generate',
+      inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens,
+      cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens),
+    })
+  }
+
   const raw = res.choices[0].message.content ?? '{}'
   const parsed = JSON.parse(raw) as { turns: PodcastTurn[] }
   return parsed.turns ?? []
+}
+
+function logTTSCost(text: string, sessionId?: string): void {
+  const characters = text.length
+  logCost({
+    type: 'openai_tts', model: 'tts-1-hd', endpoint: '/api/podcast/generate',
+    sessionId, characters, cost: calcOpenAITTSCost(characters),
+  })
 }
 
 async function synthesizeTurn(text: string, voice: string, apiKey: string): Promise<Buffer> {
@@ -197,6 +214,7 @@ export async function POST(req: NextRequest) {
     try {
       const buf = await synthesizeTurn(turn.text, voice, apiKey)
       segments.push(buf)
+      logTTSCost(turn.text, sessionId)
     } catch (err) {
       console.error(`[podcast] TTS failed for turn ${turn.speaker}:`, err)
       return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 502 })

@@ -197,8 +197,10 @@ function StudyInner() {
   const [podcastError, setPodcastError] = useState<string | null>(null)
   const [podcastDialogue, setPodcastDialogue] = useState<{ speaker: 'A' | 'B'; name: string; text: string }[] | null>(null)
   const [podcastCached, setPodcastCached] = useState(false)
+  const [podcastElapsed, setPodcastElapsed] = useState(0)
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null)
   const podcastUnitRef = useRef<string | null>(null)
+  const podcastTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Map state
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
@@ -628,7 +630,9 @@ function StudyInner() {
 
     setPodcastError(null)
     setPodcastGenerating(true)
+    setPodcastElapsed(0)
     setPodcastGeneratePhase(podcastCached ? 'voices' : 'script')
+    podcastTimerRef.current = setInterval(() => setPodcastElapsed(s => s + 1), 1000)
 
     try {
       // If not already loaded from cache check, fetch dialogue + cache status
@@ -672,6 +676,7 @@ function StudyInner() {
     } catch (err) {
       setPodcastError(err instanceof Error ? err.message : 'Network error')
     } finally {
+      if (podcastTimerRef.current) { clearInterval(podcastTimerRef.current); podcastTimerRef.current = null }
       setPodcastGenerating(false)
       setPodcastGeneratePhase(null)
     }
@@ -1359,11 +1364,19 @@ function StudyInner() {
                             ? (isEn ? 'Writing the discussion script…' : 'Escrevendo o roteiro…')
                             : (isEn ? 'Synthesizing voices…' : 'Sintetizando vozes…')}
                         </p>
-                        <p className="text-[#888888]/50 text-[10px] mt-0.5">
-                          {podcastGeneratePhase === 'voices'
-                            ? (isEn ? 'This takes ~20–30 seconds' : 'Isso leva ~20–30 segundos')
-                            : (isEn ? 'Crafting the perfect conversation' : 'Criando a conversa perfeita')}
+                        <p className="text-[#888888]/50 text-[10px] mt-1">
+                          {podcastGeneratePhase === 'script'
+                            ? (isEn ? `~5s · ${podcastElapsed}s elapsed` : `~5s · ${podcastElapsed}s`)
+                            : (isEn ? `~60s total · ${podcastElapsed}s elapsed` : `~60s total · ${podcastElapsed}s`)}
                         </p>
+                        {podcastGeneratePhase === 'voices' && podcastElapsed < 65 && (
+                          <div className="mt-2 w-32 h-1 rounded-full bg-white/5 overflow-hidden mx-auto">
+                            <div
+                              className="h-full bg-[#F94716] rounded-full transition-all duration-1000"
+                              style={{ width: `${Math.min(95, (podcastElapsed / 65) * 100)}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1414,11 +1427,11 @@ function StudyInner() {
                                 ? (isEn ? 'Play Podcast' : 'Ouvir Podcast')
                                 : (isEn ? 'Create & play podcast' : 'Criar e ouvir podcast')}
                             </span>
-                            {podcastCached && (
-                              <span className="text-[10px] text-[#888888]/60">
-                                {isEn ? 'Saved · ready to play' : 'Salvo · pronto para ouvir'}
-                              </span>
-                            )}
+                            <span className="text-[10px] text-[#888888]/60">
+                              {podcastCached
+                                ? (isEn ? 'Saved · ready to play' : 'Salvo · pronto para ouvir')
+                                : (isEn ? 'Est. ~60s to generate' : 'Aprox. ~60s para gerar')}
+                            </span>
                           </div>
                         </button>
                       )}

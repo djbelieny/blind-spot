@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/lib/engine/progress'
 import { deepseekV3, MODELS } from '@/lib/ai/clients'
+import { logCost, calcDeepseekCost } from '@/lib/costs'
 
 export async function POST(req: NextRequest) {
   const { sessionId, courseName, conceptsCovered } = (await req.json()) as {
@@ -27,6 +28,7 @@ Return JSON: {"questions": [{"id":"c1","question":"...","options":["A)...","B)..
     response_format: { type: 'json_object' },
   })
 
+  if (res.usage) logCost({ type: 'deepseek_chat', model: MODELS.V3, endpoint: '/api/study/checkpoint', sessionId, inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens, cost: calcDeepseekCost(res.usage.prompt_tokens, res.usage.completion_tokens) })
   const content = res.choices[0].message.content ?? '{}'
   try {
     return NextResponse.json(JSON.parse(content))
