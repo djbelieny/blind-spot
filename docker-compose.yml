@@ -1,20 +1,5 @@
 version: '3.9'
 services:
-  caddy:
-    image: caddy:2-alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    environment:
-      - DOMAIN=${DOMAIN:-localhost}
-    depends_on:
-      - app
-
   app:
     build:
       context: .
@@ -26,19 +11,21 @@ services:
       - QDRANT_URL=http://qdrant:6333
     env_file:
       - .env.production
+    networks:
+      - default
+      - bcd-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=bcd-network"
+      - "traefik.http.routers.blindspot.entrypoints=websecure"
+      - "traefik.http.routers.blindspot.rule=Host(`blindspot.07labs.com`)"
+      - "traefik.http.routers.blindspot.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.blindspot.middlewares=blindspot-headers"
+      - "traefik.http.middlewares.blindspot-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.services.blindspot.loadbalancer.server.port=3000"
     depends_on:
       - redis
       - qdrant
-
-  hyperframes-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.hyperframes
-    restart: always
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./hyperframes-output:/app/output
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -54,7 +41,9 @@ services:
     command: redis-server --appendonly yes
 
 volumes:
-  caddy_data:
-  caddy_config:
   qdrant_data:
   redis_data:
+
+networks:
+  bcd-network:
+    external: true
