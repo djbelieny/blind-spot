@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
   const videoFilePath = resolve(process.cwd(), 'public/generated/lesson-videos', `${cacheKey}.mp4`)
   const fileExists = existsSync(videoFilePath)
 
-  // Reconcile: if file exists but Redis says generating, correct to ready
+  // Reconcile: correct Redis ↔ filesystem mismatches
   if (fileExists && statusData?.status === 'generating') {
     const corrected: VideoStatus = {
       status: 'ready',
@@ -51,6 +51,10 @@ export async function GET(req: NextRequest) {
     }
     await redis.set(key, JSON.stringify(corrected), 'EX', 60 * 60 * 24 * 7)
     statusData = corrected
+  } else if (!fileExists && statusData?.status === 'ready') {
+    // File was lost (container rebuild with no volume) — reset so it regenerates
+    await redis.del(key)
+    statusData = null
   }
 
   if (!statusData) {

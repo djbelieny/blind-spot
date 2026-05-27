@@ -23,6 +23,8 @@ services:
       - "traefik.http.routers.blindspot.middlewares=blindspot-headers"
       - "traefik.http.middlewares.blindspot-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.services.blindspot.loadbalancer.server.port=3000"
+    volumes:
+      - lesson_videos:/app/public/generated/lesson-videos
     depends_on:
       - redis
       - qdrant
@@ -43,6 +45,7 @@ services:
 volumes:
   qdrant_data:
   redis_data:
+  lesson_videos:
 
 networks:
   bcd-network:
