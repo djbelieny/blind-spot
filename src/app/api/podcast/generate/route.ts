@@ -6,8 +6,10 @@ import redis from '@/lib/redis'
 
 export const maxDuration = 120
 
-const VOICE_HOST_A = process.env.ELEVENLABS_VOICE_HOST_A ?? 'pNInz6obpgDQGcFmaJgB'
-const VOICE_HOST_B = process.env.ELEVENLABS_VOICE_HOST_B ?? '21m00Tcm4TlvDq8ikWAM'
+// OpenAI TTS voices for the two hosts
+// Available: alloy, ash, ballad, coral, echo, fable, onyx, nova, sage, shimmer, verse
+const VOICE_HOST_A = (process.env.OPENAI_VOICE_HOST_A ?? 'onyx')   // deep, authoritative — the explainer
+const VOICE_HOST_B = (process.env.OPENAI_VOICE_HOST_B ?? 'nova')   // warm, conversational — the questioner
 
 export interface PodcastTurn {
   speaker: 'A' | 'B'
@@ -75,27 +77,23 @@ Return JSON only:
   return parsed.turns ?? []
 }
 
-async function synthesizeTurn(text: string, voiceId: string, apiKey: string): Promise<Buffer> {
-  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+async function synthesizeTurn(text: string, voice: string, apiKey: string): Promise<Buffer> {
+  const res = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'xi-api-key': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      text: text.slice(0, 2500),
-      model_id: 'eleven_multilingual_v2',
-      voice_settings: {
-        stability: 0.5,
-        similarity_boost: 0.75,
-        style: 0.3,
-        use_speaker_boost: true,
-      },
+      model: 'tts-1-hd',
+      voice,
+      input: text.slice(0, 4096),
+      response_format: 'mp3',
     }),
   })
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`ElevenLabs ${res.status}: ${body.slice(0, 200)}`)
+    throw new Error(`OpenAI TTS ${res.status}: ${body.slice(0, 200)}`)
   }
   return Buffer.from(await res.arrayBuffer())
 }
@@ -128,9 +126,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'sessionId and unitId required' }, { status: 400 })
   }
 
-  const apiKey = process.env.ELEVENLABS_API_KEY
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'ElevenLabs API key not configured' }, { status: 503 })
+    return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 503 })
   }
 
   const slug = topicSlug(topic)
@@ -169,15 +167,15 @@ export async function POST(req: NextRequest) {
     await redis.set(cacheKey, JSON.stringify(dialogue), 'EX', 60 * 60 * 24 * 7)
   }
 
-  // Synthesize each turn sequentially (ElevenLabs rate limits)
+  // Synthesize each turn sequentially with OpenAI TTS
   const segments: Buffer[] = []
   for (const turn of dialogue) {
-    const voiceId = turn.speaker === 'A' ? VOICE_HOST_A : VOICE_HOST_B
+    const voice = turn.speaker === 'A' ? VOICE_HOST_A : VOICE_HOST_B
     try {
-      const buf = await synthesizeTurn(turn.text, voiceId, apiKey)
+      const buf = await synthesizeTurn(turn.text, voice, apiKey)
       segments.push(buf)
     } catch (err) {
-      console.error(`[podcast] synthesis failed for turn ${turn.speaker}:`, err)
+      console.error(`[podcast] TTS failed for turn ${turn.speaker}:`, err)
       return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 502 })
     }
   }

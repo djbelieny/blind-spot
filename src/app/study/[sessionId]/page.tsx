@@ -1366,7 +1366,7 @@ function StudyInner() {
                   {podcastError && !podcastGenerating && (
                     <div className="flex items-center gap-2 text-[#F87171] text-xs bg-[#F87171]/8 rounded-xl px-3 py-2.5">
                       <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <span className="flex-1">{podcastError.includes('API key') ? (isEn ? 'ElevenLabs API key not configured' : 'Chave ElevenLabs não configurada') : podcastError}</span>
+                      <span className="flex-1">{podcastError.includes('API key') ? (isEn ? 'OpenAI API key not configured' : 'Chave OpenAI não configurada') : podcastError}</span>
                     </div>
                   )}
 
