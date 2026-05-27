@@ -337,7 +337,7 @@ export default function Home() {
     <div className="min-h-screen overflow-x-hidden" style={{ background: '#0d0d0d', color: '#fff', fontFamily: 'Inter, DM Sans, sans-serif', lineHeight: 1.5, WebkitFontSmoothing: 'antialiased' }}>
 
       {/* HEADER */}
-      <header className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-12 py-[18px] transition-all duration-300 border-b ${scrolled ? 'bg-[#0d0d0d]/92 backdrop-blur-xl border-white/[0.08]' : 'border-transparent'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 sm:px-8 md:px-12 py-[18px] transition-all duration-300 border-b ${scrolled ? 'bg-[#0d0d0d]/92 backdrop-blur-xl border-white/[0.08]' : 'border-transparent'}`}>
         <a className="flex items-center gap-2.5 no-underline" href="/">
           <span className="text-[16px] font-bold tracking-[-0.01em] text-white">BlindSpot</span>
         </a>
@@ -346,7 +346,7 @@ export default function Home() {
             <a key={href} href={href} className="text-[14px] text-[#888] no-underline hover:text-white transition-colors duration-200 font-medium">{label}</a>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1 text-[13px] font-semibold">
             <button
               onClick={() => setLang('pt')}
@@ -358,16 +358,16 @@ export default function Home() {
               className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer ${lang === 'en' ? 'text-white' : 'text-[#555] hover:text-[#888]'}`}
             >EN</button>
           </div>
-          <button onClick={() => router.push('/auth/login')} className={`${DARK_BTN} px-[18px] py-[9px] text-[14px]`}>{t.loginBtn}</button>
-          <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>{t.ctaBtn}</button>
+          <button onClick={() => router.push('/auth/login')} className={`${DARK_BTN} px-3 sm:px-[18px] py-[9px] text-[13px] sm:text-[14px]`}>{t.loginBtn}</button>
+          <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} hidden sm:inline-flex px-[22px] py-[10px] text-[14px]`}>{t.ctaBtn}</button>
         </div>
       </header>
 
       {/* HERO */}
-      <section id="hero" className="relative min-h-screen flex items-center overflow-hidden" style={{ padding: '130px 48px 80px' }}>
+      <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-16 sm:pt-36 sm:pb-20 px-4 sm:px-8 md:px-12">
         <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 600, top: '-20%', left: '-5%', background: 'rgba(249,71,22,.08)', filter: 'blur(100px)' }} />
         <div className="absolute rounded-full pointer-events-none" style={{ width: 400, height: 400, bottom: '-10%', right: '-8%', background: 'rgba(249,71,22,.05)', filter: 'blur(100px)' }} />
-        <div className="relative z-10 w-full max-w-[1200px] mx-auto grid gap-[80px] items-center" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-[80px] items-center">
 
           {/* LEFT */}
           <div>
@@ -381,12 +381,12 @@ export default function Home() {
             <p className="mb-10 font-medium" style={{ fontSize: 20, color: '#888', lineHeight: 1.5, maxWidth: 480 }}>
               {t.heroSub}
             </p>
-            <div className="flex gap-3 flex-wrap mb-14">
-              <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px]`}>
+            <div className="flex flex-col sm:flex-row gap-3 mb-14">
+              <button onClick={() => router.push('/auth/signup')} className={`${OR_BTN} px-[22px] py-[10px] text-[14px] justify-center`}>
                 {t.heroMainCta}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
-              <button type="button" onClick={openExplainer} className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>
+              <button type="button" onClick={openExplainer} className={`${DARK_BTN} px-[22px] py-[10px] text-[14px] justify-center`}>
                 {t.heroSecondaryCta}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/><path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="currentColor"/></svg>
               </button>
@@ -444,16 +444,16 @@ export default function Home() {
       </section>
 
       {/* PROBLEM */}
-      <section id="problem" className="relative" style={{ padding: '100px 48px' }}>
+      <section id="problem" className="relative py-16 sm:py-24 px-4 sm:px-8 md:px-12">
         <div className="absolute rounded-full pointer-events-none" style={{ width: 500, height: 500, top: 0, right: '-10%', background: 'rgba(249,71,22,.06)', filter: 'blur(100px)' }} />
         <div className="max-w-[1200px] mx-auto">
           <div className="reveal text-center max-w-[760px] mx-auto mb-14">
             <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">{t.problemLabel}</p>
             <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>{t.problemTitle}</h2>
           </div>
-          <div className="reveal grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
-            {t.problemCards.map(card => (
-              <div key={card.n} className="group relative overflow-hidden transition-all duration-300" style={{ padding: '36px 32px', background: '#141414', border: '1px solid rgba(255,255,255,.08)', borderRadius: card.r }}>
+          <div className="reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[2px]">
+            {t.problemCards.map((card, idx) => (
+              <div key={card.n} className="group relative overflow-hidden transition-all duration-300" style={{ padding: '36px 32px', background: '#141414', border: '1px solid rgba(255,255,255,.08)', borderRadius: idx === 0 ? '16px 16px 0 0' : idx === 2 ? '0 0 16px 16px' : undefined }}>
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#F94716] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left" />
                 <div className="text-[42px] font-black leading-[1] mb-4 text-[#F94716]" style={{ opacity: 0.2 }}>{card.n}</div>
                 <h3 className="text-[18px] font-extrabold text-white mb-2.5">{card.title}</h3>
@@ -466,10 +466,10 @@ export default function Home() {
 
       {/* STATS STRIP */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', borderBottom: '1px solid rgba(255,255,255,.08)', padding: '40px 0', background: '#141414' }}>
-        <div className="grid max-w-[1200px] mx-auto px-12" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 max-w-[1200px] mx-auto px-4 sm:px-8 md:px-12">
           {t.statsStrip.map(([val, lbl], i) => (
-            <div key={val} className={`reveal text-center px-6 ${i < 3 ? 'border-r border-white/[0.08]' : ''}`}>
-              <span className="block font-black leading-[1] mb-2 text-[#F94716]" style={{ fontSize: 'clamp(36px,4vw,52px)' }}>{val}</span>
+            <div key={val} className={`reveal text-center px-4 sm:px-6 py-4 sm:py-0 ${i % 2 === 0 && i < 2 ? 'border-r border-white/[0.08]' : ''} ${i < 2 ? 'border-b sm:border-b-0' : ''} sm:border-r-0 ${i < 3 ? 'sm:border-r border-white/[0.08]' : ''}`}>
+              <span className="block font-black leading-[1] mb-2 text-[#F94716]" style={{ fontSize: 'clamp(28px,4vw,52px)' }}>{val}</span>
               <p className="text-[13px]" style={{ color: '#888' }}>{lbl}</p>
             </div>
           ))}
@@ -477,14 +477,14 @@ export default function Home() {
       </div>
 
       {/* FEATURES */}
-      <section id="features" className="relative" style={{ padding: '100px 48px' }}>
+      <section id="features" className="relative py-16 sm:py-24 px-4 sm:px-8 md:px-12">
         <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 600, bottom: 0, left: '-15%', background: 'rgba(249,71,22,.07)', filter: 'blur(100px)' }} />
         <div className="max-w-[1200px] mx-auto">
           <div className="reveal text-center mb-14">
             <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">{t.featuresLabel}</p>
             <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>{t.featuresTitle}</h2>
           </div>
-          <div className="grid gap-6 mb-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             <div className="reveal relative overflow-hidden rounded-[20px] transition-colors duration-300 hover:border-[#F94716]/25 p-9" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)' }}>
               <div className="absolute bottom-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle,rgba(249,71,22,.12),transparent 70%)' }} />
               <div className="flex items-center gap-2.5 mb-5">
@@ -513,7 +513,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {t.featureCards.map((card, idx) => (
               <div key={card.title} className="reveal group rounded-2xl transition-all duration-300 hover:bg-[#181818] hover:border-[#F94716]/20 p-6" style={{ background: '#141414', border: '1px solid rgba(255,255,255,.08)' }}>
                 <div className="w-9 h-9 rounded-[10px] flex items-center justify-center mb-3.5" style={{ background: 'rgba(249,71,22,.12)', border: '1px solid rgba(249,71,22,.25)' }}>
@@ -531,13 +531,13 @@ export default function Home() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section id="students" style={{ padding: '100px 48px', background: '#141414' }}>
+      <section id="students" className="py-16 sm:py-24 px-4 sm:px-8 md:px-12" style={{ background: '#141414' }}>
         <div className="max-w-[1200px] mx-auto">
           <div className="reveal text-center mb-14">
             <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">{t.testimonialsLabel}</p>
             <h2 className="font-black leading-[1.05] tracking-[-0.025em] text-white" style={{ fontSize: 'clamp(32px,4vw,52px)' }}>{t.testimonialsTitle}</h2>
           </div>
-          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {t.testimonials.map(testimonial => (
               <div key={testimonial.n} className="reveal rounded-[18px] transition-all duration-300 hover:bg-[#181818] hover:border-[#F94716]/20 p-7" style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,.08)' }}>
                 <Stars />
@@ -553,7 +553,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" style={{ padding: '100px 48px' }}>
+      <section id="faq" className="py-16 sm:py-24 px-4 sm:px-8 md:px-12">
         <div className="max-w-[1200px] mx-auto">
           <div className="reveal text-center mb-14">
             <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[#F94716]">{t.faqLabel}</p>
@@ -566,7 +566,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section id="cta" className="relative overflow-hidden text-center" style={{ padding: '120px 48px' }}>
+      <section id="cta" className="relative overflow-hidden text-center py-20 sm:py-28 px-4 sm:px-8 md:px-12">
         <div className="absolute rounded-full pointer-events-none" style={{ width: 700, height: 700, top: '-15%', right: '-20%', background: 'rgba(249,71,22,.05)', filter: 'blur(100px)' }} />
         <div className="absolute rounded-full pointer-events-none" style={{ width: 500, height: 500, bottom: 0, left: '-10%', background: 'rgba(249,71,22,.06)', filter: 'blur(100px)' }} />
         <div className="max-w-[1200px] mx-auto relative z-10">
@@ -599,9 +599,9 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,.08)', padding: '56px 48px 36px' }}>
-        <div className="grid max-w-[1200px] mx-auto mb-12" style={{ gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 48 }}>
-          <div>
+      <footer className="px-4 sm:px-8 md:px-12 pt-12 sm:pt-14 pb-9" style={{ borderTop: '1px solid rgba(255,255,255,.08)' }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 max-w-[1200px] mx-auto mb-12 gap-8 md:gap-12">
+          <div className="col-span-2 md:col-span-1">
             <p className="text-white font-bold text-base mb-4">BlindSpot</p>
             <p className="text-[13px] leading-[1.6]" style={{ color: '#888' }}>{t.footerDesc}</p>
           </div>

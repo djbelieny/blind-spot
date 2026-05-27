@@ -105,7 +105,7 @@ function MapLegend({ isEn }: { isEn: boolean }) {
   const items = LEGEND_ITEMS(isEn)
 
   return (
-    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+    <div className="absolute bottom-20 sm:bottom-5 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
       {/* Tooltip card */}
       <div className={`transition-all duration-200 ${hoveredIdx !== null ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}`}>
         {hoveredIdx !== null && (
@@ -1646,16 +1646,16 @@ function StudyInner() {
 
         {/* ── Floating chat panel ── */}
         <div
-          className={`absolute bottom-[92px] right-6 z-40 transition-all duration-300 ease-out ${
+          className={`absolute bottom-[92px] right-3 sm:right-6 z-40 transition-all duration-300 ease-out ${
             chatOpen
               ? 'opacity-100 translate-y-0 pointer-events-auto'
               : 'opacity-0 translate-y-3 pointer-events-none'
           }`}
-          style={{ width: 'min(380px, calc(100vw - 48px))' }}
+          style={{ width: 'min(380px, calc(100vw - 24px))' }}
         >
           <div
             className="bg-[#141414] border border-[#888888]/12 rounded-3xl flex flex-col overflow-hidden"
-            style={{ height: 480, boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(124,58,237,0.1)' }}
+            style={{ height: 'min(480px, calc(100dvh - 200px))', boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(124,58,237,0.1)' }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#888888]/8 flex-shrink-0">
@@ -1741,7 +1741,7 @@ function StudyInner() {
         {/* ── Chat FAB ── */}
         <button
           onClick={() => { setChatOpen(v => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 350) }}
-          className={`absolute bottom-6 right-6 z-50 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
+          className={`absolute bottom-6 right-3 sm:right-6 z-50 flex items-center gap-2.5 transition-all duration-300 active:scale-95 ${
             chatOpen
               ? 'rounded-full bg-[#141414] border border-[#888888]/20 text-[#888888] hover:border-[#888888]/40 justify-center'
               : 'rounded-full bg-gradient-to-br from-[#F94716] to-[#FF6B3D] text-white hover:opacity-90 shadow-lg shadow-[#F94716]/20 pl-5 pr-6'
