@@ -196,6 +196,7 @@ function StudyInner() {
   const [podcastProgress, setPodcastProgress] = useState(0)
   const [podcastError, setPodcastError] = useState<string | null>(null)
   const [podcastDialogue, setPodcastDialogue] = useState<{ speaker: 'A' | 'B'; name: string; text: string }[] | null>(null)
+  const [podcastCached, setPodcastCached] = useState(false)
   const podcastAudioRef = useRef<HTMLAudioElement | null>(null)
   const podcastUnitRef = useRef<string | null>(null)
 
@@ -392,6 +393,7 @@ function StudyInner() {
       setPodcastProgress(0)
       setPodcastDialogue(null)
       setPodcastError(null)
+      setPodcastCached(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNodeId, sessionId])
@@ -626,19 +628,22 @@ function StudyInner() {
 
     setPodcastError(null)
     setPodcastGenerating(true)
-    setPodcastGeneratePhase('script')
+    setPodcastGeneratePhase(podcastCached ? 'voices' : 'script')
 
     try {
-      // Phase 1: check if dialogue script is already cached
+      // If not already loaded from cache check, fetch dialogue + cache status
       const studyTopic = initialTopic || ''
       const topicParam = encodeURIComponent(studyTopic)
-      const checkRes = await fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
-      if (checkRes.ok) {
-        const checkData = await checkRes.json()
-        if (checkData.dialogue?.length) setPodcastDialogue(checkData.dialogue)
+      if (!podcastCached && !podcastDialogue) {
+        const checkRes = await fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+        if (checkRes.ok) {
+          const checkData = await checkRes.json()
+          if (checkData.dialogue?.length) setPodcastDialogue(checkData.dialogue)
+          if (checkData.audioCached) setPodcastCached(true)
+        }
       }
 
-      // Phase 2: synthesize (includes script generation if not cached)
+      // Fetch audio (returns instantly from Redis if cached, otherwise synthesizes)
       setPodcastGeneratePhase('voices')
       const res = await fetch('/api/podcast/generate', {
         method: 'POST',
@@ -650,15 +655,6 @@ function StudyInner() {
         const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
         setPodcastError(err.error ?? 'Generation failed')
         return
-      }
-
-      // If dialogue wasn't pre-loaded, try to get it now
-      if (!podcastDialogue) {
-        const scriptRes = await fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
-        if (scriptRes.ok) {
-          const sd = await scriptRes.json()
-          if (sd.dialogue?.length) setPodcastDialogue(sd.dialogue)
-        }
       }
 
       const blob = await res.blob()
@@ -968,6 +964,16 @@ function StudyInner() {
                 }
                 const interactionType = typeMap[tab]
                 if (interactionType) recordInteraction(interactionType)
+                if (tab === 'listen' && selectedNodeId && !podcastCached && !podcastAudioRef.current) {
+                  const topicParam = encodeURIComponent(initialTopic || '')
+                  fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                      if (data?.audioCached) setPodcastCached(true)
+                      if (data?.dialogue?.length) setPodcastDialogue(data.dialogue)
+                    })
+                    .catch(() => {})
+                }
               }}
                 className={`flex-1 py-2.5 text-[10px] uppercase tracking-widest transition-colors ${
                   contentTab === tab
@@ -1402,9 +1408,18 @@ function StudyInner() {
                           <span className="w-11 h-11 rounded-full border border-[#F94716]/40 bg-[#F94716]/8 hover:bg-[#F94716]/15 transition-colors flex items-center justify-center flex-shrink-0">
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                           </span>
-                          <span className="text-sm">
-                            {isEn ? 'Create & play podcast' : 'Criar e ouvir podcast'}
-                          </span>
+                          <div>
+                            <span className="text-sm block">
+                              {podcastCached
+                                ? (isEn ? 'Play Podcast' : 'Ouvir Podcast')
+                                : (isEn ? 'Create & play podcast' : 'Criar e ouvir podcast')}
+                            </span>
+                            {podcastCached && (
+                              <span className="text-[10px] text-[#888888]/60">
+                                {isEn ? 'Saved · ready to play' : 'Salvo · pronto para ouvir'}
+                              </span>
+                            )}
+                          </div>
                         </button>
                       )}
                     </div>

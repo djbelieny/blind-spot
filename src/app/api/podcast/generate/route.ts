@@ -25,6 +25,10 @@ function dialogueCacheKey(sessionId: string, unitId: string, slug: string) {
   return `podcast_dialogue:${sessionId}:${slug}:${unitId}`
 }
 
+function audioCacheKey(sessionId: string, unitId: string, slug: string) {
+  return `podcast_audio:${sessionId}:${slug}:${unitId}`
+}
+
 async function generateDialogue(
   unitTitle: string,
   description: string,
@@ -106,13 +110,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'sessionId and unitId required' }, { status: 400 })
   }
   const slug = topicSlug(topic)
-  const cached = await redis.get(dialogueCacheKey(sessionId, unitId, slug))
-  if (!cached) return NextResponse.json({ dialogue: null })
-  try {
-    return NextResponse.json({ dialogue: JSON.parse(cached) as PodcastTurn[] })
-  } catch {
-    return NextResponse.json({ dialogue: null })
+
+  const [cached, audioExists] = await Promise.all([
+    redis.get(dialogueCacheKey(sessionId, unitId, slug)),
+    redis.exists(audioCacheKey(sessionId, unitId, slug)),
+  ])
+
+  let dialogue: PodcastTurn[] | null = null
+  if (cached) {
+    try { dialogue = JSON.parse(cached) } catch {}
   }
+
+  return NextResponse.json({ dialogue, audioCached: audioExists > 0 })
 }
 
 export async function POST(req: NextRequest) {
@@ -133,6 +142,20 @@ export async function POST(req: NextRequest) {
 
   const slug = topicSlug(topic)
   const cacheKey = dialogueCacheKey(sessionId, unitId, slug)
+  const audioKey = audioCacheKey(sessionId, unitId, slug)
+
+  // Return cached audio immediately if available
+  const cachedAudio = await redis.getBuffer(audioKey)
+  if (cachedAudio) {
+    return new Response(cachedAudio.buffer as ArrayBuffer, {
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': String(cachedAudio.length),
+        'Cache-Control': 'private, max-age=604800',
+        'X-Podcast-Cached': 'true',
+      },
+    })
+  }
 
   // Check cached dialogue script
   let dialogue: PodcastTurn[] | null = null
@@ -181,11 +204,15 @@ export async function POST(req: NextRequest) {
   }
 
   const combined = Buffer.concat(segments)
+
+  // Cache the audio for future requests (7-day TTL, same as dialogue)
+  await redis.set(audioKey, combined, 'EX', 60 * 60 * 24 * 7)
+
   return new Response(combined, {
     headers: {
       'Content-Type': 'audio/mpeg',
       'Content-Length': String(combined.length),
-      'Cache-Control': 'private, max-age=3600',
+      'Cache-Control': 'private, max-age=604800',
     },
   })
 }
