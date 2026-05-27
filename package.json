@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "video:explainer": "node scripts/generate-explainer-video.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

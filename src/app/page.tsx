@@ -113,11 +113,24 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 const OR_BTN = 'inline-flex items-center gap-2 rounded-lg bg-[#F94716] text-white font-bold cursor-pointer transition-all duration-200 hover:bg-[#FF6B3D] hover:-translate-y-px [box-shadow:0_0_20px_rgba(249,71,22,.35)]'
 const DARK_BTN = 'inline-flex items-center gap-2 rounded-lg text-white font-semibold cursor-pointer transition-all duration-200 hover:border-white/20 hover:bg-[#1f1f1f] bg-[#1a1a1a] border border-white/[0.08]'
+const EXPLAINER_VIDEO = '/videos/blindspot-explainer.mp4'
+const EXPLAINER_POSTER = '/videos/blindspot-explainer-poster.png'
 
 export default function Home() {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
+  const [explainerOpen, setExplainerOpen] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const explainerVideoRef = useRef<HTMLVideoElement>(null)
+
+  const openExplainer = useCallback(() => setExplainerOpen(true), [])
+  const closeExplainer = useCallback(() => {
+    setExplainerOpen(false)
+    if (explainerVideoRef.current) {
+      explainerVideoRef.current.pause()
+      explainerVideoRef.current.currentTime = 0
+    }
+  }, [])
 
   useScrollReveal()
 
@@ -134,6 +147,20 @@ export default function Home() {
   useEffect(() => {
     if (canvasRef.current) drawRadar(canvasRef.current)
   }, [])
+
+  useEffect(() => {
+    if (!explainerOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeExplainer()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [closeExplainer, explainerOpen])
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: '#0d0d0d', color: '#fff', fontFamily: 'Inter, DM Sans, sans-serif', lineHeight: 1.5, WebkitFontSmoothing: 'antialiased' }}>
@@ -174,10 +201,10 @@ export default function Home() {
                 Quero aprender qualquer coisa
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
-              <a href="#features" className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>
+              <button type="button" onClick={openExplainer} className={`${DARK_BTN} px-[22px] py-[10px] text-[14px]`}>
                 Ver em ação
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/><path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="currentColor"/></svg>
-              </a>
+              </button>
             </div>
             <div className="reveal flex gap-10 flex-wrap">
               {[['2.400', '+', 'alunos ativos'], ['100', '%', 'personalizável'], ['4.2', '×', 'mais absorção de conteúdo']].map(([n, s, l]) => (
@@ -428,6 +455,48 @@ export default function Home() {
           Copyright 2024 BlindSpot. Todos os direitos reservados.
         </div>
       </footer>
+
+      {explainerOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vídeo explicativo do BlindSpot"
+          className="fixed inset-0 z-[200] flex items-center justify-center px-4 py-8"
+          style={{ background: 'rgba(0,0,0,.78)', backdropFilter: 'blur(14px)' }}
+          onClick={closeExplainer}
+        >
+          <div
+            className="relative w-full max-w-[960px] overflow-hidden rounded-[24px]"
+            style={{ background: '#0d0d0d', border: '1px solid rgba(249,71,22,.35)', boxShadow: '0 30px 120px rgba(0,0,0,.8), 0 0 60px rgba(249,71,22,.14)' }}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-4 px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#F94716]">Explainer</p>
+                <h2 className="text-white text-[18px] font-extrabold">Como o BlindSpot encontra seus pontos cegos</h2>
+              </div>
+              <button
+                type="button"
+                onClick={closeExplainer}
+                aria-label="Fechar vídeo"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white bg-white/[0.06] border border-white/[0.10] hover:bg-[#F94716] hover:border-[#F94716] transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+              </button>
+            </div>
+            <video
+              ref={explainerVideoRef}
+              src={EXPLAINER_VIDEO}
+              poster={EXPLAINER_POSTER}
+              controls
+              autoPlay
+              playsInline
+              preload="metadata"
+              className="block w-full bg-black"
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   )

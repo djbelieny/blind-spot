@@ -2,6 +2,7 @@ version: '3.9'
 services:
   caddy:
     image: caddy:2-alpine
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -9,6 +10,8 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
     depends_on:
       - app
 
@@ -16,12 +19,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
     environment:
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
       - QDRANT_URL=http://qdrant:6333
     env_file:
-      - .env
+      - .env.production
     depends_on:
       - redis
       - qdrant
@@ -30,6 +34,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.hyperframes
+    restart: always
     ports:
       - "3001:3001"
     volumes:
@@ -37,11 +42,13 @@ services:
 
   qdrant:
     image: qdrant/qdrant:latest
+    restart: always
     volumes:
       - qdrant_data:/qdrant/storage
 
   redis:
     image: redis:7-alpine
+    restart: always
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
