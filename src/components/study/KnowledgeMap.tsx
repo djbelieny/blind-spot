@@ -17,8 +17,8 @@ const NODE_R: Record<number, number> = { 0: 0.85, 1: 0.60, 2: 0.50, 3: 0.40, 4: 
 
 // Status → emissive color (on-brand palette)
 const STATUS_COLOR: Record<NodeStatus, string> = {
-  available:   '#F94716',   // violet
-  'in-progress': '#FF6B3D', // magenta
+  available:   '#8B5CF6',   // purple
+  'in-progress': '#FF6B3D', // orange
   completed:   '#34C785',   // teal-green
   locked:      '#555870',   // visible gray-blue
 }
@@ -96,14 +96,14 @@ function SunNode({ label }: { label: string }) {
 
   return (
     <group>
-      {/* Corona layers */}
-      {[1.6, 2.2, 3.2].map((scale, i) => (
+      {/* Corona layers — 2 rings only */}
+      {[1.6, 2.8].map((scale, i) => (
         <mesh key={i}>
           <sphereGeometry args={[0.85 * scale, 32, 32]} />
           <meshBasicMaterial
-            color="#F94716"
+            color="#8B5CF6"
             transparent
-            opacity={[0.18, 0.08, 0.03][i]}
+            opacity={[0.22, 0.07][i]}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
           />
@@ -127,12 +127,12 @@ function SunNode({ label }: { label: string }) {
       </mesh>
       <Html center position={[0, 1.35, 0]} style={{ pointerEvents: 'none' }} zIndexRange={[50, 0]}>
         <span style={{
-          fontSize: 13, fontWeight: 700, color: '#E9D5FF',
+          fontSize: 14, fontWeight: 700, color: '#E9D5FF',
           fontFamily: 'system-ui, sans-serif',
           textShadow: '0 0 12px rgba(124,58,237,0.9), 0 2px 6px #000',
           whiteSpace: 'nowrap', letterSpacing: '0.02em',
         }}>
-          {label.length > 20 ? label.slice(0, 19) + '…' : label}
+          {label}
         </span>
       </Html>
     </group>
@@ -161,38 +161,37 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
     }
   })
 
-  const accentColor = isBlindSpot && status === 'locked' ? '#22D3EE' : STATUS_COLOR[status]
+  const accentColor = isBlindSpot ? '#F94716' : STATUS_COLOR[status]
   const isActive = status !== 'locked'
+  const hasAtmosphere = status === 'in-progress' || status === 'completed'
 
   // Surface material props
   const emissiveIntensity = status === 'locked' ? 0.45 : status === 'available' ? 0.75 : 1.0
   const baseHex = status === 'locked' ? '#1C1E2E' : status === 'completed' ? '#04180e' : status === 'in-progress' ? '#130320' : '#0b0820'
 
   // Label styling
-  const labelColor = status === 'locked'
-    ? (isBlindSpot ? '#67E8F9' : '#6B6E8A')
+  const labelColor = isBlindSpot
+    ? '#FF8C5A'
+    : status === 'locked' ? '#6B6E8A'
     : status === 'completed' ? '#6EE7B7'
     : status === 'in-progress' ? '#E879F9'
     : '#C4B5FD'
 
   const labelOpacity = status === 'locked' && !isBlindSpot ? 0.65 : 1
 
-  // Title — clean truncation, 2 lines max
+  // Title — split into 2 lines, no truncation
   const words = placed.unit.title.split(' ')
   const mid = Math.ceil(words.length / 2)
-  const line1 = words.slice(0, mid).join(' ')
-  const line2 = words.length > 1 ? words.slice(mid).join(' ') : ''
-  const maxW = 13
-  const l1 = line1.length > maxW ? line1.slice(0, maxW - 1) + '…' : line1
-  const l2 = line2.length > maxW ? line2.slice(0, maxW - 1) + '…' : line2
+  const l1 = words.slice(0, mid).join(' ')
+  const l2 = words.length > 1 ? words.slice(mid).join(' ') : ''
 
   const clickable = isActive
 
   return (
     <group position={[placed.x, 0, placed.z]}>
 
-      {/* Atmosphere glow — only for active planets */}
-      {isActive && (
+      {/* Atmosphere glow — only for in-progress and completed */}
+      {hasAtmosphere && (
         <mesh>
           <sphereGeometry args={[r * 1.55, 32, 32]} />
           <meshBasicMaterial
@@ -205,8 +204,8 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
         </mesh>
       )}
 
-      {/* Outer haze — only for active */}
-      {isActive && (
+      {/* Outer haze — only for in-progress and completed */}
+      {hasAtmosphere && (
         <mesh>
           <sphereGeometry args={[r * 2.4, 24, 24]} />
           <meshBasicMaterial
@@ -234,10 +233,10 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
       )}
 
       {/* Blind spot indicator ring */}
-      {isBlindSpot && status === 'locked' && (
+      {isBlindSpot && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[r * 1.5, 0.02, 8, 64]} />
-          <meshBasicMaterial color="#22D3EE" transparent opacity={0.55} depthWrite={false} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial color="#F94716" transparent opacity={0.60} depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
       )}
 
@@ -277,7 +276,7 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
         <div style={{ textAlign: 'center', opacity: labelOpacity }}>
           <span style={{
             display: 'block',
-            fontSize: placed.unit.tier <= 2 ? 11 : 10,
+            fontSize: placed.unit.tier <= 2 ? 13 : 12,
             fontWeight: 500,
             color: labelColor,
             fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -290,7 +289,7 @@ function Planet({ placed, status, isSelected, isBlindSpot, r, onSelect }: Planet
           {l2 && (
             <span style={{
               display: 'block',
-              fontSize: placed.unit.tier <= 2 ? 11 : 10,
+              fontSize: placed.unit.tier <= 2 ? 13 : 12,
               fontWeight: 500,
               color: labelColor,
               fontFamily: 'system-ui, -apple-system, sans-serif',

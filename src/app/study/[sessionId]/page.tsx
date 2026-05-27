@@ -745,6 +745,14 @@ function StudyInner() {
       audio.play()
       setPodcastPlaying(true)
       recordInteraction('listen', { minutesSpent: 8 })
+      // Fetch dialogue for transcript (generated during this POST)
+      if (!podcastDialogue) {
+        const topicParam2 = encodeURIComponent(studyTopic)
+        fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam2}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(d => { if (d?.dialogue?.length) setPodcastDialogue(d.dialogue) })
+          .catch(() => {})
+      }
     } catch (err) {
       setPodcastError(err instanceof Error ? err.message : 'Network error')
     } finally {
@@ -1041,7 +1049,7 @@ function StudyInner() {
                 }
                 const interactionType = typeMap[tab]
                 if (interactionType) recordInteraction(interactionType)
-                if (tab === 'listen' && selectedNodeId && !podcastCached && !podcastAudioRef.current) {
+                if (tab === 'listen' && selectedNodeId && !podcastDialogue) {
                   const topicParam = encodeURIComponent(initialTopic || '')
                   fetch(`/api/podcast/generate?sessionId=${sessionId}&unitId=${selectedNodeId}&topic=${topicParam}`)
                     .then(r => r.ok ? r.json() : null)
