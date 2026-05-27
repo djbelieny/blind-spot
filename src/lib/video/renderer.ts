@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, renameSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { renderScenePng, type SceneData } from './svgScenes'
@@ -233,11 +233,11 @@ export async function generateLessonVideo(params: VideoJobParams): Promise<void>
     const outDir = resolve(process.cwd(), 'public/generated/lesson-videos')
     mkdirSync(outDir, { recursive: true })
 
-    // 12. Move files to public directory
+    // 12. Copy files to public directory (copyFileSync works across devices/volumes)
     const finalVideoPath = join(outDir, `${cacheKey}.mp4`)
     const finalPosterPath = join(outDir, `${cacheKey}-poster.png`)
-    renameSync(outputPath, finalVideoPath)
-    renameSync(posterPath, finalPosterPath)
+    copyFileSync(outputPath, finalVideoPath)
+    copyFileSync(posterPath, finalPosterPath)
 
   } finally {
     // 14. Clean up temp dir
